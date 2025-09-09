@@ -1,0 +1,3237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply to Donate Blood - Blood Donor Application | BloodConnect</title>
+    <meta name="description" content="Apply to become a blood donor and help save lives. Submit your application to join our life-saving community of blood donors.">
+    <meta name="keywords" content="blood donor application, apply to donate blood, blood donation application, save lives, donor registration">
+
+    <!-- Favicon -->
+    <!-- <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico"> -->
+
+    <!-- Auth Dropdown CSS -->
+    <link rel="stylesheet" href="css/auth-dropdown.css">
+
+    <!-- Embedded CSS -->
+    <style>
+        /* Advanced CSS Variables for Blood Donation Page */
+        :root {
+            /* Primary Blood Red Palette */
+            --primary-red: #e53e3e;
+            --primary-red-dark: #c53030;
+            --primary-red-darker: #9b2c2c;
+            --primary-red-light: #fc8181;
+            --primary-red-lighter: #feb2b2;
+            --secondary-red: #fed7d7;
+            --accent-red: #fef5f5;
+
+            /* Premium Neutral Palette */
+            --white: #ffffff;
+            --off-white: #fafafa;
+            --gray-50: #f7fafc;
+            --gray-100: #edf2f7;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e0;
+            --gray-400: #a0aec0;
+            --gray-500: #718096;
+            --gray-600: #4a5568;
+            --gray-700: #2d3748;
+            --gray-800: #1a202c;
+            --gray-900: #171923;
+
+            /* Status Colors */
+            --success-green: #38a169;
+            --success-light: #c6f6d5;
+            --error-red: #e53e3e;
+            --error-light: #fed7d7;
+            --warning-yellow: #d69e2e;
+            --warning-light: #faf089;
+            --info-blue: #3182ce;
+            --info-light: #bee3f8;
+
+            /* Advanced Typography */
+            --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-secondary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-size-xs: clamp(0.7rem, 0.8vw, 0.75rem);
+            --font-size-sm: clamp(0.8rem, 0.9vw, 0.875rem);
+            --font-size-base: clamp(0.9rem, 1vw, 1rem);
+            --font-size-lg: clamp(1rem, 1.2vw, 1.125rem);
+            --font-size-xl: clamp(1.1rem, 1.4vw, 1.25rem);
+            --font-size-2xl: clamp(1.3rem, 1.8vw, 1.5rem);
+            --font-size-3xl: clamp(1.6rem, 2.4vw, 1.875rem);
+            --font-size-4xl: clamp(2rem, 3vw, 2.25rem);
+            --font-size-5xl: clamp(2.5rem, 4vw, 3rem);
+            --font-size-6xl: clamp(3rem, 5vw, 3.75rem);
+            --font-weight-light: 300;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            --font-weight-extrabold: 800;
+            --font-weight-black: 900;
+
+            /* Advanced Spacing System */
+            --spacing-1: 0.25rem;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-5: 1.25rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-10: 2.5rem;
+            --spacing-12: 3rem;
+            --spacing-16: 4rem;
+            --spacing-20: 5rem;
+            --spacing-24: 6rem;
+            --spacing-32: 8rem;
+
+            /* Advanced Border Radius */
+            --radius-sm: 0.25rem;
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --radius-2xl: 1rem;
+            --radius-3xl: 1.5rem;
+            --radius-full: 9999px;
+
+            /* Advanced Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --shadow-red: 0 10px 25px -5px rgba(229, 62, 62, 0.4);
+            --shadow-red-lg: 0 20px 40px -10px rgba(229, 62, 62, 0.3);
+            --glow-red: 0 0 20px rgba(229, 62, 62, 0.5);
+            --glow-red-lg: 0 0 40px rgba(229, 62, 62, 0.3);
+
+            /* Advanced Transitions */
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+            /* Z-Index Scale */
+            --z-dropdown: 1000;
+            --z-sticky: 1020;
+            --z-fixed: 1030;
+            --z-modal-backdrop: 1040;
+            --z-modal: 1050;
+            --z-popover: 1060;
+            --z-tooltip: 1070;
+        }
+
+        /* Advanced Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+            line-height: 1.15;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-normal);
+            line-height: 1.7;
+            color: var(--gray-800);
+            background: var(--white);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            position: relative;
+        }
+
+        /* Floating Blood Drops Background */
+        .blood-drops-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .blood-drop {
+            position: absolute;
+            width: 12px;
+            height: 16px;
+            background: rgba(229, 62, 62, 0.1);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: bloodDropFloat 15s infinite linear;
+        }
+
+        .blood-drop:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 12s;
+        }
+
+        .blood-drop:nth-child(2) {
+            left: 20%;
+            animation-delay: -2s;
+            animation-duration: 15s;
+        }
+
+        .blood-drop:nth-child(3) {
+            left: 30%;
+            animation-delay: -4s;
+            animation-duration: 18s;
+        }
+
+        .blood-drop:nth-child(4) {
+            left: 40%;
+            animation-delay: -6s;
+            animation-duration: 14s;
+        }
+
+        .blood-drop:nth-child(5) {
+            left: 50%;
+            animation-delay: -8s;
+            animation-duration: 16s;
+        }
+
+        .blood-drop:nth-child(6) {
+            left: 60%;
+            animation-delay: -10s;
+            animation-duration: 13s;
+        }
+
+        .blood-drop:nth-child(7) {
+            left: 70%;
+            animation-delay: -12s;
+            animation-duration: 17s;
+        }
+
+        .blood-drop:nth-child(8) {
+            left: 80%;
+            animation-delay: -14s;
+            animation-duration: 19s;
+        }
+
+        .blood-drop:nth-child(9) {
+            left: 90%;
+            animation-delay: -16s;
+            animation-duration: 11s;
+        }
+
+        @keyframes bloodDropFloat {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Advanced Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: var(--font-weight-bold);
+            line-height: 1.2;
+            margin-bottom: var(--spacing-4);
+            color: var(--gray-900);
+            letter-spacing: -0.025em;
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-weight: var(--font-weight-black);
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-weight-extrabold);
+        }
+
+        h3 {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+        }
+
+        p {
+            margin-bottom: var(--spacing-4);
+            color: var(--gray-600);
+            line-height: 1.8;
+        }
+
+        a {
+            color: var(--primary-red);
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            position: relative;
+        }
+
+        a:hover {
+            color: var(--primary-red-dark);
+        }
+
+        /* Advanced Container System */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-6);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 0 var(--spacing-4);
+            }
+        }
+
+        /* Advanced Animation Classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-in-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-in-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .scale-in {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scale-in.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Staggered Animation Delays */
+        .fade-in[data-delay="100"] { transition-delay: 0.1s; }
+        .fade-in[data-delay="200"] { transition-delay: 0.2s; }
+        .fade-in[data-delay="300"] { transition-delay: 0.3s; }
+        .fade-in[data-delay="400"] { transition-delay: 0.4s; }
+        .fade-in[data-delay="500"] { transition-delay: 0.5s; }
+        .fade-in[data-delay="600"] { transition-delay: 0.6s; }
+        .fade-in[data-delay="700"] { transition-delay: 0.7s; }
+        .fade-in[data-delay="800"] { transition-delay: 0.8s; }
+
+        /* Modern Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: var(--z-fixed);
+            transition: all var(--transition-normal);
+            border-bottom: 1px solid rgba(229, 62, 62, 0.1);
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-4) 0;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            text-decoration: none;
+        }
+
+        .nav-logo i {
+            font-size: 1.8rem;
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.1); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: var(--spacing-1);
+            align-items: center;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-2) var(--spacing-4);
+            border-radius: var(--radius-full);
+            font-weight: 500;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(229, 62, 62, 0.1), transparent);
+            transition: left var(--transition-normal);
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--accent-red), rgba(229, 62, 62, 0.1));
+            color: var(--primary-red);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(229, 62, 62, 0.2);
+        }
+
+        .nav-link.login-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            box-shadow: var(--shadow-red);
+        }
+
+        .nav-link.login-btn:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-3px);
+            box-shadow: var(--glow-red);
+        }
+
+        /* Mobile Navigation */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .hamburger .bar {
+            width: 25px;
+            height: 3px;
+            background: var(--primary-red);
+            border-radius: 2px;
+            transition: all var(--transition-normal);
+        }
+
+        /* Hero Section with Parallax */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-dark) 50%, var(--primary-red-darker) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            color: var(--white);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="heroPattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23heroPattern)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-16);
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-text {
+            max-width: 600px;
+        }
+
+        .hero-text h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: var(--font-weight-black);
+            margin-bottom: var(--spacing-6);
+            line-height: 1.1;
+            color: var(--white);
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: heroTitleSlide 1s ease-out;
+        }
+
+        @keyframes heroTitleSlide {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-text p {
+            font-size: var(--font-size-xl);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: var(--spacing-8);
+            line-height: 1.6;
+            animation: heroSubtitleSlide 1s ease-out 0.3s both;
+        }
+
+        @keyframes heroSubtitleSlide {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: var(--spacing-4);
+            flex-wrap: wrap;
+            animation: heroCTASlide 1s ease-out 0.6s both;
+        }
+
+        @keyframes heroCTASlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .hero-illustration {
+            width: 100%;
+            max-width: 500px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-3xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: heroIllustrationFloat 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-illustration::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes heroIllustrationFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-icon {
+            font-size: 8rem;
+            color: rgba(255, 255, 255, 0.9);
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.9;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        /* Parallax Background Elements */
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .parallax-element {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: parallaxFloat 20s linear infinite;
+        }
+
+        .parallax-element:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .parallax-element:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            right: 15%;
+            animation-delay: -7s;
+        }
+
+        .parallax-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 30%;
+            left: 20%;
+            animation-delay: -14s;
+        }
+
+        @keyframes parallaxFloat {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-50px) rotate(180deg);
+                opacity: 0.1;
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+                opacity: 0.3;
+            }
+        }
+
+        /* Application Form Section */
+        .form-section {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+            padding: var(--spacing-24) 0;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .application-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-6);
+        }
+
+        .application-header {
+            text-align: center;
+            margin-bottom: var(--spacing-16);
+        }
+
+        .application-header h2 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-4);
+            font-size: var(--font-size-4xl);
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .application-header p {
+            color: var(--gray-600);
+            font-size: var(--font-size-lg);
+            max-width: 700px;
+            margin: 0 auto var(--spacing-8);
+        }
+
+        .application-stats {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-8);
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            color: var(--gray-700);
+            font-weight: var(--font-weight-medium);
+            padding: var(--spacing-3) var(--spacing-4);
+            background: rgba(229, 62, 62, 0.1);
+            border-radius: var(--radius-full);
+            border: 1px solid rgba(229, 62, 62, 0.2);
+        }
+
+        .stat-item i {
+            color: var(--primary-red);
+            font-size: var(--font-size-base);
+        }
+
+        /* Two Column Layout */
+        .application-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: var(--spacing-12);
+            align-items: start;
+        }
+
+        /* Instructions Panel */
+        .instructions-panel {
+            background: var(--white);
+            padding: var(--spacing-8);
+            border-radius: var(--radius-3xl);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            position: sticky;
+            top: var(--spacing-8);
+            height: fit-content;
+        }
+
+        .instructions-panel h3 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-6);
+            font-size: var(--font-size-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+        }
+
+        .instructions-panel h3 i {
+            color: var(--primary-red);
+        }
+
+        .instruction-step {
+            display: flex;
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-6);
+            padding-bottom: var(--spacing-6);
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .instruction-step:last-of-type {
+            border-bottom: none;
+            margin-bottom: var(--spacing-8);
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-sm);
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-2);
+            font-size: var(--font-size-base);
+        }
+
+        .step-content p {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+        }
+
+        .eligibility-info {
+            background: var(--gray-50);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-xl);
+            border-left: 4px solid var(--primary-red);
+        }
+
+        .eligibility-info h4 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-4);
+            font-size: var(--font-size-base);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+
+        .eligibility-info h4 i {
+            color: var(--primary-red);
+        }
+
+        .eligibility-info ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .eligibility-info li {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-2);
+            padding-left: var(--spacing-6);
+            position: relative;
+        }
+
+        .eligibility-info li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary-red);
+            font-weight: var(--font-weight-bold);
+        }
+
+        /* Application Form */
+        .application-form {
+            background: var(--white);
+            padding: var(--spacing-10);
+            border-radius: var(--radius-3xl);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .application-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-red-light));
+        }
+
+        .application-form h3 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-8);
+            font-size: var(--font-size-2xl);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            padding-bottom: var(--spacing-4);
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .application-form h3 i {
+            color: var(--primary-red);
+        }
+
+        .form-section-group {
+            margin-bottom: var(--spacing-10);
+            padding: var(--spacing-6);
+            background: var(--gray-50);
+            border-radius: var(--radius-xl);
+            border-left: 4px solid var(--primary-red);
+        }
+
+        .form-section-group h4 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-6);
+            font-size: var(--font-size-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .form-section-group h4 i {
+            color: var(--primary-red);
+        }
+
+        .form-info {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-8);
+            margin-top: var(--spacing-6);
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            color: var(--primary-red);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .info-item i {
+            font-size: var(--font-size-base);
+        }
+
+        @media (max-width: 768px) {
+            .form-info {
+                flex-direction: column;
+                align-items: center;
+                gap: var(--spacing-3);
+            }
+        }
+
+        /* Form Fields */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-3);
+            font-weight: var(--font-weight-semibold);
+            color: var(--gray-700);
+            font-size: var(--font-size-sm);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--spacing-4) var(--spacing-5);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            font-size: var(--font-size-base);
+            color: var(--gray-900);
+            background: var(--white);
+            transition: all var(--transition-normal);
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: var(--primary-red-light);
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Consent Checkboxes */
+        .consent-checkboxes {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-4);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-3);
+            cursor: pointer;
+            font-size: var(--font-size-sm);
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkmark {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            position: relative;
+            flex-shrink: 0;
+            transition: all var(--transition-normal);
+        }
+
+        .checkbox-label:hover .checkmark {
+            border-color: var(--primary-red);
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkmark {
+            background: var(--primary-red);
+            border-color: var(--primary-red);
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--white);
+            font-size: 12px;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .donation-form {
+            background: var(--white);
+            padding: var(--spacing-12);
+            border-radius: var(--radius-3xl);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .donation-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-red-light));
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-3);
+            font-weight: var(--font-weight-semibold);
+            color: var(--gray-700);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group label i {
+            color: var(--primary-red);
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: var(--spacing-4) var(--spacing-5);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            font-size: var(--font-size-base);
+            font-family: var(--font-primary);
+            background: var(--white);
+            transition: all var(--transition-normal);
+            position: relative;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: var(--primary-red-light);
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.1);
+        }
+
+        .form-group.focused input,
+        .form-group.focused select {
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+        }
+
+        .form-group.filled input,
+        .form-group.filled select {
+            background: var(--gray-50);
+        }
+
+        .error-message {
+            color: var(--error-red);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-2);
+            display: block;
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: var(--spacing-4);
+            justify-content: center;
+            margin-top: var(--spacing-8);
+            flex-wrap: wrap;
+        }
+
+        /* Advanced Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            padding: var(--spacing-4) var(--spacing-8);
+            border: none;
+            border-radius: var(--radius-full);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-lg);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            min-width: 180px;
+            justify-content: center;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left var(--transition-normal);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            box-shadow: var(--shadow-red);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: var(--glow-red);
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-200);
+            border-color: var(--gray-400);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Instructions Section */
+        .instructions-section {
+            background: var(--white);
+            padding: var(--spacing-24) 0;
+        }
+
+        .instructions-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .instructions-header {
+            text-align: center;
+            margin-bottom: var(--spacing-12);
+        }
+
+        .instructions-header h2 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-4);
+            font-size: var(--font-size-4xl);
+        }
+
+        .instructions-header p {
+            color: var(--gray-600);
+            font-size: var(--font-size-lg);
+        }
+
+        .instructions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-8);
+            margin-top: var(--spacing-12);
+        }
+
+        .instruction-card {
+            background: var(--white);
+            padding: var(--spacing-8);
+            border-radius: var(--radius-3xl);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-normal);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instruction-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-red-light));
+            transform: scaleX(0);
+            transition: transform var(--transition-normal);
+        }
+
+        .instruction-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(229, 62, 62, 0.15);
+        }
+
+        .instruction-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .instruction-number {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--spacing-6) auto;
+            color: var(--white);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-black);
+            box-shadow: 0 10px 30px rgba(229, 62, 62, 0.3);
+            transition: all var(--transition-normal);
+        }
+
+        .instruction-card:hover .instruction-number {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 40px rgba(229, 62, 62, 0.4);
+        }
+
+        .instruction-card h3 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-4);
+            font-size: var(--font-size-xl);
+        }
+
+        .instruction-card p {
+            color: var(--gray-600);
+            line-height: 1.7;
+        }
+
+        /* Quick Links Section */
+        .quick-links-section {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+            padding: var(--spacing-20) 0;
+        }
+
+        .quick-links-header {
+            text-align: center;
+            margin-bottom: var(--spacing-12);
+        }
+
+        .quick-links-header h2 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-4);
+            font-size: var(--font-size-3xl);
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-6);
+            margin-top: var(--spacing-8);
+        }
+
+        .quick-link-card {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+            padding: var(--spacing-6);
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-normal);
+            text-decoration: none;
+            color: var(--gray-700);
+        }
+
+        .quick-link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(229, 62, 62, 0.15);
+            border-color: var(--primary-red-light);
+            color: var(--primary-red);
+        }
+
+        .quick-link-card i {
+            font-size: var(--font-size-2xl);
+            color: var(--primary-red);
+            transition: all var(--transition-normal);
+        }
+
+        .quick-link-card:hover i {
+            transform: scale(1.2);
+        }
+
+        .quick-link-card span {
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-lg);
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
+            color: var(--white);
+            padding: var(--spacing-20) 0 var(--spacing-8) 0;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-8);
+            margin-bottom: var(--spacing-12);
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-black);
+            color: var(--primary-red);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: var(--spacing-3);
+        }
+
+        .footer-section ul li a {
+            color: var(--gray-300);
+            transition: color var(--transition-fast);
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--white);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: var(--spacing-8);
+            border-top: 1px solid var(--gray-700);
+            color: var(--gray-400);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: var(--z-modal);
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 0;
+            border-radius: var(--radius-3xl);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-2xl);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-3xl) var(--radius-3xl) 0 0;
+            text-align: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-3);
+            font-size: var(--font-size-xl);
+            color: var(--white);
+        }
+
+        .modal-body {
+            padding: var(--spacing-8);
+            text-align: center;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            padding: var(--spacing-6);
+            text-align: center;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .application-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-8);
+            }
+
+            .instructions-panel {
+                position: static;
+                order: 2;
+                margin-top: var(--spacing-8);
+            }
+
+            .application-form {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-8);
+                text-align: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .instructions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .application-container {
+                padding: 0 var(--spacing-4);
+            }
+
+            .application-form {
+                padding: var(--spacing-8);
+            }
+
+            .instructions-panel {
+                padding: var(--spacing-6);
+            }
+
+            .application-stats {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: center;
+                padding-top: var(--spacing-12);
+                transition: left var(--transition-normal);
+                z-index: var(--z-fixed);
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hamburger.active .bar:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+
+            .hamburger.active .bar:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger.active .bar:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+
+            .hero-section {
+                min-height: 80vh;
+                padding: var(--spacing-20) 0;
+            }
+
+            .hero-text h1 {
+                font-size: clamp(2.5rem, 8vw, 4rem);
+            }
+
+            .hero-illustration {
+                height: 300px;
+            }
+
+            .hero-icon {
+                font-size: 5rem;
+            }
+
+            .instructions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 var(--spacing-4);
+            }
+
+            .blood-drop {
+                display: none;
+            }
+
+            .hero-text h1 {
+                font-size: clamp(2rem, 8vw, 3rem);
+            }
+
+            .hero-icon {
+                font-size: 4rem;
+            }
+
+            .donation-form {
+                padding: var(--spacing-8);
+            }
+
+            .parallax-element {
+                display: none;
+            }
+        }
+
+        /* Performance Optimizations */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .loading.loaded {
+            opacity: 1;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--off-white) 0%, var(--gray-50) 100%);
+            overflow-x: hidden;
+            font-weight: var(--font-weight-normal);
+            letter-spacing: -0.01em;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: var(--font-weight-semibold);
+            line-height: 1.2;
+            margin-bottom: var(--spacing-4);
+            color: var(--gray-900);
+        }
+
+        h1 { font-size: var(--font-size-4xl); }
+        h2 { font-size: var(--font-size-3xl); }
+        h3 { font-size: var(--font-size-2xl); }
+
+        p {
+            margin-bottom: var(--spacing-4);
+            color: var(--gray-600);
+        }
+
+        a {
+            color: var(--primary-red);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        a:hover {
+            color: var(--primary-red-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-4);
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-lg);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: var(--z-fixed);
+            transition: all var(--transition-normal);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-4) var(--spacing-6);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: var(--spacing-1);
+            align-items: center;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-2) var(--spacing-4);
+            border-radius: var(--radius-full);
+            font-weight: 500;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--accent-red), rgba(229, 62, 62, 0.1));
+            color: var(--primary-red);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-link.login-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            box-shadow: var(--shadow-red);
+        }
+
+        .nav-link.login-btn:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-4) var(--spacing-8);
+            border: none;
+            border-radius: var(--radius-xl);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-semibold);
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            justify-content: center;
+            transition: all var(--transition-normal);
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+            font-size: var(--font-size-sm);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            box-shadow: var(--shadow-red);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary-red);
+            border: 2px solid var(--primary-red);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            border-color: transparent;
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        /* Form Section */
+        .form-section {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--off-white) 100%);
+            padding: calc(80px + var(--spacing-20)) 0 var(--spacing-20) 0;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: var(--spacing-16);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-red), var(--primary-red-light), var(--primary-red));
+            background-size: 200% 100%;
+            animation: gradientShift 4s ease-in-out infinite;
+            border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: var(--spacing-8);
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-6);
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: var(--spacing-6);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-2);
+            font-weight: var(--font-weight-medium);
+            color: var(--gray-700);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: var(--spacing-4) var(--spacing-5);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            font-size: var(--font-size-base);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all var(--transition-normal);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(229, 62, 62, 0.1), var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: var(--primary-red-light);
+            background: var(--white);
+        }
+
+        .form-actions {
+            text-align: center;
+            margin-top: var(--spacing-8);
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(40px);
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Quick Links Section */
+        .quick-links {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+            padding: var(--spacing-16) 0;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-6);
+            margin-top: var(--spacing-8);
+        }
+
+        .link-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-4);
+            padding: var(--spacing-8);
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-sm);
+            text-decoration: none;
+            color: var(--gray-700);
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(229, 62, 62, 0.1), transparent);
+            transition: left var(--transition-slow);
+        }
+
+        .link-card:hover::before {
+            left: 100%;
+        }
+
+        .link-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-2xl);
+            border-color: var(--primary-red);
+            color: var(--primary-red);
+        }
+
+        .link-card i {
+            font-size: var(--font-size-3xl);
+            color: var(--primary-red);
+            transition: all var(--transition-normal);
+        }
+
+        .link-card:hover i {
+            transform: scale(1.2);
+            color: var(--primary-red-dark);
+        }
+
+        .link-card span {
+            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-lg);
+            text-align: center;
+            transition: color var(--transition-normal);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                margin: var(--spacing-4);
+                padding: var(--spacing-8);
+            }
+
+            .links-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: var(--spacing-4);
+            }
+
+            .link-card {
+                padding: var(--spacing-6);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .links-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--gray-900);
+            color: var(--white);
+            padding: var(--spacing-16) 0 var(--spacing-8) 0;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-8);
+            margin-bottom: var(--spacing-8);
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--primary-red);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: var(--spacing-2);
+        }
+
+        .footer-section ul li a {
+            color: var(--gray-300);
+            transition: color var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--white);
+        }
+
+        .contact-info p {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-2);
+            color: var(--gray-300);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: var(--spacing-8);
+            border-top: 1px solid var(--gray-700);
+            color: var(--gray-400);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: var(--z-modal);
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 0;
+            border-radius: var(--radius-2xl);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-2xl);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+            text-align: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-3);
+            font-size: var(--font-size-xl);
+        }
+
+        .modal-body {
+            padding: var(--spacing-8);
+            text-align: center;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            padding: var(--spacing-6);
+            text-align: center;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Application Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 0;
+            border-radius: var(--radius-2xl);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease-out;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            padding: var(--spacing-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: var(--font-size-xl);
+        }
+
+        .modal-close {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity var(--transition-normal);
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: var(--spacing-8);
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            padding: var(--spacing-6);
+            text-align: center;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .modal.success .modal-header {
+            background: linear-gradient(135deg, #10b981, #34d399);
+        }
+
+        .modal.error .modal-header {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+        }
+
+        /* Error Messages */
+        .error-message {
+            color: var(--error-red);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-2);
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+    </style>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="loading">
+    <!-- Floating Blood Drops Background -->
+    <div class="blood-drops-bg">
+        <div class="blood-drop"></div>
+        <div class="blood-drop"></div>
+        <div class="blood-drop"></div>
+        <div class="blood-drop"></div>
+        <div class="blood-drop"></div>
+        <div class="blood-drop"></div>
+        <div class="blood-drop"></div>
+        <div class="blood-drop"></div>
+        <div class="blood-drop"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <i class="fas fa-heart"></i>
+                    <span>BloodConnect</span>
+                </div>
+
+                <ul class="nav-menu" id="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="donate.html" class="nav-link active">
+                            <i class="fas fa-hand-holding-heart"></i>
+                            <span>Want to Donate Blood</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="request.html" class="nav-link">
+                            <i class="fas fa-search"></i>
+                            <span>Request Blood</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="about.html" class="nav-link">
+                            <i class="fas fa-info-circle"></i>
+                            <span>About</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="contact.html" class="nav-link">
+                            <i class="fas fa-phone"></i>
+                            <span>Contact</span>
+                        </a>
+                    </li>
+                    <!-- Auth Navigation (will be updated by JavaScript) -->
+                    <li class="nav-item" id="registerNav">
+                        <a href="index.html#registration-section" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Register</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="loginNav">
+                        <a href="login.html" class="nav-link login-btn">
+                            <i class="fas fa-user"></i>
+                            <span>Login</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="hamburger" id="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Parallax -->
+    <section class="hero-section">
+        <div class="parallax-bg">
+            <div class="parallax-element"></div>
+            <div class="parallax-element"></div>
+            <div class="parallax-element"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Apply to Donate Blood</h1>
+                    <p>Join our life-saving community of blood donors. Your application will be reviewed and you'll be guided through the donation process to help save lives in your community.</p>
+                    <div class="hero-cta">
+                        <a href="#registration-form" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Apply Now
+                        </a>
+                        <a href="#instructions" class="btn btn-secondary">
+                            <i class="fas fa-info-circle"></i>
+                            How to Apply
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-illustration">
+                        <i class="fas fa-hand-holding-heart hero-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Apply to Donate Blood Form -->
+    <section class="form-section" id="registration-form">
+        <div class="container">
+            <div class="application-container">
+                <div class="application-header fade-in">
+                    <h2>🩸 Apply to Donate Blood</h2>
+                    <p>Join our life-saving community by applying to become a blood donor. Your application will be reviewed and you'll be contacted with next steps.</p>
+                    <div class="application-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-heart"></i>
+                            <span>One donation saves 3 lives</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <span>Join 10,000+ donors</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>100% safe process</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="application-content">
+                    <!-- Instructions Panel -->
+                    <div class="instructions-panel fade-in" data-delay="100">
+                        <h3><i class="fas fa-info-circle"></i> How to Apply</h3>
+
+                        <div class="instruction-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Personal Information</h4>
+                                <p>Fill in your complete name, age, and contact details. Ensure all information is accurate.</p>
+                            </div>
+                        </div>
+
+                        <div class="instruction-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Medical Details</h4>
+                                <p>Select your blood group and provide any relevant medical history or conditions.</p>
+                            </div>
+                        </div>
+
+                        <div class="instruction-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Availability</h4>
+                                <p>Choose your preferred donation date and specify your availability for future donations.</p>
+                            </div>
+                        </div>
+
+                        <div class="instruction-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Submit Application</h4>
+                                <p>Review all details and submit. You'll receive confirmation and next steps via email.</p>
+                            </div>
+                        </div>
+
+                        <div class="eligibility-info">
+                            <h4><i class="fas fa-check-circle"></i> Eligibility Criteria</h4>
+                            <ul>
+                                <li>Age: 18-65 years</li>
+                                <li>Weight: Minimum 50kg</li>
+                                <li>Good general health</li>
+                                <li>No recent illness</li>
+                                <li>No recent tattoos/piercings</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Application Form -->
+                    <form id="donorApplicationForm" class="application-form fade-in" data-delay="200">
+                        <h3><i class="fas fa-hand-holding-heart"></i> Donor Application Form</h3>
+
+                        <div class="form-section-group">
+                            <h4><i class="fas fa-user"></i> Personal Information</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="firstName">First Name *</label>
+                                    <input type="text" id="firstName" name="firstName" required
+                                           placeholder="Enter your first name" maxlength="50">
+                                    <span class="error-message" id="firstName-error"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="lastName">Last Name *</label>
+                                    <input type="text" id="lastName" name="lastName" required
+                                           placeholder="Enter your last name" maxlength="50">
+                                    <span class="error-message" id="lastName-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="dateOfBirth">Date of Birth *</label>
+                                    <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+                                    <span class="error-message" id="dateOfBirth-error"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="gender">Gender *</label>
+                                    <select id="gender" name="gender" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <span class="error-message" id="gender-error"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section-group">
+                            <h4><i class="fas fa-phone"></i> Contact Information</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="email">Email Address *</label>
+                                    <input type="email" id="email" name="email" required
+                                           placeholder="Enter your email address" maxlength="100">
+                                    <span class="error-message" id="email-error"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="phoneNumber">Phone Number *</label>
+                                    <input type="tel" id="phoneNumber" name="phoneNumber" required
+                                           placeholder="Enter your phone number" pattern="[6-9][0-9]{9}" maxlength="10">
+                                    <span class="error-message" id="phoneNumber-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="city">City *</label>
+                                    <input type="text" id="city" name="city" required
+                                           placeholder="Enter your city" maxlength="50">
+                                    <span class="error-message" id="city-error"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="state">State *</label>
+                                    <input type="text" id="state" name="state" required
+                                           placeholder="Enter your state" maxlength="50">
+                                    <span class="error-message" id="state-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="address">Complete Address *</label>
+                                <textarea id="address" name="address" required rows="2"
+                                          placeholder="Enter your complete address (minimum 5 characters)" maxlength="200" minlength="5"></textarea>
+                                <span class="error-message" id="address-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-section-group">
+                            <h4><i class="fas fa-tint"></i> Medical Information</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="bloodGroup">Blood Group *</label>
+                                    <select id="bloodGroup" name="bloodGroup" required>
+                                        <option value="">Select Blood Group</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                    <span class="error-message" id="bloodGroup-error"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="weight">Weight (kg) *</label>
+                                    <input type="number" id="weight" name="weight" required
+                                           placeholder="Enter your weight" min="50" max="200">
+                                    <span class="error-message" id="weight-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="medicalHistory">Medical History (Optional)</label>
+                                <textarea id="medicalHistory" name="medicalHistory" rows="3"
+                                          placeholder="Any relevant medical conditions, medications, or recent illnesses" maxlength="500"></textarea>
+                                <span class="error-message" id="medicalHistory-error"></span>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="lastDonation">Last Blood Donation</label>
+                                    <input type="date" id="lastDonation" name="lastDonation">
+                                    <span class="error-message" id="lastDonation-error"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="emergencyContact">Emergency Contact *</label>
+                                    <input type="tel" id="emergencyContact" name="emergencyContact" required
+                                           placeholder="Emergency contact number" pattern="[6-9][0-9]{9}" maxlength="10">
+                                    <span class="error-message" id="emergencyContact-error"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section-group">
+                            <h4><i class="fas fa-calendar"></i> Availability & Preferences</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="preferredDate">Preferred Donation Date *</label>
+                                    <input type="date" id="preferredDate" name="preferredDate" required>
+                                    <span class="error-message" id="preferredDate-error"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="preferredTime">Preferred Time *</label>
+                                    <select id="preferredTime" name="preferredTime" required>
+                                        <option value="">Select Time</option>
+                                        <option value="morning">Morning (9:00 AM - 12:00 PM)</option>
+                                        <option value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
+                                        <option value="evening">Evening (4:00 PM - 7:00 PM)</option>
+                                    </select>
+                                    <span class="error-message" id="preferredTime-error"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="availability">General Availability</label>
+                                <textarea id="availability" name="availability" rows="2"
+                                          placeholder="Describe your general availability for future donations (e.g., weekends only, flexible, etc.)" maxlength="200"></textarea>
+                                <span class="error-message" id="availability-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-section-group">
+                            <h4><i class="fas fa-check-circle"></i> Consent & Agreement</h4>
+                            <div class="consent-checkboxes">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="healthConsent" name="healthConsent" required>
+                                    <span class="checkmark"></span>
+                                    I confirm that I am in good health and meet the eligibility criteria for blood donation.
+                                </label>
+
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="dataConsent" name="dataConsent" required>
+                                    <span class="checkmark"></span>
+                                    I consent to the collection and use of my personal data for blood donation purposes.
+                                </label>
+
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="contactConsent" name="contactConsent" required>
+                                    <span class="checkmark"></span>
+                                    I agree to be contacted for future donation opportunities and health screenings.
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="submitApplicationBtn">
+                                <i class="fas fa-paper-plane"></i>
+                                Submit Application
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="fas fa-redo"></i>
+                                Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Instructions -->
+    <section class="instructions-section" id="instructions">
+        <div class="container">
+            <div class="instructions-container">
+                <div class="instructions-header fade-in">
+                    <h2>How to Register as a Blood Donor</h2>
+                    <p>Follow these simple steps to complete your blood donor registration</p>
+                </div>
+
+                <div class="instructions-grid">
+                    <div class="instruction-card fade-in" data-delay="100">
+                        <div class="instruction-number">1</div>
+                        <h3>Fill Personal Details</h3>
+                        <p>Enter your full name, age, gender, and contact information accurately. Make sure all details are correct as they will be used for verification.</p>
+                    </div>
+
+                    <div class="instruction-card fade-in" data-delay="200">
+                        <div class="instruction-number">2</div>
+                        <h3>Select Blood Group</h3>
+                        <p>Choose your correct blood group from the dropdown. If you're unsure, please get a blood test done before registration.</p>
+                    </div>
+
+                    <div class="instruction-card fade-in" data-delay="300">
+                        <div class="instruction-number">3</div>
+                        <h3>Provide Location</h3>
+                        <p>Enter your city and state to help us connect you with nearby blood banks and patients in need of blood.</p>
+                    </div>
+
+                    <div class="instruction-card fade-in" data-delay="400">
+                        <div class="instruction-number">4</div>
+                        <h3>Choose Donation Date</h3>
+                        <p>Select your preferred date for blood donation. You can always reschedule later if needed.</p>
+                    </div>
+
+                    <div class="instruction-card fade-in" data-delay="500">
+                        <div class="instruction-number">5</div>
+                        <h3>Submit Registration</h3>
+                        <p>Review all information and submit your registration. You'll receive a confirmation email with further instructions.</p>
+                    </div>
+
+                    <div class="instruction-card fade-in" data-delay="600">
+                        <div class="instruction-number">6</div>
+                        <h3>Get Verified</h3>
+                        <p>Our team will verify your details and contact you to schedule your first donation appointment.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- BloodConnect Section -->
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-heart"></i>
+                        <span>BloodConnect</span>
+                    </div>
+                    <p class="footer-description">
+                        Connecting lives through blood donation. Join our community and help save lives every day.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a href="donate.html"><i class="fas fa-hand-holding-heart"></i> Donate Blood</a></li>
+                        <li><a href="request.html"><i class="fas fa-search"></i> Request Blood</a></li>
+                        <li><a href="about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
+                        <li><a href="contact.html"><i class="fas fa-phone"></i> Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Help Center</a></li>
+                        <li><a href="#"><i class="fas fa-file-alt"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+                        <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-phone"></i> 9307066500</li>
+                        <li><i class="fas fa-envelope"></i> blooddonation1627@gmail.com</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Emergency Support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 BloodConnect. All rights reserved. | Saving lives through blood donation</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced JavaScript for Blood Donation Page -->
+    <script>
+        // Modern Blood Donation Page Interactions
+        class BloodDonationPage {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.setupScrollAnimations();
+                this.setupNavbarEffects();
+                this.setupFormInteractions();
+                this.setupMobileMenu();
+                this.setupParallaxEffects();
+                this.initializeLoadingAnimation();
+                this.setMinDate();
+                this.setupDonorApplicationForm();
+            }
+
+            // Scroll-triggered animations
+            setupScrollAnimations() {
+                const observerOptions = {
+                    threshold: 0.1,
+                    rootMargin: '0px 0px -50px 0px'
+                };
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                        }
+                    });
+                }, observerOptions);
+
+                // Observe all animation elements
+                document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right, .scale-in').forEach(el => {
+                    observer.observe(el);
+                });
+            }
+
+            // Navbar scroll effects
+            setupNavbarEffects() {
+                const navbar = document.querySelector('.navbar');
+                let lastScrollY = window.scrollY;
+
+                window.addEventListener('scroll', () => {
+                    const currentScrollY = window.scrollY;
+
+                    if (currentScrollY > 100) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+
+                    lastScrollY = currentScrollY;
+                });
+            }
+
+            // Form field interactions
+            setupFormInteractions() {
+                const formFields = document.querySelectorAll('input, select');
+
+                formFields.forEach(field => {
+                    // Focus effects
+                    field.addEventListener('focus', function() {
+                        this.parentElement.classList.add('focused');
+                    });
+
+                    field.addEventListener('blur', function() {
+                        this.parentElement.classList.remove('focused');
+                        if (this.value.trim() !== '') {
+                            this.parentElement.classList.add('filled');
+                        } else {
+                            this.parentElement.classList.remove('filled');
+                        }
+                    });
+
+                    // Real-time validation
+                    field.addEventListener('input', function() {
+                        this.validateField();
+                    });
+                });
+            }
+
+            // Mobile menu toggle
+            setupMobileMenu() {
+                const hamburger = document.querySelector('.hamburger');
+                const navMenu = document.querySelector('.nav-menu');
+
+                if (hamburger && navMenu) {
+                    hamburger.addEventListener('click', () => {
+                        hamburger.classList.toggle('active');
+                        navMenu.classList.toggle('active');
+                    });
+
+                    // Close menu when clicking on links
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.addEventListener('click', () => {
+                            hamburger.classList.remove('active');
+                            navMenu.classList.remove('active');
+                        });
+                    });
+                }
+            }
+
+            // Parallax effects
+            setupParallaxEffects() {
+                const parallaxElements = document.querySelectorAll('.parallax-element');
+
+                window.addEventListener('scroll', () => {
+                    const scrolled = window.pageYOffset;
+                    const rate = scrolled * -0.5;
+
+                    parallaxElements.forEach((element, index) => {
+                        const speed = 0.5 + (index * 0.2);
+                        element.style.transform = `translateY(${rate * speed}px)`;
+                    });
+                });
+            }
+
+            // Set minimum date for donation date field
+            setMinDate() {
+                const preferredDateField = document.getElementById('preferredDate');
+                if (preferredDateField) {
+                    const today = new Date();
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    preferredDateField.min = tomorrow.toISOString().split('T')[0];
+                }
+
+                // Set maximum date for date of birth (18 years ago)
+                const dobField = document.getElementById('dateOfBirth');
+                if (dobField) {
+                    const eighteenYearsAgo = new Date();
+                    eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+                    dobField.max = eighteenYearsAgo.toISOString().split('T')[0];
+
+                    // Set minimum date for date of birth (65 years ago)
+                    const sixtyFiveYearsAgo = new Date();
+                    sixtyFiveYearsAgo.setFullYear(sixtyFiveYearsAgo.getFullYear() - 65);
+                    dobField.min = sixtyFiveYearsAgo.toISOString().split('T')[0];
+                }
+            }
+
+            // Donor Application Form Handling
+            setupDonorApplicationForm() {
+                const form = document.getElementById('donorApplicationForm');
+                if (!form) return;
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const submitBtn = document.getElementById('submitApplicationBtn');
+                    const originalText = submitBtn.innerHTML;
+
+                    try {
+                        // Show loading state
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting Application...';
+
+                        // Clear previous errors
+                        document.querySelectorAll('.error-message').forEach(error => {
+                            error.textContent = '';
+                            error.classList.remove('show');
+                        });
+
+                        // Get form data
+                        const formData = new FormData(form);
+                        const applicationData = {};
+
+                        // Convert FormData to object
+                        for (let [key, value] of formData.entries()) {
+                            if (key.includes('Consent')) {
+                                applicationData[key] = value === 'on';
+                            } else {
+                                applicationData[key] = value.trim(); // Trim whitespace
+                            }
+                        }
+
+                        console.log('📋 Form data collected:', applicationData);
+                        console.log('📋 Form data keys:', Object.keys(applicationData));
+                        console.log('📋 Form data values:', Object.values(applicationData));
+
+                        // Validate required consents
+                        if (!applicationData.healthConsent || !applicationData.dataConsent || !applicationData.contactConsent) {
+                            console.log('❌ Consent validation failed:', {
+                                health: applicationData.healthConsent,
+                                data: applicationData.dataConsent,
+                                contact: applicationData.contactConsent
+                            });
+                            throw new Error('All consent checkboxes must be checked to proceed.');
+                        }
+
+                        // Validate required fields
+                        const requiredFields = ['firstName', 'lastName', 'dateOfBirth', 'gender', 'email', 'phoneNumber', 'city', 'state', 'address', 'bloodGroup', 'weight', 'emergencyContact', 'preferredDate', 'preferredTime'];
+                        const missingFields = [];
+
+                        requiredFields.forEach(field => {
+                            if (!applicationData[field] || applicationData[field] === '') {
+                                missingFields.push(field);
+                            }
+                        });
+
+                        if (missingFields.length > 0) {
+                            throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+                        }
+
+                        console.log('🚀 Submitting donor application:', applicationData);
+
+                        // Submit to API
+                        const apiUrl = 'http://localhost:3002/api/donors/apply';
+                        console.log('📡 Making request to:', apiUrl);
+
+                        // Get auth token if user is logged in
+                        const token = localStorage.getItem('authToken');
+                        const headers = {
+                            'Content-Type': 'application/json'
+                        };
+
+                        if (token) {
+                            headers['Authorization'] = `Bearer ${token}`;
+                            console.log('🔐 User is logged in, sending with auth token');
+                        } else {
+                            console.log('👤 User is not logged in, submitting as guest');
+                        }
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: headers,
+                            body: JSON.stringify(applicationData)
+                        });
+
+                        console.log('📡 Response status:', response.status);
+                        console.log('📡 Response headers:', response.headers);
+
+                        let result;
+                        try {
+                            const responseText = await response.text();
+                            console.log('📡 Raw response:', responseText);
+                            result = JSON.parse(responseText);
+                        } catch (parseError) {
+                            console.error('❌ Failed to parse response as JSON:', parseError);
+                            throw new Error(`Server returned invalid response (Status: ${response.status}). Please try again.`);
+                        }
+
+                        console.log('📊 Application response:', result);
+
+                        // Check if response was successful
+                        if (!response.ok) {
+                            throw new Error(result.message || `Server error (${response.status}): ${response.statusText}`);
+                        }
+
+                        if (result.success) {
+                            // Show success message
+                            this.showModal(
+                                '🎉 Application Submitted Successfully!',
+                                `Thank you for applying to become a blood donor! Your application has been submitted successfully.
+
+                                <strong>Application ID:</strong> ${result.data.applicationId}
+
+                                You will be contacted within 2-3 business days with next steps. Please keep this ID for your records.`,
+                                'success'
+                            );
+
+                            // Clear form
+                            form.reset();
+
+                            // Scroll to top
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                        } else {
+                            // Handle validation errors
+                            if (result.errors && Array.isArray(result.errors)) {
+                                console.log('📝 Validation errors:', result.errors);
+
+                                let errorMessages = [];
+                                result.errors.forEach(error => {
+                                    const field = error.param || error.path;
+                                    const message = error.msg || error.message;
+                                    errorMessages.push(`${field}: ${message}`);
+
+                                    const errorElement = document.getElementById(`${field}-error`);
+                                    if (errorElement) {
+                                        errorElement.textContent = message;
+                                        errorElement.classList.add('show');
+                                    }
+                                });
+
+                                this.showModal(
+                                    '❌ Validation Error',
+                                    `Please fix the following errors:<br><br>${errorMessages.join('<br>')}`,
+                                    'error'
+                                );
+                            } else {
+                                this.showModal(
+                                    '❌ Application Failed',
+                                    result.message || 'There was an error submitting your application. Please try again.',
+                                    'error'
+                                );
+                            }
+                        }
+
+                    } catch (error) {
+                        console.error('❌ Application submission error:', error);
+                        this.showModal(
+                            '❌ Network Error',
+                            error.message || 'Unable to submit application. Please check your connection and try again.',
+                            'error'
+                        );
+                    } finally {
+                        // Reset button
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                });
+            }
+
+            // Modal display function
+            showModal(title, message, type = 'info') {
+                // Create modal if it doesn't exist
+                let modal = document.getElementById('applicationModal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'applicationModal';
+                    modal.className = 'modal';
+                    modal.innerHTML = `
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 id="modalTitle"></h3>
+                                <span class="modal-close">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <p id="modalMessage"></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary" onclick="document.getElementById('applicationModal').style.display='none'">OK</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+
+                    // Add close functionality
+                    modal.querySelector('.modal-close').onclick = () => modal.style.display = 'none';
+                    modal.onclick = (e) => {
+                        if (e.target === modal) modal.style.display = 'none';
+                    };
+                }
+
+                // Update content
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalMessage').innerHTML = message;
+                modal.className = `modal ${type}`;
+                modal.style.display = 'block';
+            }
+
+            // Loading animation
+            initializeLoadingAnimation() {
+                window.addEventListener('load', () => {
+                    document.body.classList.add('loaded');
+                });
+            }
+        }
+
+        // Enhanced button interactions
+        function setupButtonEffects() {
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.02)';
+                });
+
+                btn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        }
+
+        // Smooth scrolling for anchor links
+        function setupSmoothScrolling() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+
+        // Modal close functionality
+        function closeModal() {
+            const modal = document.getElementById('successModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new BloodDonationPage();
+            setupButtonEffects();
+            setupSmoothScrolling();
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('successModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Performance optimization: Throttle scroll events
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            }
+        }
+
+        // Initialize on page load - auth state manager will handle navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auth state manager will automatically handle navigation updates
+            console.log('Donate page loaded - auth state manager active');
+        });
+    </script>
+
+    <!-- Fallback JavaScript Files -->
+    <script src="js/main.js"></script>
+    <script src="js/forms.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth-state.js"></script>
+</body>
+</html>
