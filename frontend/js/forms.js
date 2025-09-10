@@ -553,10 +553,17 @@ function validateContactForm() {
  */
 function setupLoginForm() {
     const loginForm = document.getElementById('loginForm');
-    if (!loginForm) return;
+    if (!loginForm) {
+        console.log('❌ Login form not found in setupLoginForm');
+        return;
+    }
+    
+    console.log('✅ Login form found, setting up event listener');
     
     loginForm.addEventListener('submit', async function(e) {
+        console.log('🔐 Login form submitted, preventing default...');
         e.preventDefault();
+        e.stopPropagation();
         
         if (!validateLoginForm()) {
             return;
@@ -566,12 +573,22 @@ function setupLoginForm() {
         const originalText = submitBtn.innerHTML;
         
         try {
+            if (typeof BloodConnect === 'undefined') {
+                console.error('❌ BloodConnect object not available');
+                return;
+            }
+            
             BloodConnect.setLoadingState(submitBtn, true);
             
             const formData = new FormData(loginForm);
             const loginData = Object.fromEntries(formData.entries());
             
+            console.log('📧 Login data:', loginData);
+            
             const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+            console.log('🌐 API Base URL:', apiBase);
+            console.log('📤 Making login request to:', `${apiBase}/auth/login`);
+            
             const response = await fetch(`${apiBase}/auth/login`, {
                 method: 'POST',
                 headers: {
@@ -628,6 +645,7 @@ function setupLoginForm() {
  */
 function validateLoginForm() {
     try {
+        console.log('🔍 Validating login form...');
         const form = document.getElementById('loginForm');
         if (!form) {
             console.error('❌ Login form not found');
@@ -670,6 +688,7 @@ function validateLoginForm() {
             BloodConnect.clearFieldError(password);
         }
 
+        console.log('✅ Login form validation result:', isValid);
         return isValid;
 
     } catch (error) {
