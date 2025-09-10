@@ -52,8 +52,14 @@ const corsOptions = {
 
         // Production origins from environment variable
         const productionOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
+        
+        // Add known production domains
+        const knownProductionOrigins = [
+            'https://blood-donation-website5.onrender.com',
+            'https://blood-donation-website.onrender.com'
+        ];
 
-        const allowedOrigins = [...developmentOrigins, ...productionOrigins];
+        const allowedOrigins = [...developmentOrigins, ...productionOrigins, ...knownProductionOrigins];
         
         console.log(`🌐 CORS: Request from origin: ${origin}`);
         console.log(`🌐 CORS: Allowed origins:`, allowedOrigins);
