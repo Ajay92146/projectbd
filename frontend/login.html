@@ -756,7 +756,7 @@
             </div>
 
             <!-- Login Form -->
-            <form class="login-form" id="loginForm" onsubmit="return false;">
+            <form class="login-form" id="loginForm">
                 <!-- Email Address -->
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
@@ -784,7 +784,7 @@
                 </div>
 
                 <!-- Login Button -->
-                <button type="button" id="loginButton" class="btn btn-primary" onclick="handleLoginClick()">
+                <button type="submit" id="loginSubmitBtn" class="btn btn-primary">
                     <i class="fas fa-sign-in-alt"></i>
                     Sign In
                 </button>
@@ -886,162 +886,9 @@
             }
         }
 
-        // Global login function for onclick handler
-        window.handleLoginClick = function() {
-            console.log('🔘 Login button clicked via onclick');
-            handleLogin();
-        };
+        // Login form will be handled by forms.js
 
-        // Wait for DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔧 DOM loaded, setting up login form event listener...');
-
-            const loginForm = document.getElementById('loginForm');
-            const loginButton = document.getElementById('loginButton');
-
-            if (!loginForm) {
-                console.error('❌ Login form not found!');
-                return;
-            }
-
-            console.log('✅ Login form found, attaching event listeners');
-
-            // Function to handle login
-            window.handleLogin = async function(e) {
-                if (e) {
-                    console.log('🔐 Login triggered, preventing default...');
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const rememberMe = document.getElementById('rememberMe').checked;
-
-            // Basic validation
-            if (!email || !password) {
-                showMessage('Please fill in all fields', 'error');
-                return;
-            }
-
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showMessage('Please enter a valid email address', 'error');
-                return;
-            }
-
-            // Show loading state
-            const submitButton = document.querySelector('.btn-primary');
-            const originalText = submitButton.innerHTML;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
-            submitButton.disabled = true;
-
-            try {
-                // Try to connect to backend API first
-                const response = await fetch('http://localhost:3002/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Store authentication data
-                    localStorage.setItem('bloodconnect_token', data.data.token);
-                    localStorage.setItem('bloodconnect_user', JSON.stringify(data.data.user));
-
-                    // Store remember me preference
-                    if (rememberMe) {
-                        localStorage.setItem('bloodconnect_remember', 'true');
-                    } else {
-                        localStorage.removeItem('bloodconnect_remember');
-                    }
-
-                    // Update auth state if available
-                    if (window.authStateManager) {
-                        window.authStateManager.handleLoginSuccess(data.data.user, data.data.token);
-                    }
-
-                    showMessage(`Welcome back, ${data.data.user.firstName}! Login successful.`, 'success');
-
-                    // Redirect to dashboard or home page after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 2000);
-
-                } else {
-                    // Handle login failure
-                    showMessage(data.message || 'Login failed. Please check your credentials.', 'error');
-                }
-
-            } catch (error) {
-                console.error('Login error:', error);
-
-                // Check if it's a network error (server not running)
-                if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                    // Backend server is not running, fall back to demo mode
-                    console.warn('🔌 Backend server not available, using demo mode');
-
-                    // Demo login logic
-                    if (email === 'demo@bloodconnect.com' || email.includes('demo')) {
-                        // Simulate successful demo login
-                        const demoUserData = {
-                            _id: 'demo_user_id',
-                            email: email,
-                            firstName: 'Demo',
-                            lastName: 'User',
-                            role: 'user',
-                            loginTime: new Date().toISOString()
-                        };
-
-                        // Store demo data
-                        localStorage.setItem('bloodconnect_user', JSON.stringify(demoUserData));
-                        localStorage.setItem('bloodconnect_token', 'demo_token_' + Date.now());
-
-                        if (rememberMe) {
-                            localStorage.setItem('bloodconnect_remember', 'true');
-                        }
-
-                        showMessage('Demo login successful! (Backend server not running)', 'success');
-
-                        // Redirect after 2 seconds
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 2000);
-
-                    } else {
-                        showMessage('Backend server not available. Use demo@bloodconnect.com for testing, or start the backend server.', 'error');
-                    }
-                } else {
-                    // Other errors
-                    showMessage('Network error. Please check your connection and try again.', 'error');
-                }
-
-            } finally {
-                // Reset button state
-                submitButton.innerHTML = originalText;
-                submitButton.disabled = false;
-            }
-            };
-
-            // Attach form submit event listener
-            loginForm.addEventListener('submit', handleLogin);
-
-            // Also attach click event to button as backup
-            if (loginButton) {
-                loginButton.addEventListener('click', function(e) {
-                    console.log('🔘 Login button clicked');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleLogin(e);
-                });
-            }
-
-            console.log('✅ Event listeners attached successfully');
+            // Event listeners will be handled by forms.js
         });
 
         // Message display function
@@ -1137,6 +984,7 @@
     <!-- Include API JavaScript (Optional - will load if files exist) -->
     <script src="js/api.js" onerror="console.log('api.js not found - using built-in functionality')"></script>
     <script src="js/auth-state.js" onerror="console.log('auth-state.js not found - using built-in functionality')"></script>
+    <script src="js/forms.js"></script>
 </body>
 </html>
 

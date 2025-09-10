@@ -585,8 +585,16 @@ nd server
     </div>
 
     <script>
-        // Admin Login Form Handler
-        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Admin Login Form Handler
+            const adminLoginForm = document.getElementById('adminLoginForm');
+            if (!adminLoginForm) {
+                console.error('❌ Admin login form not found!');
+                return;
+            }
+            
+            adminLoginForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('adminEmail').value;
@@ -630,26 +638,25 @@ nd server
                 loginBtn.disabled = false;
                 loadingSpinner.classList.remove('active');
             }
-        });
+            });
+            
+            // Password toggle functionality
+            window.toggleAdminPassword = function() {
+                const passwordInput = document.getElementById('adminPassword');
+                const toggleButton = document.querySelector('.password-toggle i');
 
-        // Password toggle functionality
-        function toggleAdminPassword() {
-            const passwordInput = document.getElementById('adminPassword');
-            const toggleButton = document.querySelector('.password-toggle i');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleButton.classList.remove('fa-eye');
+                    toggleButton.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    toggleButton.classList.remove('fa-eye-slash');
+                    toggleButton.classList.add('fa-eye');
+                }
+            };
 
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleButton.classList.remove('fa-eye');
-                toggleButton.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleButton.classList.remove('fa-eye-slash');
-                toggleButton.classList.add('fa-eye');
-            }
-        }
-
-        // Check if already logged in as admin
-        document.addEventListener('DOMContentLoaded', function() {
+            // Check if already logged in as admin
             if (localStorage.getItem('bloodconnect_admin') === 'true') {
                 window.location.href = 'admin-dashboard.html';
             }
