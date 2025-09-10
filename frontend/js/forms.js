@@ -68,7 +68,8 @@ function setupDonorForm() {
                 throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
             }
 
-            const response = await fetch('http://localhost:3002/api/donors', {
+            const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+            const response = await fetch(`${apiBase}/donors`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -248,7 +249,8 @@ function setupRequestForm() {
                 console.log('👤 User is not logged in, submitting blood request as guest');
             }
 
-            const response = await fetch('http://localhost:3002/api/requests', {
+            const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+            const response = await fetch(`${apiBase}/requests`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(requestData)
@@ -569,7 +571,8 @@ function setupLoginForm() {
             const formData = new FormData(loginForm);
             const loginData = Object.fromEntries(formData.entries());
             
-            const response = await fetch('http://localhost:3002/api/auth/login', {
+            const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+            const response = await fetch(`${apiBase}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -681,7 +684,8 @@ function validateLoginForm() {
 async function testCORSConnection() {
     try {
         console.log('🧪 Testing CORS connection to backend...');
-        const response = await fetch('http://localhost:3002/api/cors-test');
+        const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+        const response = await fetch(`${apiBase}/cors-test`);
         const data = await response.json();
         console.log('✅ CORS test successful:', data);
         return true;
@@ -718,9 +722,10 @@ function setupRegisterForm() {
             const registerData = Object.fromEntries(formData.entries());
             
             console.log('📤 Registration data being sent:', registerData);
-            console.log('🌐 Making request to:', 'http://localhost:3002/api/auth/register');
+            const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+            console.log('🌐 Making request to:', `${apiBase}/auth/register`);
             
-            const response = await fetch('http://localhost:3002/api/auth/register', {
+            const response = await fetch(`${apiBase}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -746,7 +751,7 @@ function setupRegisterForm() {
 
                 // Redirect to login page after 3 seconds
                 setTimeout(() => {
-                    window.location.href = '/login';
+                    window.location.href = '/login.html';
                 }, 3000);
                 
             } else {
