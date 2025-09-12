@@ -2,17 +2,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Profile page JavaScript loaded');
     
-    // For demo purposes, skip token check and set up demo user
-    const demoUser = {
-        name: 'John Doe',
-        email: 'john@example.com',
-        phone: '+1-555-0123',
-        bloodType: 'O+'
-    };
-    localStorage.setItem('token', 'demo-token');
-    localStorage.setItem('user', JSON.stringify(demoUser));
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.log('❌ No token found, redirecting to login');
+        window.location.href = 'login.html';
+        return;
+    }
     
-    console.log('👤 Demo user set up');
+    console.log('🔑 Token found, initializing profile page');
 
     // Load user profile data
     loadProfileData();
@@ -30,42 +28,78 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function loadProfileData() {
-    console.log('📋 Loading profile data...');
+    console.log('📋 Loading profile data from backend...');
     
     try {
-        // Use demo user data for now
-        const userData = JSON.parse(localStorage.getItem('user') || '{}');
-        console.log('📄 User data:', userData);
-        
-        // Update UI elements if they exist
-        const userNameElement = document.getElementById('userName');
-        if (userNameElement) {
-            userNameElement.textContent = userData.name || 'User';
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/auth/profile', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.log('❌ Unauthorized, redirecting to login');
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+                return;
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+
+        const result = await response.json();
+        console.log('📄 Profile API response:', result);
         
-        const profileNameElement = document.getElementById('profileName');
-        if (profileNameElement) {
-            profileNameElement.value = userData.name || '';
+        if (result.success && result.data && result.data.user) {
+            const userData = result.data.user;
+            console.log('👤 User data:', userData);
+            
+            // Update UI elements if they exist
+            const userNameElement = document.getElementById('userName');
+            if (userNameElement) {
+                const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
+                userNameElement.textContent = fullName || 'User';
+            }
+            
+            const profileNameElement = document.getElementById('profileName');
+            if (profileNameElement) {
+                const fullName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim();
+                profileNameElement.value = fullName;
+            }
+            
+            const profileEmailElement = document.getElementById('profileEmail');
+            if (profileEmailElement) {
+                profileEmailElement.value = userData.email || '';
+            }
+            
+            const profilePhoneElement = document.getElementById('profilePhone');
+            if (profilePhoneElement) {
+                profilePhoneElement.value = userData.phoneNumber || '';
+            }
+            
+            const profileBloodTypeElement = document.getElementById('profileBloodType');
+            if (profileBloodTypeElement) {
+                profileBloodTypeElement.value = userData.bloodGroup || '';
+            }
+            
+            // Store user data locally for other functions
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            
+            console.log('✅ Profile data loaded successfully');
+        } else {
+            throw new Error('Invalid response format from server');
         }
-        
-        const profileEmailElement = document.getElementById('profileEmail');
-        if (profileEmailElement) {
-            profileEmailElement.value = userData.email || '';
-        }
-        
-        const profilePhoneElement = document.getElementById('profilePhone');
-        if (profilePhoneElement) {
-            profilePhoneElement.value = userData.phone || '';
-        }
-        
-        const profileBloodTypeElement = document.getElementById('profileBloodType');
-        if (profileBloodTypeElement) {
-            profileBloodTypeElement.value = userData.bloodType || '';
-        }
-        
-        console.log('✅ Profile data loaded successfully');
     } catch (error) {
         console.error('❌ Error loading profile data:', error);
+        // Show user-friendly error message
+        const userNameElement = document.getElementById('userName');
+        if (userNameElement) {
+            userNameElement.textContent = 'Error loading profile';
+        }
+        // You might want to show a toast notification here
     }
 }
 
@@ -148,86 +182,288 @@ function showTab(tabName) {
 }
 
 async function loadDonations() {
+    console.log('🩸 Loading donations from backend...');
+    
+    const donationsContainer = document.getElementById('donations');
+    if (!donationsContainer) {
+        console.error('❌ donations container not found');
+        return;
+    }
+    
+    // Show loading state
+    donationsContainer.innerHTML = `
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading your donations...</p>
+        </div>
+    `;
+    
     try {
-        const response = await fetch('/api/donations/my-donations', {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/profile/donations', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
         });
 
-        if (response.ok) {
-            const donations = await response.json();
-            displayDonations(donations);
+        console.log('🔄 Donations API response status:', response.status);
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.log('❌ Unauthorized, redirecting to login');
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+                return;
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('📦 Donations API full response:', result);
+        
+        if (result.success && result.data && result.data.donations) {
+            const donations = result.data.donations;
+            console.log('🩸 Found donations:', donations.length);
+            
+            if (donations.length > 0) {
+                displayDonations(donations);
+            } else {
+                showEmptyDonations();
+            }
         } else {
-            document.getElementById('donations').innerHTML = '<p>Failed to load donations</p>';
+            console.log('⚠️ No donations data in response');
+            showEmptyDonations();
         }
     } catch (error) {
-        console.error('Error loading donations:', error);
-        document.getElementById('donations').innerHTML = '<p>Error loading donations</p>';
+        console.error('❌ Error loading donations:', error);
+        donationsContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--error-color, #dc3545); margin-bottom: 1rem;"></i>
+                <h3>Error Loading Donations</h3>
+                <p>Unable to load your donations. Please try again later.</p>
+                <button class="btn btn-primary" onclick="loadDonations()" style="margin-top: 1rem;">
+                    <i class="fas fa-redo"></i>
+                    Retry
+                </button>
+            </div>
+        `;
     }
 }
 
 async function loadRequests() {
+    console.log('🔍 Loading requests from backend...');
+    
+    const requestsContainer = document.getElementById('requests');
+    if (!requestsContainer) {
+        console.error('❌ requests container not found');
+        return;
+    }
+    
+    // Show loading state
+    requestsContainer.innerHTML = `
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading your blood requests...</p>
+        </div>
+    `;
+    
     try {
-        const response = await fetch('/api/requests/my-requests', {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/profile/requests', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
         });
 
-        if (response.ok) {
-            const requests = await response.json();
-            displayRequests(requests);
+        console.log('🔄 Requests API response status:', response.status);
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.log('❌ Unauthorized, redirecting to login');
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+                return;
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('📦 Requests API full response:', result);
+        
+        if (result.success && result.data && result.data.requests) {
+            const requests = result.data.requests;
+            console.log('🔍 Found requests:', requests.length);
+            
+            if (requests.length > 0) {
+                displayRequests(requests);
+            } else {
+                showEmptyRequests();
+            }
         } else {
-            document.getElementById('requests').innerHTML = '<p>Failed to load requests</p>';
+            console.log('⚠️ No requests data in response');
+            showEmptyRequests();
         }
     } catch (error) {
-        console.error('Error loading requests:', error);
-        document.getElementById('requests').innerHTML = '<p>Error loading requests</p>';
+        console.error('❌ Error loading requests:', error);
+        requestsContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--error-color, #dc3545); margin-bottom: 1rem;"></i>
+                <h3>Error Loading Requests</h3>
+                <p>Unable to load your blood requests. Please try again later.</p>
+                <button class="btn btn-primary" onclick="loadRequests()" style="margin-top: 1rem;">
+                    <i class="fas fa-redo"></i>
+                    Retry
+                </button>
+            </div>
+        `;
     }
 }
 
 function displayDonations(donations) {
     const container = document.getElementById('donations');
+    console.log('🔄 Displaying donations:', donations);
+    
+    if (!container) {
+        console.error('❌ donations container not found');
+        return;
+    }
+    
     if (donations.length === 0) {
-        container.innerHTML = '<p>No donations found.</p>';
+        showEmptyDonations();
         return;
     }
 
-    const html = donations.map(donation => `
-        <div class="donation-item">
-            <h4>Donation to ${donation.recipientName}</h4>
-            <p><strong>Date:</strong> ${new Date(donation.date).toLocaleDateString()}</p>
-            <p><strong>Location:</strong> ${donation.location}</p>
-            <p><strong>Status:</strong> ${donation.status}</p>
-        </div>
-    `).join('');
+    const html = donations.map(donation => {
+        // Handle both backend formats (mapped and original)
+        const donationDate = donation.donationDate || donation.dateOfDonation;
+        const bloodGroup = donation.bloodGroup;
+        const donorName = donation.donorName || donation.name || 'Unknown';
+        const city = donation.city || 'Unknown';
+        const state = donation.state || 'Unknown';
+        const status = donation.status || 'Completed';
+        const unitsCollected = donation.unitsCollected || 1;
+        const donationCenter = donation.donationCenter || {};
+        
+        return `
+            <div class="donation-item">
+                <div class="donation-header">
+                    <h4>Blood Donation</h4>
+                    <span class="status-badge ${status.toLowerCase()}">${status}</span>
+                </div>
+                <div class="donation-details">
+                    <p><strong>Date:</strong> ${donationDate ? new Date(donationDate).toLocaleDateString() : 'Not specified'}</p>
+                    <p><strong>Blood Group:</strong> ${bloodGroup || 'Not specified'}</p>
+                    <p><strong>Units:</strong> ${unitsCollected}</p>
+                    <p><strong>Donor:</strong> ${donorName}</p>
+                    <p><strong>Center:</strong> ${donationCenter.name || 'Blood Bank'}</p>
+                    <p><strong>Location:</strong> ${city}, ${state}</p>
+                    ${donation.contactNumber ? `<p><strong>Contact:</strong> ${donation.contactNumber}</p>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
 
     container.innerHTML = html;
 }
 
 function displayRequests(requests) {
     const container = document.getElementById('requests');
+    console.log('🔄 Displaying requests:', requests);
+    
+    if (!container) {
+        console.error('❌ requests container not found');
+        return;
+    }
+    
     if (requests.length === 0) {
-        container.innerHTML = '<p>No requests found.</p>';
+        showEmptyRequests();
         return;
     }
 
-    const html = requests.map(request => `
-        <div class="request-item">
-            <h4>Request for ${request.bloodType}</h4>
-            <p><strong>Date:</strong> ${new Date(request.date).toLocaleDateString()}</p>
-            <p><strong>Location:</strong> ${request.location}</p>
-            <p><strong>Status:</strong> ${request.status}</p>
-            <p><strong>Urgency:</strong> ${request.urgency}</p>
-        </div>
-    `).join('');
+    const html = requests.map(request => {
+        // Handle both UserRequest and Request model formats
+        const patientName = request.patientName || 'Patient';
+        const bloodGroup = request.bloodGroup || request.bloodType || 'Not specified';
+        const requiredUnits = request.requiredUnits || request.units || 1;
+        const fulfilledUnits = request.fulfilledUnits || 0;
+        const status = request.status || 'Pending';
+        const urgency = request.urgency || request.priority || 'Medium';
+        const hospitalName = request.hospitalName || request.hospital || 'Not specified';
+        const location = request.location || `${request.city || ''}, ${request.state || ''}`.trim() || 'Not specified';
+        const requestDate = request.createdAt || request.requestDate || new Date();
+        const requiredBy = request.requiredBy || request.requiredDate;
+        const contactNumber = request.contactNumber || request.contactPersonNumber || 'Not provided';
+        
+        // Calculate fulfillment percentage
+        const fulfillmentPercentage = requiredUnits > 0 ? Math.round((fulfilledUnits / requiredUnits) * 100) : 0;
+        
+        return `
+            <div class="request-item">
+                <div class="request-header">
+                    <h4>${patientName}</h4>
+                    <span class="status-badge ${status.toLowerCase().replace(' ', '-')}">${status}</span>
+                </div>
+                <div class="request-details">
+                    <p><strong>Blood Group:</strong> ${bloodGroup}</p>
+                    <p><strong>Required Units:</strong> ${requiredUnits}</p>
+                    <p><strong>Fulfilled:</strong> ${fulfilledUnits}/${requiredUnits} (${fulfillmentPercentage}%)</p>
+                    <p><strong>Urgency:</strong> ${urgency}</p>
+                    <p><strong>Hospital:</strong> ${hospitalName}</p>
+                    <p><strong>Location:</strong> ${location}</p>
+                    <p><strong>Request Date:</strong> ${new Date(requestDate).toLocaleDateString()}</p>
+                    ${requiredBy ? `<p><strong>Required By:</strong> ${new Date(requiredBy).toLocaleDateString()}</p>` : ''}
+                    ${contactNumber !== 'Not provided' ? `<p><strong>Contact:</strong> ${contactNumber}</p>` : ''}
+                    ${request.additionalNotes ? `<p><strong>Notes:</strong> ${request.additionalNotes}</p>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
 
     container.innerHTML = html;
+}
+
+function showEmptyDonations() {
+    const donationsContainer = document.getElementById('donations');
+    if (!donationsContainer) {
+        console.error('❌ donations container not found');
+        return;
+    }
+    
+    donationsContainer.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-hand-holding-heart" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+            <h3>No Donations Yet</h3>
+            <p>You haven't made any blood donations yet. Start saving lives today!</p>
+            <a href="donate.html" class="btn btn-primary" style="margin-top: 1rem;">
+                <i class="fas fa-hand-holding-heart"></i>
+                Donate Blood
+            </a>
+        </div>
+    `;
+}
+
+function showEmptyRequests() {
+    const requestsContainer = document.getElementById('requests');
+    if (!requestsContainer) {
+        console.error('❌ requests container not found');
+        return;
+    }
+    
+    requestsContainer.innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-search" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+            <h3>No Blood Requests</h3>
+            <p>You haven't made any blood requests yet.</p>
+            <a href="request.html" class="btn btn-primary" style="margin-top: 1rem;">
+                <i class="fas fa-search"></i>
+                Request Blood
+            </a>
+        </div>
+    `;
 }
 
 function initializeProfileFunctionality() {
@@ -299,33 +535,66 @@ function enableProfileEdit() {
 async function saveProfile(event) {
     event.preventDefault();
     
+    console.log('💾 Saving profile...');
+    
+    // Split name into first and last name
+    const fullName = document.getElementById('profileName').value.trim();
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
     const formData = {
-        name: document.getElementById('profileName').value,
-        email: document.getElementById('profileEmail').value,
-        phone: document.getElementById('profilePhone').value,
-        bloodType: document.getElementById('profileBloodType').value
+        firstName: firstName,
+        lastName: lastName,
+        phoneNumber: document.getElementById('profilePhone').value,
+        bloodGroup: document.getElementById('profileBloodType').value
     };
+    
+    // Remove empty fields
+    Object.keys(formData).forEach(key => {
+        if (!formData[key]) {
+            delete formData[key];
+        }
+    });
+    
+    console.log('📄 Profile data to save:', formData);
 
     try {
-        const response = await fetch('/api/profile', {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/auth/profile', {
             method: 'PUT',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(formData)
         });
 
-        if (response.ok) {
+        console.log('🔄 Profile update response status:', response.status);
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.log('❌ Unauthorized, redirecting to login');
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+                return;
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('📦 Profile update response:', result);
+        
+        if (result.success) {
             alert('Profile updated successfully!');
             loadProfileData(); // Reload profile data
             cancelProfileEdit();
         } else {
-            alert('Failed to update profile');
+            alert(result.message || 'Failed to update profile');
         }
     } catch (error) {
-        console.error('Error saving profile:', error);
-        alert('Error saving profile');
+        console.error('❌ Error saving profile:', error);
+        alert('Error saving profile: ' + error.message);
     }
 }
 
