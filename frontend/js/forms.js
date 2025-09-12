@@ -5,6 +5,80 @@
 
 // Form handlers
 document.addEventListener('DOMContentLoaded', function() {
+    // Ensure BloodConnect exists before setting up forms
+    if (typeof window.BloodConnect === 'undefined') {
+        console.warn('⚠️ BloodConnect not found, creating minimal fallback...');
+        window.BloodConnect = {
+            showModal: function(title, message, type) {
+                const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : '💬';
+                alert(`${icon} ${title}\n\n${message}`);
+            },
+            setLoadingState: function(button, loading) {
+                if (!button) return;
+                if (loading) {
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                } else {
+                    button.disabled = false;
+                    button.innerHTML = button.getAttribute('data-original-text') || 'Submit';
+                }
+            },
+            showFieldError: function(field, message) {
+                console.error('Field validation error:', field.name || field.id, message);
+                field.style.borderColor = 'red';
+                
+                // Create or update error message element
+                let errorDiv = document.getElementById((field.name || field.id) + '-error');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.id = (field.name || field.id) + '-error';
+                    errorDiv.className = 'field-error';
+                    errorDiv.style.cssText = 'color: red; font-size: 12px; margin-top: 4px; display: block;';
+                    field.parentNode.appendChild(errorDiv);
+                }
+                errorDiv.textContent = message;
+            },
+            clearFieldError: function(field) {
+                field.style.borderColor = '';
+                const errorDiv = document.getElementById((field.name || field.id) + '-error');
+                if (errorDiv) {
+                    errorDiv.textContent = '';
+                    errorDiv.style.display = 'none';
+                }
+            },
+            validateField: function(field) {
+                const value = field.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+                
+                // Required field validation
+                if (field.hasAttribute('required') && !value) {
+                    isValid = false;
+                    errorMessage = 'This field is required';
+                }
+                // Email validation
+                else if (field.type === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    isValid = false;
+                    errorMessage = 'Please enter a valid email address';
+                }
+                // Password validation (minimum length)
+                else if (field.type === 'password' && value && value.length < 1) {
+                    isValid = false;
+                    errorMessage = 'Password is required';
+                }
+                
+                if (!isValid) {
+                    this.showFieldError(field, errorMessage);
+                } else {
+                    this.clearFieldError(field);
+                }
+                
+                return isValid;
+            }
+        };
+        console.log('✅ BloodConnect fallback created successfully!');
+    }
+    
     setupFormHandlers();
 });
 
@@ -552,9 +626,12 @@ function validateContactForm() {
  * Setup login form
  */
 function setupLoginForm() {
+    console.log('🔧 Setting up login form...');
     const loginForm = document.getElementById('loginForm');
+    
     if (!loginForm) {
-        console.log('❌ Login form not found in setupLoginForm');
+        console.error('❌ Login form not found! Available forms:', 
+            Array.from(document.querySelectorAll('form')).map(f => f.id || f.className));
         return;
     }
     
@@ -572,10 +649,32 @@ function setupLoginForm() {
         const submitBtn = document.getElementById('loginSubmitBtn');
         const originalText = submitBtn.innerHTML;
         
+        // Store original text for loading state restoration
+        if (!submitBtn.hasAttribute('data-original-text')) {
+            submitBtn.setAttribute('data-original-text', originalText);
+        }
+        
         try {
+            // Check if BloodConnect is available, if not create minimal fallback
             if (typeof BloodConnect === 'undefined') {
-                console.error('❌ BloodConnect object not available');
-                return;
+                console.warn('⚠️ BloodConnect object not available, creating fallback...');
+                window.BloodConnect = {
+                    setLoadingState: function(btn, loading) {
+                        if (btn) {
+                            btn.disabled = loading;
+                            btn.textContent = loading ? 'Loading...' : 'Sign In';
+                        }
+                    },
+                    showModal: function(title, message, type) {
+                        alert(title + ': ' + message);
+                    },
+                    showFieldError: function(field, message) {
+                        console.error('Field error:', field.name, message);
+                    },
+                    clearFieldError: function(field) {
+                        console.log('Clearing error for:', field.name);
+                    }
+                };
             }
             
             BloodConnect.setLoadingState(submitBtn, true);

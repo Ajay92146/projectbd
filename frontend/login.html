@@ -986,9 +986,38 @@
         });
     </script>
 
-    <!-- Include API JavaScript (Optional - will load if files exist) -->
+    <!-- Include JavaScript files in correct order -->
+    <script src="js/main.js" onerror="console.log('main.js not found - creating fallback BloodConnect object')"></script>
     <script src="js/api.js" onerror="console.log('api.js not found - using built-in functionality')"></script>
     <script src="js/auth-state.js" onerror="console.log('auth-state.js not found - using built-in functionality')"></script>
+    
+    <!-- Ensure BloodConnect exists before loading forms.js -->
+    <script>
+        if (typeof window.BloodConnect === 'undefined') {
+            console.warn('⚠️ BloodConnect not found, creating minimal version...');
+            window.BloodConnect = {
+                showModal: function(title, message, type) {
+                    alert((type === 'error' ? '❌ ' : '✅ ') + title + '\n' + message);
+                },
+                setLoadingState: function(button, loading) {
+                    if (button) {
+                        button.disabled = loading;
+                        button.innerHTML = loading ? 'Loading...' : 'Sign In';
+                    }
+                },
+                showFieldError: function(field, message) {
+                    console.error('Field error:', field.name, message);
+                },
+                clearFieldError: function(field) {
+                    console.log('Clearing field error:', field.name);
+                },
+                validateField: function(field) {
+                    return field.value.trim().length > 0;
+                }
+            };
+        }
+    </script>
+    
     <script src="js/forms.js"></script>
 </body>
 </html>
