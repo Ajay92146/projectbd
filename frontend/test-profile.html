@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .test-button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #c82333;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Profile Page Test</h1>
+        <p>This page tests the profile page functionality without CSP violations.</p>
+        
+        <div id="testResults"></div>
+        
+        <button class="test-button" onclick="runTests()">Run Tests</button>
+        <button class="test-button" onclick="openProfilePage()">Open Profile Page</button>
+        
+        <div id="profileFrame" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function logResult(message, isSuccess = true) {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            resultDiv.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function runTests() {
+            document.getElementById('testResults').innerHTML = '';
+            
+            // Test 1: Check if profile.js exists
+            fetch('profile.js')
+                .then(response => {
+                    if (response.ok) {
+                        logResult('✅ profile.js file exists and is accessible');
+                        return response.text();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                })
+                .then(content => {
+                    // Test 2: Check if key functions exist in the file
+                    const keyFunctions = [
+                        'loadProfileData',
+                        'showTab',
+                        'initializeTabNavigation',
+                        'loadDonations',
+                        'loadRequests'
+                    ];
+                    
+                    keyFunctions.forEach(funcName => {
+                        if (content.includes(`function ${funcName}`)) {
+                            logResult(`✅ Function ${funcName} found in profile.js`);
+                        } else {
+                            logResult(`❌ Function ${funcName} not found in profile.js`, false);
+                        }
+                    });
+                })
+                .catch(error => {
+                    logResult(`❌ Failed to load profile.js: ${error.message}`, false);
+                });
+            
+            // Test 3: Check if profile.html exists
+            fetch('profile.html')
+                .then(response => {
+                    if (response.ok) {
+                        logResult('✅ profile.html file exists and is accessible');
+                        return response.text();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                })
+                .then(content => {
+                    // Test 4: Check if external script reference exists
+                    if (content.includes('profile.js')) {
+                        logResult('✅ profile.js script reference found in profile.html');
+                    } else {
+                        logResult('❌ profile.js script reference not found in profile.html', false);
+                    }
+                    
+                    // Test 5: Check if inline scripts are removed
+                    const inlineScriptCount = (content.match(/<script(?![^>]*src=)[^>]*>/g) || []).length;
+                    if (inlineScriptCount === 0) {
+                        logResult('✅ No inline scripts found - CSP violation fixed');
+                    } else {
+                        logResult(`⚠️ Found ${inlineScriptCount} inline script(s) - may cause CSP violations`, false);
+                    }
+                    
+                    // Test 6: Check if tab structure is correct
+                    const tabButtonCount = (content.match(/tab-button/g) || []).length;
+                    const tabContentCount = (content.match(/tab-content/g) || []).length;
+                    
+                    if (tabButtonCount > 0 && tabContentCount > 0) {
+                        logResult(`✅ Tab structure found: ${tabButtonCount} buttons, ${tabContentCount} content sections`);
+                    } else {
+                        logResult('❌ Tab structure not found', false);
+                    }
+                })
+                .catch(error => {
+                    logResult(`❌ Failed to load profile.html: ${error.message}`, false);
+                });
+        }
+
+        function openProfilePage() {
+            const frameDiv = document.getElementById('profileFrame');
+            frameDiv.innerHTML = '<iframe src="profile.html"></iframe>';
+            logResult('📖 Profile page loaded in iframe below');
+        }
+    </script>
+</body>
+</html>
