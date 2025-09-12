@@ -2,12 +2,21 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Profile page JavaScript loaded');
     
-    // Check if user is logged in
-    const token = localStorage.getItem('token');
+    // Check if user is logged in (check both possible token keys)
+    const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token');
     if (!token) {
         console.log('❌ No token found, redirecting to login');
+        console.log('Available localStorage keys:', Object.keys(localStorage));
         window.location.href = 'login.html';
         return;
+    }
+    
+    console.log('✅ Token found:', token.substring(0, 50) + '...');
+    
+    // Ensure we use the correct token key going forward
+    if (localStorage.getItem('bloodconnect_token') && !localStorage.getItem('token')) {
+        localStorage.setItem('token', localStorage.getItem('bloodconnect_token'));
+        console.log('🔄 Copied bloodconnect_token to token for compatibility');
     }
     
     console.log('🔑 Token found, initializing profile page');
@@ -31,7 +40,7 @@ async function loadProfileData() {
     console.log('📋 Loading profile data from backend...');
     
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token');
         const response = await fetch('/api/auth/profile', {
             method: 'GET',
             headers: {
@@ -44,6 +53,7 @@ async function loadProfileData() {
             if (response.status === 401) {
                 console.log('❌ Unauthorized, redirecting to login');
                 localStorage.removeItem('token');
+                localStorage.removeItem('bloodconnect_token');
                 window.location.href = 'login.html';
                 return;
             }
@@ -199,7 +209,7 @@ async function loadDonations() {
     `;
     
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token');
         const response = await fetch('/api/profile/donations', {
             method: 'GET',
             headers: {
@@ -214,6 +224,7 @@ async function loadDonations() {
             if (response.status === 401) {
                 console.log('❌ Unauthorized, redirecting to login');
                 localStorage.removeItem('token');
+                localStorage.removeItem('bloodconnect_token');
                 window.location.href = 'login.html';
                 return;
             }
@@ -270,7 +281,7 @@ async function loadRequests() {
     `;
     
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token');
         const response = await fetch('/api/profile/requests', {
             method: 'GET',
             headers: {
@@ -285,6 +296,7 @@ async function loadRequests() {
             if (response.status === 401) {
                 console.log('❌ Unauthorized, redirecting to login');
                 localStorage.removeItem('token');
+                localStorage.removeItem('bloodconnect_token');
                 window.location.href = 'login.html';
                 return;
             }
@@ -560,7 +572,7 @@ async function saveProfile(event) {
     console.log('📄 Profile data to save:', formData);
 
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token');
         const response = await fetch('/api/auth/profile', {
             method: 'PUT',
             headers: {
@@ -617,7 +629,13 @@ function toggleProfileDropdown() {
 }
 
 function logout() {
+    // Clear all authentication-related localStorage items
     localStorage.removeItem('token');
+    localStorage.removeItem('bloodconnect_token');
+    localStorage.removeItem('bloodconnect_user');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('user');
+    console.log('🔓 All authentication data cleared');
     window.location.href = 'login.html';
 }
 
