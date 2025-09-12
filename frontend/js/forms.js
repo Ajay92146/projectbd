@@ -583,21 +583,35 @@ function setupLoginForm() {
             const formData = new FormData(loginForm);
             const loginData = Object.fromEntries(formData.entries());
             
-            console.log('📧 Login data:', loginData);
-            
-            const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
-            console.log('🌐 API Base URL:', apiBase);
-            console.log('📤 Making login request to:', `${apiBase}/auth/login`);
-            
-            const response = await fetch(`${apiBase}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(loginData)
+            console.log('📧 Login data:', {
+                email: loginData.email,
+                password: '***hidden***'
             });
             
-            const result = await response.json();
+            // Use the API client if available, otherwise fallback to fetch
+            let response, result;
+            
+            if (window.API && window.API.auth) {
+                console.log('🔧 Using API client for login...');
+                result = await window.API.auth.login(loginData);
+                response = { ok: result.success };
+            } else {
+                console.log('🔧 Using direct fetch for login...');
+                const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+                console.log('🌐 API Base URL:', apiBase);
+                console.log('📤 Making login request to:', `${apiBase}/auth/login`);
+                
+                response = await fetch(`${apiBase}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+                
+                result = await response.json();
+            }
             
             if (response.ok) {
                 // Handle login success with auth state manager
@@ -626,12 +640,33 @@ function setupLoginForm() {
             }
             
         } catch (error) {
-            console.error('Login error:', error);
-            BloodConnect.showModal(
-                'Login Failed',
-                error.message || 'Invalid email or password. Please try again.',
-                'error'
-            );
+            console.error('❌ Login error:', error);
+            
+            let errorMessage = 'An error occurred during login. Please try again.';
+            
+            if (error.message) {
+                if (error.message.includes('fetch')) {
+                    errorMessage = '🔌 Connection Error: Unable to connect to the server. Please check your internet connection.';
+                } else if (error.message.includes('401') || error.message.includes('Invalid')) {
+                    errorMessage = '🔐 Invalid email or password. Please check your credentials and try again.';
+                } else if (error.message.includes('500')) {
+                    errorMessage = '🛠️ Server Error: Please try again later or contact support.';
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+            
+            // Check if we can use BloodConnect.showModal
+            if (typeof BloodConnect !== 'undefined' && BloodConnect.showModal) {
+                BloodConnect.showModal(
+                    '❌ Login Failed',
+                    errorMessage,
+                    'error'
+                );
+            } else {
+                // Fallback to alert if BloodConnect is not available
+                alert(`Login Failed: ${errorMessage}`);
+            }
         } finally {
             submitBtn.innerHTML = originalText;
             BloodConnect.setLoadingState(submitBtn, false);
@@ -676,13 +711,13 @@ function validateLoginForm() {
             BloodConnect.clearFieldError(email);
         }
 
-        // Password validation
+        // Password validation (simplified for login)
         const passwordValue = password.value.trim();
         if (!passwordValue) {
             BloodConnect.showFieldError(password, 'Password is required');
             isValid = false;
-        } else if (passwordValue.length < 6) {
-            BloodConnect.showFieldError(password, 'Password must be at least 6 characters');
+        } else if (passwordValue.length < 1) {
+            BloodConnect.showFieldError(password, 'Password cannot be empty');
             isValid = false;
         } else {
             BloodConnect.clearFieldError(password);

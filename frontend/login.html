@@ -926,7 +926,11 @@
         // Check backend server status
         async function checkBackendStatus() {
             try {
-                const response = await fetch('http://localhost:3002/api/auth/profile', {
+                // Use dynamic API URL instead of hardcoded localhost
+                const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+                console.log('🧪 Testing backend connectivity to:', apiBase);
+                
+                const response = await fetch(`${apiBase}/health`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -934,8 +938,9 @@
                 });
 
                 // If we get any response (even 401), the server is running
-                return true;
+                return response.ok || response.status === 401;
             } catch (error) {
+                console.error('❌ Backend status check failed:', error);
                 return false;
             }
         }

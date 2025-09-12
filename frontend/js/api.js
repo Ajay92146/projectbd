@@ -5,23 +5,24 @@
 
 // API Configuration - Dynamic URL detection
 const getAPIBaseURL = () => {
-    // Check if we're in development (localhost)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:3002/api';
-    }
-
-    // For production, use the same domain as the frontend
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     const port = window.location.port;
-
-    // If frontend is served from a different port, adjust accordingly
-    if (port && port !== '80' && port !== '443') {
-        // Assume backend is on port 3002 or same domain with /api path
-        return `${protocol}//${hostname}/api`;
+    
+    console.log('🔧 Determining API URL:', { protocol, hostname, port });
+    
+    // Check if we're in development (localhost)
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        const devApiUrl = 'http://localhost:3002/api';
+        console.log('🔧 Development API URL:', devApiUrl);
+        return devApiUrl;
     }
 
-    return `${protocol}//${hostname}/api`;
+    // For production, backend and frontend are served from the same domain
+    // Render serves both frontend and backend from the same service
+    const prodApiUrl = `${protocol}//${hostname}/api`;
+    console.log('🔧 Production API URL:', prodApiUrl);
+    return prodApiUrl;
 };
 
 const API_CONFIG = {
