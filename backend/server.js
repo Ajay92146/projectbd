@@ -29,7 +29,19 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(helmet()); // Security headers
+// Configure helmet with relaxed CSP for admin pages
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'"],
+        },
+    },
+}));
 app.use(morgan('combined')); // Logging
 // CORS Configuration - Enhanced for development and production
 const corsOptions = {
@@ -162,6 +174,11 @@ app.get('/simple-admin-login', (req, res) => {
 app.get('/production-admin-test', (req, res) => {
     console.log('🧪 Production admin test page requested');
     res.sendFile(path.join(__dirname, '../frontend/production-admin-test.html'));
+});
+
+app.get('/admin-dashboard-csp-fixed', (req, res) => {
+    console.log('🔧 CSP-fixed admin dashboard requested');
+    res.sendFile(path.join(__dirname, '../frontend/admin-dashboard-csp-fixed.html'));
 });
 
 // Test endpoint
