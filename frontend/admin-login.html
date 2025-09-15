@@ -621,18 +621,44 @@
             
             if (email === 'admin@bloodconnect.com' && password === 'Admin@123') {
                 console.log('✅ Admin credentials are correct!');
-                // Success - redirect to admin dashboard
-                successMessage.textContent = 'Login successful! Redirecting to dashboard...';
-                successMessage.style.display = 'block';
                 
-                // Store admin session
-                localStorage.setItem('bloodconnect_admin', 'true');
-                localStorage.setItem('admin_email', email);
-                
-                // Redirect after short delay
-                setTimeout(() => {
-                    window.location.href = 'admin-dashboard.html';
-                }, 1500);
+                // Store admin session with verification
+                try {
+                    localStorage.setItem('bloodconnect_admin', 'true');
+                    localStorage.setItem('admin_email', email);
+                    localStorage.setItem('admin_login_time', new Date().toISOString());
+                    
+                    // Verify storage was successful
+                    const storedStatus = localStorage.getItem('bloodconnect_admin');
+                    const storedEmail = localStorage.getItem('admin_email');
+                    
+                    console.log('💾 Stored admin status:', storedStatus);
+                    console.log('💾 Stored admin email:', storedEmail);
+                    
+                    if (storedStatus === 'true' && storedEmail === email) {
+                        console.log('✅ LocalStorage verification successful!');
+                        
+                        // Success - redirect to admin dashboard
+                        successMessage.textContent = 'Login successful! Redirecting to dashboard...';
+                        successMessage.style.display = 'block';
+                        
+                        // Redirect with longer delay to ensure storage is committed
+                        setTimeout(() => {
+                            console.log('🚀 Redirecting to admin dashboard...');
+                            window.location.href = 'admin-dashboard.html';
+                        }, 2000);
+                    } else {
+                        throw new Error('Failed to store admin session in localStorage');
+                    }
+                } catch (storageError) {
+                    console.error('❌ LocalStorage error:', storageError);
+                    errorMessage.textContent = 'Session storage failed. Please try again.';
+                    errorMessage.style.display = 'block';
+                    
+                    // Re-enable button
+                    loginBtn.disabled = false;
+                    loadingSpinner.classList.remove('active');
+                }
             } else {
                 console.log('❌ Admin credentials are incorrect!');
                 // Show error message

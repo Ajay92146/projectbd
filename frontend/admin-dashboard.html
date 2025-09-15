@@ -587,12 +587,30 @@
     </main>
 
     <script>
-        // Check admin authentication
+        // Enhanced admin authentication check with debugging
         document.addEventListener('DOMContentLoaded', function() {
-            if (localStorage.getItem('bloodconnect_admin') !== 'true') {
-                window.location.href = 'admin-login.html';
+            console.log('🔍 Admin Dashboard: Checking authentication...');
+            
+            // Get admin status from localStorage
+            const adminStatus = localStorage.getItem('bloodconnect_admin');
+            const adminEmail = localStorage.getItem('admin_email');
+            
+            console.log('📱 LocalStorage admin status:', adminStatus);
+            console.log('📧 LocalStorage admin email:', adminEmail);
+            console.log('🌐 Current URL:', window.location.href);
+            
+            // Check if admin is authenticated
+            if (adminStatus !== 'true') {
+                console.log('❌ Not authenticated as admin, redirecting to login...');
+                // Add delay to ensure any ongoing localStorage operations complete
+                setTimeout(() => {
+                    window.location.href = 'admin-login.html';
+                }, 100);
                 return;
             }
+            
+            console.log('✅ Admin authenticated successfully!');
+            console.log('🚀 Initializing admin dashboard...');
 
             // Initialize dashboard
             initializeDashboard();

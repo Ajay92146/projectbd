@@ -134,11 +134,34 @@ app.get('/profile', (req, res) => {
 });
 
 app.get('/admin-login', (req, res) => {
+    console.log('📋 Admin login page requested');
+    console.log('Origin:', req.headers.origin);
+    console.log('Referer:', req.headers.referer);
     res.sendFile(path.join(__dirname, '../frontend/admin-login.html'));
 });
 
 app.get('/admin-dashboard', (req, res) => {
+    console.log('📊 Admin dashboard page requested');
+    console.log('Origin:', req.headers.origin);
+    console.log('Referer:', req.headers.referer);
+    console.log('User-Agent:', req.headers['user-agent']);
     res.sendFile(path.join(__dirname, '../frontend/admin-dashboard.html'));
+});
+
+// Add debug routes
+app.get('/admin-login-debug', (req, res) => {
+    console.log('🔧 Admin login debug page requested');
+    res.sendFile(path.join(__dirname, '../frontend/admin-login-debug.html'));
+});
+
+app.get('/simple-admin-login', (req, res) => {
+    console.log('🔑 Simple admin login page requested');
+    res.sendFile(path.join(__dirname, '../frontend/simple-admin-login.html'));
+});
+
+app.get('/production-admin-test', (req, res) => {
+    console.log('🧪 Production admin test page requested');
+    res.sendFile(path.join(__dirname, '../frontend/production-admin-test.html'));
 });
 
 // Test endpoint
