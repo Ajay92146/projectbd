@@ -59,12 +59,16 @@ const corsOptions = {
             'https://blood-donation-website.onrender.com'
         ];
 
+        // Add flexible Render domain pattern
+        const isRenderDomain = origin && origin.includes('.onrender.com');
+
         const allowedOrigins = [...developmentOrigins, ...productionOrigins, ...knownProductionOrigins];
         
         console.log(`🌐 CORS: Request from origin: ${origin}`);
         console.log(`🌐 CORS: Allowed origins:`, allowedOrigins);
+        console.log(`🌐 CORS: Is Render domain:`, isRenderDomain);
 
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        if (allowedOrigins.indexOf(origin) !== -1 || isRenderDomain) {
             console.log(`✅ CORS: Origin ${origin} is allowed`);
             callback(null, true);
         } else {

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Admin Test - BloodConnect</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #fef5f5 0%, #f7fafc 100%);
+            line-height: 1.6;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #e53e3e;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+        }
+        
+        .env-info {
+            background: #e0f2fe;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0891b2;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+        }
+        
+        .test-section h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .credentials {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #0ea5e9;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #e53e3e;
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #e53e3e, #fc8181);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #c53030, #e53e3e);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .warning {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+        
+        .debug-info {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online { background: #10b981; }
+        .status-offline { background: #ef4444; }
+        .status-unknown { background: #6b7280; }
+        
+        .test-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .test-links a {
+            padding: 12px;
+            text-align: center;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.3s;
+            font-weight: 500;
+        }
+        
+        .test-links a:hover {
+            background: #4f46e5;
+        }
+        
+        .copy-btn {
+            background: #059669;
+            font-size: 14px;
+            padding: 8px 12px;
+            width: auto;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .api-test {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .api-test h4 {
+            margin: 0 0 10px 0;
+            color: #334155;
+        }
+        
+        .api-result {
+            font-family: monospace;
+            font-size: 12px;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e0;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🚀 Production Admin Test</h1>
+        
+        <div class="env-info">
+            <h3>🌐 Environment Information</h3>
+            <p><strong>Current URL:</strong> <span id="currentUrl"></span></p>
+            <p><strong>Environment:</strong> <span id="environment"></span></p>
+            <p><strong>API Base URL:</strong> <span id="apiBaseUrl"></span></p>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 System Status</h3>
+            <p><span class="status-indicator" id="serverStatus"></span>Server Connection: <span id="serverStatusText">Checking...</span></p>
+            <p><span class="status-indicator" id="corsStatus"></span>CORS Configuration: <span id="corsStatusText">Checking...</span></p>
+            <p><span class="status-indicator" id="adminApiStatus"></span>Admin API: <span id="adminApiStatusText">Checking...</span></p>
+            <p><span class="status-indicator" id="storageStatus"></span>Local Storage: <span id="storageStatusText">Checking...</span></p>
+            
+            <button onclick="runAllTests()" id="testAllBtn">🔍 Run All Tests</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔐 Admin Login Test</h3>
+            <div class="credentials">
+                <strong>Production Admin Credentials:</strong><br>
+                📧 Email: admin@bloodconnect.com<br>
+                🔑 Password: Admin@123
+            </div>
+            
+            <form id="productionLoginForm">
+                <div class="form-group">
+                    <label for="prodEmail">Admin Email:</label>
+                    <input type="email" id="prodEmail" value="admin@bloodconnect.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="prodPassword">Admin Password:</label>
+                    <input type="password" id="prodPassword" value="Admin@123" required>
+                </div>
+                
+                <button type="submit" id="prodLoginBtn">🚀 Test Production Login</button>
+            </form>
+            
+            <div class="message error" id="errorMessage"></div>
+            <div class="message success" id="successMessage"></div>
+            <div class="message warning" id="warningMessage"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 API Endpoint Tests</h3>
+            <div id="apiTests"></div>
+            <button onclick="testAllEndpoints()" id="testEndpointsBtn">🧪 Test All Endpoints</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>🐛 Debug Information</h3>
+            <div class="debug-info" id="debugInfo">Initializing production admin test...</div>
+            <button onclick="copyDebugInfo()" class="copy-btn">📋 Copy Debug Info</button>
+        </div>
+        
+        <div class="test-links">
+            <a href="admin-login.html">🔐 Go to Admin Login</a>
+            <a href="admin-dashboard.html">📊 Go to Dashboard</a>
+            <a href="index.html">🏠 Go to Home</a>
+            <a href="/api/health" target="_blank">🔗 API Health Check</a>
+        </div>
+    </div>
+
+    <script>
+        let debugInfo = '';
+        
+        function addDebugLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo += `[${timestamp}] ${message}\n`;
+            document.getElementById('debugInfo').textContent = debugInfo;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function updateStatus(elementId, textId, status, message) {
+            const indicator = document.getElementById(elementId);
+            const text = document.getElementById(textId);
+            
+            const statusClass = status === true ? 'status-online' : 
+                               status === false ? 'status-offline' : 'status-unknown';
+            
+            indicator.className = `status-indicator ${statusClass}`;
+            text.textContent = message;
+        }
+        
+        function getAPIBaseURL() {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+            
+            // For production (no port in URL)
+            if (!port && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+                return `${protocol}//${hostname}/api`;
+            }
+            
+            // For localhost development
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return `${protocol}//${hostname}:3002/api`;
+            }
+            
+            // Fallback
+            return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
+        }
+        
+        async function testServerConnection() {
+            try {
+                addDebugLog('🔍 Testing server connection...');
+                const apiUrl = `${getAPIBaseURL()}/health`;
+                addDebugLog(`📡 Health check URL: ${apiUrl}`);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addDebugLog(`✅ Server online: ${JSON.stringify(data)}`);
+                    updateStatus('serverStatus', 'serverStatusText', true, 'Online');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                addDebugLog(`❌ Server connection failed: ${error.message}`);
+                updateStatus('serverStatus', 'serverStatusText', false, `Offline (${error.message})`);
+                return false;
+            }
+        }
+        
+        async function testCORS() {
+            try {
+                addDebugLog('🔍 Testing CORS configuration...');
+                const apiUrl = `${getAPIBaseURL()}/cors-test`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addDebugLog(`✅ CORS test passed: ${JSON.stringify(data)}`);
+                    updateStatus('corsStatus', 'corsStatusText', true, 'Working');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                addDebugLog(`❌ CORS test failed: ${error.message}`);
+                updateStatus('corsStatus', 'corsStatusText', false, `Failed (${error.message})`);
+                return false;
+            }
+        }
+        
+        async function testAdminAPI() {
+            try {
+                addDebugLog('🔍 Testing admin API endpoints...');
+                const apiUrl = `${getAPIBaseURL()}/admin/dashboard-stats`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addDebugLog(`✅ Admin API working: ${JSON.stringify(data)}`);
+                    updateStatus('adminApiStatus', 'adminApiStatusText', true, 'Working');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                addDebugLog(`❌ Admin API failed: ${error.message}`);
+                updateStatus('adminApiStatus', 'adminApiStatusText', false, `Failed (${error.message})`);
+                return false;
+            }
+        }
+        
+        function testLocalStorage() {
+            try {
+                addDebugLog('🔍 Testing local storage...');
+                
+                // Test localStorage functionality
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                
+                // Check current admin status
+                const adminStatus = localStorage.getItem('bloodconnect_admin');
+                const adminEmail = localStorage.getItem('admin_email');
+                
+                addDebugLog(`📱 LocalStorage working. Admin status: ${adminStatus}, Email: ${adminEmail}`);
+                updateStatus('storageStatus', 'storageStatusText', true, 'Working');
+                
+                if (adminStatus === 'true') {
+                    addDebugLog(`⚠️ Already logged in as admin!`);
+                    const warningMsg = document.getElementById('warningMessage');
+                    warningMsg.textContent = 'You are already logged in as admin. Try accessing the dashboard directly.';
+                    warningMsg.style.display = 'block';
+                }
+                
+                return true;
+            } catch (error) {
+                addDebugLog(`❌ LocalStorage failed: ${error.message}`);
+                updateStatus('storageStatus', 'storageStatusText', false, `Failed (${error.message})`);
+                return false;
+            }
+        }
+        
+        async function testProductionLogin(email, password) {
+            addDebugLog(`🔐 Testing production admin login...`);
+            addDebugLog(`📧 Email: ${email}`);
+            
+            // Clear previous messages
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('warningMessage').style.display = 'none';
+            
+            // Disable button during test
+            const loginBtn = document.getElementById('prodLoginBtn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = '🔄 Testing...';
+            
+            try {
+                // Check credentials (same logic as real login)
+                if (email === 'admin@bloodconnect.com' && password === 'Admin@123') {
+                    addDebugLog('✅ Credentials are correct!');
+                    
+                    // Store admin session
+                    localStorage.setItem('bloodconnect_admin', 'true');
+                    localStorage.setItem('admin_email', email);
+                    addDebugLog('💾 Admin session stored in localStorage');
+                    
+                    // Show success
+                    const successMsg = document.getElementById('successMessage');
+                    successMsg.textContent = 'Login test successful! Redirecting to dashboard...';
+                    successMsg.style.display = 'block';
+                    
+                    addDebugLog('🎉 Production admin login test completed successfully!');
+                    
+                    // Test dashboard access
+                    setTimeout(() => {
+                        addDebugLog('🔄 Redirecting to admin dashboard...');
+                        window.location.href = 'admin-dashboard.html';
+                    }, 2000);
+                    
+                    return true;
+                } else {
+                    addDebugLog('❌ Invalid credentials!');
+                    const errorMsg = document.getElementById('errorMessage');
+                    errorMsg.textContent = 'Invalid admin credentials. Please check email and password.';
+                    errorMsg.style.display = 'block';
+                    return false;
+                }
+            } finally {
+                // Re-enable button
+                loginBtn.disabled = false;
+                loginBtn.textContent = '🚀 Test Production Login';
+            }
+        }
+        
+        async function testAllEndpoints() {
+            const endpoints = [
+                { name: 'Health Check', url: '/health' },
+                { name: 'CORS Test', url: '/cors-test' },
+                { name: 'API Test', url: '/test' },
+                { name: 'Dashboard Stats', url: '/admin/dashboard-stats' },
+                { name: 'Admin Users', url: '/admin/users' },
+                { name: 'Admin Donations', url: '/admin/donations' },
+                { name: 'Admin Requests', url: '/admin/requests' }
+            ];
+            
+            const container = document.getElementById('apiTests');
+            container.innerHTML = '';
+            
+            for (const endpoint of endpoints) {
+                const testDiv = document.createElement('div');
+                testDiv.className = 'api-test';
+                testDiv.innerHTML = `
+                    <h4>Testing: ${endpoint.name}</h4>
+                    <div class="api-result" id="result-${endpoint.name.replace(/\s+/g, '')}">Testing...</div>
+                `;
+                container.appendChild(testDiv);
+                
+                try {
+                    const apiUrl = `${getAPIBaseURL()}${endpoint.url}`;
+                    addDebugLog(`🧪 Testing endpoint: ${apiUrl}`);
+                    
+                    const response = await fetch(apiUrl);
+                    const resultDiv = document.getElementById(`result-${endpoint.name.replace(/\s+/g, '')}`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        resultDiv.innerHTML = `✅ Status: ${response.status}<br>Response: ${JSON.stringify(data, null, 2)}`;
+                        resultDiv.style.background = '#f0fdf4';
+                    } else {
+                        resultDiv.innerHTML = `❌ Status: ${response.status}<br>Error: ${response.statusText}`;
+                        resultDiv.style.background = '#fef2f2';
+                    }
+                } catch (error) {
+                    const resultDiv = document.getElementById(`result-${endpoint.name.replace(/\s+/g, '')}`);
+                    resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                    resultDiv.style.background = '#fef2f2';
+                }
+            }
+        }
+        
+        async function runAllTests() {
+            const testBtn = document.getElementById('testAllBtn');
+            testBtn.disabled = true;
+            testBtn.textContent = '🔄 Running Tests...';
+            
+            addDebugLog('🚀 Running all production tests...');
+            
+            await testServerConnection();
+            await testCORS();
+            await testAdminAPI();
+            testLocalStorage();
+            
+            testBtn.disabled = false;
+            testBtn.textContent = '🔍 Run All Tests';
+            
+            addDebugLog('✅ All tests completed!');
+        }
+        
+        function copyDebugInfo() {
+            navigator.clipboard.writeText(debugInfo).then(() => {
+                alert('Debug information copied to clipboard!');
+            }).catch(() => {
+                prompt('Copy this debug information:', debugInfo);
+            });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addDebugLog('🚀 Production Admin Test Tool started');
+            
+            // Set environment info
+            document.getElementById('currentUrl').textContent = window.location.href;
+            document.getElementById('environment').textContent = 
+                window.location.hostname.includes('localhost') ? 'Development' : 'Production';
+            document.getElementById('apiBaseUrl').textContent = getAPIBaseURL();
+            
+            // Auto-run initial tests
+            runAllTests();
+            
+            // Form submission
+            document.getElementById('productionLoginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('prodEmail').value;
+                const password = document.getElementById('prodPassword').value;
+                
+                await testProductionLogin(email, password);
+            });
+            
+            addDebugLog('✅ Production test tool ready!');
+        });
+    </script>
+</body>
+</html>

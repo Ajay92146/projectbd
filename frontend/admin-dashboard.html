@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -617,16 +618,38 @@
             }, 60000);
         }
 
+        // Get dynamic API base URL
+        function getAPIBaseURL() {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+            
+            // If on localhost, use the same port as the frontend (3002)
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return `${protocol}//${hostname}:3002/api`; // Fixed to use port 3002
+            }
+            
+            return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
+        }
+
         // Load dashboard statistics
         async function loadStats() {
             try {
                 console.log('Loading dashboard stats...');
-                const apiUrl = 'http://localhost:3002/api/admin/dashboard-stats';
+                const apiUrl = `${getAPIBaseURL()}/admin/dashboard-stats`;
                 console.log('API URL:', apiUrl);
                 
-                const response = await fetch(apiUrl);
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 
                 const data = await response.json();
                 console.log('Response data:', data);
@@ -656,7 +679,7 @@
 
             try {
                 console.log('Loading users...');
-                const apiUrl = 'http://localhost:3002/api/admin/users';
+                const apiUrl = `${getAPIBaseURL()}/admin/users`;
                 console.log('Users API URL:', apiUrl);
                 
                 const response = await fetch(apiUrl);
@@ -711,7 +734,7 @@
 
             try {
                 console.log('Loading donations...');
-                const apiUrl = 'http://localhost:3002/api/admin/donations';
+                const apiUrl = `${getAPIBaseURL()}/admin/donations`;
                 console.log('Donations API URL:', apiUrl);
                 
                 const response = await fetch(apiUrl);
@@ -764,7 +787,7 @@
 
             try {
                 console.log('Loading requests...');
-                const apiUrl = 'http://localhost:3002/api/admin/requests';
+                const apiUrl = `${getAPIBaseURL()}/admin/requests`;
                 console.log('Requests API URL:', apiUrl);
                 
                 const response = await fetch(apiUrl);
@@ -884,7 +907,7 @@
                 if (search) params.append('search', search);
                 if (role) params.append('role', role);
 
-                const apiUrl = `http://localhost:3002/api/admin/users?${params}`;
+                const apiUrl = `${getAPIBaseURL()}/admin/users?${params}`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
@@ -908,7 +931,7 @@
                 if (search) params.append('search', search);
                 if (status) params.append('status', status);
 
-                const apiUrl = `http://localhost:3002/api/admin/donations?${params}`;
+                const apiUrl = `${getAPIBaseURL()}/admin/donations?${params}`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
@@ -932,7 +955,7 @@
                 if (search) params.append('search', search);
                 if (urgency) params.append('urgency', urgency);
 
-                const apiUrl = `http://localhost:3002/api/admin/requests?${params}`;
+                const apiUrl = `${getAPIBaseURL()}/admin/requests?${params}`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 

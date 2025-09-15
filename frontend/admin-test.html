@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login Test - BloodConnect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #fef5f5 0%, #f7fafc 100%);
+        }
+        
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #e53e3e;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+        }
+        
+        .test-section h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .credentials {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #0ea5e9;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #e53e3e;
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #e53e3e, #fc8181);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #c53030, #e53e3e);
+            transform: translateY(-2px);
+        }
+        
+        .message {
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .debug-info {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online { background: #10b981; }
+        .status-offline { background: #ef4444; }
+        
+        .test-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .test-links a {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        
+        .test-links a:hover {
+            background: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Admin Login Diagnostic Tool</h1>
+        
+        <div class="test-section">
+            <h3>📋 System Status</h3>
+            <p><span class="status-indicator" id="serverStatus"></span>Server Connection: <span id="serverStatusText">Checking...</span></p>
+            <p><span class="status-indicator" id="adminApiStatus"></span>Admin API: <span id="adminApiStatusText">Checking...</span></p>
+            <p><span class="status-indicator" id="storageStatus"></span>Local Storage: <span id="storageStatusText">Checking...</span></p>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔐 Admin Login Test</h3>
+            <div class="credentials">
+                <strong>Default Admin Credentials:</strong><br>
+                📧 Email: admin@bloodconnect.com<br>
+                🔑 Password: Admin@123
+            </div>
+            
+            <form id="testLoginForm">
+                <div class="form-group">
+                    <label for="testEmail">Admin Email:</label>
+                    <input type="email" id="testEmail" value="admin@bloodconnect.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="testPassword">Admin Password:</label>
+                    <input type="password" id="testPassword" value="Admin@123" required>
+                </div>
+                
+                <button type="submit">🚀 Test Admin Login</button>
+            </form>
+            
+            <div class="message error" id="errorMessage"></div>
+            <div class="message success" id="successMessage"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔍 Debug Information</h3>
+            <div class="debug-info" id="debugInfo">Initializing debug information...</div>
+        </div>
+        
+        <div class="test-links">
+            <a href="admin-login.html">🔐 Go to Admin Login</a>
+            <a href="admin-dashboard.html">📊 Go to Dashboard</a>
+            <a href="index.html">🏠 Go to Home</a>
+        </div>
+    </div>
+
+    <script>
+        let debugInfo = '';
+        
+        function addDebugLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo += `[${timestamp}] ${message}\n`;
+            document.getElementById('debugInfo').textContent = debugInfo;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function updateStatus(elementId, textId, isOnline, message) {
+            const indicator = document.getElementById(elementId);
+            const text = document.getElementById(textId);
+            
+            indicator.className = `status-indicator ${isOnline ? 'status-online' : 'status-offline'}`;
+            text.textContent = message;
+        }
+        
+        async function checkServerStatus() {
+            try {
+                addDebugLog('🔍 Checking server connection...');
+                const response = await fetch('http://localhost:3002/api/test');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addDebugLog(`✅ Server is online: ${data.message}`);
+                    updateStatus('serverStatus', 'serverStatusText', true, 'Online');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                addDebugLog(`❌ Server connection failed: ${error.message}`);
+                updateStatus('serverStatus', 'serverStatusText', false, `Offline (${error.message})`);
+                return false;
+            }
+        }
+        
+        async function checkAdminAPI() {
+            try {
+                addDebugLog('🔍 Checking admin API...');
+                const response = await fetch('http://localhost:3002/api/admin/dashboard-stats');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addDebugLog(`✅ Admin API is working: ${JSON.stringify(data)}`);
+                    updateStatus('adminApiStatus', 'adminApiStatusText', true, 'Working');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                addDebugLog(`❌ Admin API failed: ${error.message}`);
+                updateStatus('adminApiStatus', 'adminApiStatusText', false, `Failed (${error.message})`);
+                return false;
+            }
+        }
+        
+        function checkLocalStorage() {
+            try {
+                addDebugLog('🔍 Checking local storage...');
+                
+                // Test localStorage
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                
+                // Check current admin status
+                const adminStatus = localStorage.getItem('bloodconnect_admin');
+                const adminEmail = localStorage.getItem('admin_email');
+                
+                addDebugLog(`📱 LocalStorage working. Admin status: ${adminStatus}, Email: ${adminEmail}`);
+                updateStatus('storageStatus', 'storageStatusText', true, 'Working');
+                
+                if (adminStatus === 'true') {
+                    addDebugLog(`⚠️ Already logged in as admin!`);
+                }
+                
+                return true;
+            } catch (error) {
+                addDebugLog(`❌ LocalStorage failed: ${error.message}`);
+                updateStatus('storageStatus', 'storageStatusText', false, `Failed (${error.message})`);
+                return false;
+            }
+        }
+        
+        async function testAdminLogin(email, password) {
+            addDebugLog(`🔐 Testing admin login with email: ${email}`);
+            
+            // Clear previous messages
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            
+            // Check credentials (same logic as real login)
+            if (email === 'admin@bloodconnect.com' && password === 'Admin@123') {
+                addDebugLog('✅ Credentials are correct!');
+                
+                // Store admin session
+                localStorage.setItem('bloodconnect_admin', 'true');
+                localStorage.setItem('admin_email', email);
+                addDebugLog('💾 Admin session stored in localStorage');
+                
+                // Show success
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = 'Login successful! You can now access the admin dashboard.';
+                successMsg.style.display = 'block';
+                
+                addDebugLog('🎉 Admin login test completed successfully!');
+                
+                // Check if we can access dashboard
+                setTimeout(() => {
+                    addDebugLog('🔄 Testing dashboard access...');
+                    window.location.href = 'admin-dashboard.html';
+                }, 2000);
+                
+                return true;
+            } else {
+                addDebugLog('❌ Invalid credentials!');
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.textContent = 'Invalid admin credentials. Please check email and password.';
+                errorMsg.style.display = 'block';
+                return false;
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            addDebugLog('🚀 Admin Login Diagnostic Tool started');
+            
+            // Check all systems
+            await checkServerStatus();
+            await checkAdminAPI();
+            checkLocalStorage();
+            
+            // Form submission
+            document.getElementById('testLoginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('testEmail').value;
+                const password = document.getElementById('testPassword').value;
+                
+                await testAdminLogin(email, password);
+            });
+            
+            addDebugLog('✅ Diagnostic tool ready!');
+        });
+    </script>
+</body>
+</html>
