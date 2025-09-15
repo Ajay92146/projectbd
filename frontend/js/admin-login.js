@@ -26,6 +26,20 @@ function toggleAdminPassword() {
     }
 }
 
+// Get dynamic API base URL
+function getAPIBaseURL() {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    
+    // If on localhost, use the same port as the frontend (3002)
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return `${protocol}//${hostname}:3002/api`;
+    }
+    
+    return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
+}
+
 // Admin login process
 async function processAdminLogin(email, password) {
     debugLog('🔐 Starting admin login process...');
@@ -45,10 +59,28 @@ async function processAdminLogin(email, password) {
     if (loadingSpinner) loadingSpinner.classList.add('active');
 
     try {
-        // Check admin credentials
-        debugLog('🔍 Validating credentials...');
+        // Call backend API for admin authentication
+        debugLog('🔍 Calling backend API for authentication...');
         
-        if (email === 'admin@bloodconnect.com' && password === 'Admin@123') {
+        const apiUrl = `${getAPIBaseURL()}/admin/login`;
+        debugLog(`API URL: ${apiUrl}`);
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+        
+        debugLog(`Response status: ${response.status}`);
+        const data = await response.json();
+        debugLog('Response data:', data);
+        
+        if (response.ok && data.success) {
             debugLog('✅ Admin credentials are correct!');
             
             // Store admin session with verification
@@ -94,8 +126,8 @@ async function processAdminLogin(email, password) {
             }
             
         } else {
-            debugLog('❌ Invalid admin credentials');
-            throw new Error('Invalid admin credentials. Please try again.');
+            debugLog('❌ Invalid admin credentials or API error');
+            throw new Error(data.message || 'Invalid admin credentials. Please try again.');
         }
         
     } catch (error) {

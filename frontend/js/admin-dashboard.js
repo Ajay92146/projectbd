@@ -48,6 +48,16 @@ function checkAdminAuthentication() {
     return true;
 }
 
+// Get auth headers for admin API calls
+function getAdminAuthHeaders() {
+    const adminEmail = localStorage.getItem('admin_email');
+    return {
+        'Content-Type': 'application/json',
+        'x-admin-email': adminEmail || '',
+        'x-admin-auth': 'true'
+    };
+}
+
 // Load dashboard statistics
 async function loadStats() {
     try {
@@ -57,9 +67,7 @@ async function loadStats() {
         
         const response = await fetch(apiUrl, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: getAdminAuthHeaders()
         });
         debugLog(`Response status: ${response.status}`);
         
@@ -99,7 +107,7 @@ async function loadStats() {
 }
 
 // Load users data
-async function loadUsers() {
+async function loadUsers(searchTerm = '', roleFilter = '') {
     const usersTableBody = document.getElementById('usersTableBody');
     if (usersTableBody) {
         usersTableBody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner"></i> Loading users...</td></tr>';
@@ -107,10 +115,22 @@ async function loadUsers() {
 
     try {
         debugLog('Loading users...');
-        const apiUrl = `${getAPIBaseURL()}/admin/users`;
+        let apiUrl = `${getAPIBaseURL()}/admin/users?limit=50`;
+        
+        // Add search and filter parameters
+        if (searchTerm) {
+            apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+        if (roleFilter) {
+            apiUrl += `&role=${encodeURIComponent(roleFilter)}`;
+        }
+        
         debugLog(`Users API URL: ${apiUrl}`);
         
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
         debugLog(`Users response status: ${response.status}`);
         
         const data = await response.json();
@@ -160,7 +180,7 @@ function displayUsers(users) {
 }
 
 // Load donations data (simplified version)
-async function loadDonations() {
+async function loadDonations(searchTerm = '', statusFilter = '') {
     const donationsTableBody = document.getElementById('donationsTableBody');
     if (donationsTableBody) {
         donationsTableBody.innerHTML = '<tr><td colspan="6" class="loading"><i class="fas fa-spinner"></i> Loading donations...</td></tr>';
@@ -168,9 +188,20 @@ async function loadDonations() {
 
     try {
         debugLog('Loading donations...');
-        const apiUrl = `${getAPIBaseURL()}/admin/donations`;
+        let apiUrl = `${getAPIBaseURL()}/admin/donations?limit=50`;
         
-        const response = await fetch(apiUrl);
+        // Add search and filter parameters
+        if (searchTerm) {
+            apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+        if (statusFilter) {
+            apiUrl += `&status=${encodeURIComponent(statusFilter)}`;
+        }
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
         const data = await response.json();
         
         if (data.success) {
@@ -215,7 +246,7 @@ function displayDonations(donations) {
 }
 
 // Load requests data (simplified version)
-async function loadRequests() {
+async function loadRequests(searchTerm = '', urgencyFilter = '') {
     const requestsTableBody = document.getElementById('requestsTableBody');
     if (requestsTableBody) {
         requestsTableBody.innerHTML = '<tr><td colspan="7" class="loading"><i class="fas fa-spinner"></i> Loading requests...</td></tr>';
@@ -223,9 +254,20 @@ async function loadRequests() {
 
     try {
         debugLog('Loading requests...');
-        const apiUrl = `${getAPIBaseURL()}/admin/requests`;
+        let apiUrl = `${getAPIBaseURL()}/admin/requests?limit=50`;
         
-        const response = await fetch(apiUrl);
+        // Add search and filter parameters
+        if (searchTerm) {
+            apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+        if (urgencyFilter) {
+            apiUrl += `&urgency=${encodeURIComponent(urgencyFilter)}`;
+        }
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
         const data = await response.json();
         
         if (data.success) {
@@ -279,39 +321,158 @@ function initializeDashboard() {
     loadDonations();
     loadRequests();
     
-    // Auto-refresh data every 30 seconds
+    // Set up search and filter event listeners
+    setupSearchAndFilters();
+    
+    // Auto-refresh data every 5 minutes (reduced from 30 seconds/1 minute)
     setInterval(() => {
         loadStats();
-    }, 30000);
+    }, 300000); // 5 minutes
     
-    // Auto-refresh tables every 60 seconds
+    // Auto-refresh tables every 10 minutes
     setInterval(() => {
         loadUsers();
         loadDonations();
         loadRequests();
-    }, 60000);
+    }, 600000); // 10 minutes
+}
+
+// Set up search and filter functionality
+function setupSearchAndFilters() {
+    // Users search and filter
+    const userSearch = document.getElementById('userSearch');
+    const userFilter = document.getElementById('userFilter');
+    
+    if (userSearch) {
+        let userSearchTimeout;
+        userSearch.addEventListener('input', function() {
+            clearTimeout(userSearchTimeout);
+            userSearchTimeout = setTimeout(() => {
+                const searchTerm = this.value.trim();
+                const roleFilter = userFilter ? userFilter.value : '';
+                loadUsers(searchTerm, roleFilter);
+            }, 500); // Debounce search
+        });
+    }
+    
+    if (userFilter) {
+        userFilter.addEventListener('change', function() {
+            const searchTerm = userSearch ? userSearch.value.trim() : '';
+            const roleFilter = this.value;
+            loadUsers(searchTerm, roleFilter);
+        });
+    }
+    
+    // Donations search and filter
+    const donationSearch = document.getElementById('donationSearch');
+    const donationFilter = document.getElementById('donationFilter');
+    
+    if (donationSearch) {
+        let donationSearchTimeout;
+        donationSearch.addEventListener('input', function() {
+            clearTimeout(donationSearchTimeout);
+            donationSearchTimeout = setTimeout(() => {
+                const searchTerm = this.value.trim();
+                const statusFilter = donationFilter ? donationFilter.value : '';
+                loadDonations(searchTerm, statusFilter);
+            }, 500);
+        });
+    }
+    
+    if (donationFilter) {
+        donationFilter.addEventListener('change', function() {
+            const searchTerm = donationSearch ? donationSearch.value.trim() : '';
+            const statusFilter = this.value;
+            loadDonations(searchTerm, statusFilter);
+        });
+    }
+    
+    // Requests search and filter
+    const requestSearch = document.getElementById('requestSearch');
+    const requestFilter = document.getElementById('requestFilter');
+    
+    if (requestSearch) {
+        let requestSearchTimeout;
+        requestSearch.addEventListener('input', function() {
+            clearTimeout(requestSearchTimeout);
+            requestSearchTimeout = setTimeout(() => {
+                const searchTerm = this.value.trim();
+                const urgencyFilter = requestFilter ? requestFilter.value : '';
+                loadRequests(searchTerm, urgencyFilter);
+            }, 500);
+        });
+    }
+    
+    if (requestFilter) {
+        requestFilter.addEventListener('change', function() {
+            const searchTerm = requestSearch ? requestSearch.value.trim() : '';
+            const urgencyFilter = this.value;
+            loadRequests(searchTerm, urgencyFilter);
+        });
+    }
 }
 
 // Refresh functions
 function refreshUsers() {
-    loadUsers();
+    const userSearch = document.getElementById('userSearch');
+    const userFilter = document.getElementById('userFilter');
+    const searchTerm = userSearch ? userSearch.value.trim() : '';
+    const roleFilter = userFilter ? userFilter.value : '';
+    loadUsers(searchTerm, roleFilter);
 }
 
 function refreshDonations() {
-    loadDonations();
+    const donationSearch = document.getElementById('donationSearch');
+    const donationFilter = document.getElementById('donationFilter');
+    const searchTerm = donationSearch ? donationSearch.value.trim() : '';
+    const statusFilter = donationFilter ? donationFilter.value : '';
+    loadDonations(searchTerm, statusFilter);
 }
 
 function refreshRequests() {
-    loadRequests();
+    const requestSearch = document.getElementById('requestSearch');
+    const requestFilter = document.getElementById('requestFilter');
+    const searchTerm = requestSearch ? requestSearch.value.trim() : '';
+    const urgencyFilter = requestFilter ? requestFilter.value : '';
+    loadRequests(searchTerm, urgencyFilter);
 }
 
-// Logout function
+// Improved logout function
 function logout() {
-    if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('bloodconnect_admin');
-        localStorage.removeItem('admin_email');
-        localStorage.removeItem('admin_login_time');
-        window.location.href = 'admin-login.html';
+    // Create a custom modal-style confirmation instead of browser confirm
+    const confirmLogout = confirm('Are you sure you want to logout from the admin dashboard?');
+    
+    if (confirmLogout) {
+        debugLog('📝 Logging out admin user...');
+        
+        try {
+            // Clear all admin-related localStorage items
+            const adminKeys = [
+                'bloodconnect_admin',
+                'admin_email',
+                'admin_login_time',
+                'admin_session',
+                'admin_preferences'
+            ];
+            
+            adminKeys.forEach(key => {
+                localStorage.removeItem(key);
+                debugLog(`📝 Cleared localStorage key: ${key}`);
+            });
+            
+            // Clear any sessionStorage as well
+            sessionStorage.clear();
+            
+            debugLog('✅ Admin logout completed successfully');
+            
+            // Redirect to admin login page
+            window.location.href = 'admin-login.html';
+            
+        } catch (error) {
+            debugLog(`❌ Error during logout: ${error.message}`);
+            // Force redirect even if cleanup fails
+            window.location.href = 'admin-login.html';
+        }
     }
 }
 

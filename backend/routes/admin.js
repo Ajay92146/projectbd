@@ -11,12 +11,81 @@ const { authMiddleware } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const router = express.Router();
 
+// Admin authentication middleware
+function adminAuthMiddleware(req, res, next) {
+    // For now, we'll use a simple admin check
+    // In production, this should validate JWT tokens with admin role
+    const adminEmail = req.headers['x-admin-email'];
+    const adminAuth = req.headers['x-admin-auth'];
+    
+    if (adminEmail === 'admin@bloodconnect.com' && adminAuth === 'true') {
+        next();
+    } else {
+        return res.status(401).json({
+            success: false,
+            message: 'Admin authentication required'
+        });
+    }
+}
+
+/**
+ * @route   POST /api/admin/login
+ * @desc    Admin login endpoint
+ * @access  Public
+ */
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        // Hardcoded admin credentials (should be in environment variables in production)
+        const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@bloodconnect.com';
+        const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@123';
+        
+        if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+            // Log successful admin login
+            logger.auth('ADMIN_LOGIN_SUCCESS', 'admin', {
+                email: email,
+                ip: req.ip,
+                userAgent: req.get('User-Agent')
+            });
+            
+            res.json({
+                success: true,
+                message: 'Admin login successful',
+                data: {
+                    email: email,
+                    role: 'admin',
+                    loginTime: new Date().toISOString()
+                }
+            });
+        } else {
+            // Log failed admin login attempt
+            logger.security('ADMIN_LOGIN_FAILED', {
+                email: email,
+                ip: req.ip,
+                userAgent: req.get('User-Agent')
+            });
+            
+            res.status(401).json({
+                success: false,
+                message: 'Invalid admin credentials'
+            });
+        }
+    } catch (error) {
+        logger.error('Error during admin login:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Admin login error'
+        });
+    }
+});
+
 /**
  * @route   GET /api/admin/dashboard-stats
  * @desc    Get dashboard statistics
  * @access  Admin only
  */
-router.get('/dashboard-stats', async (req, res) => {
+router.get('/dashboard-stats', adminAuthMiddleware, async (req, res) => {
     try {
         // Get total users count
         const totalUsers = await User.countDocuments({ isActive: true });
@@ -53,7 +122,7 @@ router.get('/dashboard-stats', async (req, res) => {
  * @desc    Get all users with pagination and filtering
  * @access  Admin only
  */
-router.get('/users', async (req, res) => {
+router.get('/users', adminAuthMiddleware, async (req, res) => {
     try {
         const { page = 1, limit = 10, search = '', role = '', status = '' } = req.query;
         
@@ -113,7 +182,7 @@ router.get('/users', async (req, res) => {
  * @desc    Get all donors with pagination and filtering
  * @access  Admin only
  */
-router.get('/donations', async (req, res) => {
+router.get('/donations', adminAuthMiddleware, async (req, res) => {
     try {
         const { page = 1, limit = 10, search = '', status = '', bloodGroup = '' } = req.query;
         
@@ -176,7 +245,7 @@ router.get('/donations', async (req, res) => {
  * @desc    Get all blood requests with pagination and filtering
  * @access  Admin only
  */
-router.get('/requests', async (req, res) => {
+router.get('/requests', adminAuthMiddleware, async (req, res) => {
     try {
         const { page = 1, limit = 10, search = '', status = '', urgency = '', bloodGroup = '' } = req.query;
         
