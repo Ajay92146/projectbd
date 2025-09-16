@@ -81,6 +81,62 @@ router.post('/login', async (req, res) => {
 });
 
 /**
+ * @route   POST /api/admin/logout
+ * @desc    Admin logout endpoint (clears any server-side session if needed)
+ * @access  Admin only
+ */
+router.post('/logout', adminAuthMiddleware, async (req, res) => {
+    try {
+        const adminEmail = req.headers['x-admin-email'];
+        
+        // Log successful admin logout
+        logger.auth('ADMIN_LOGOUT_SUCCESS', 'admin', {
+            email: adminEmail,
+            ip: req.ip,
+            userAgent: req.get('User-Agent')
+        });
+        
+        res.json({
+            success: true,
+            message: 'Admin logout successful'
+        });
+    } catch (error) {
+        logger.error('Error during admin logout:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Admin logout error'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/admin/verify
+ * @desc    Verify admin authentication status
+ * @access  Admin only
+ */
+router.get('/verify', adminAuthMiddleware, async (req, res) => {
+    try {
+        const adminEmail = req.headers['x-admin-email'];
+        
+        res.json({
+            success: true,
+            message: 'Admin authentication verified',
+            data: {
+                email: adminEmail,
+                role: 'admin',
+                verifiedAt: new Date().toISOString()
+            }
+        });
+    } catch (error) {
+        logger.error('Error during admin verification:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Admin verification error'
+        });
+    }
+});
+
+/**
  * @route   GET /api/admin/dashboard-stats
  * @desc    Get dashboard statistics
  * @access  Admin only

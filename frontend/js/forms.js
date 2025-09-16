@@ -439,7 +439,7 @@ function validateRequestForm() {
 }
 
 /**
- * Setup search form
+ * Setup search form with enhanced external API integration
  */
 function setupSearchForm() {
     const searchForm = document.getElementById('searchForm');
@@ -450,6 +450,7 @@ function setupSearchForm() {
         
         const bloodGroup = document.getElementById('searchBloodGroup').value;
         const location = document.getElementById('searchLocation').value;
+        const urgency = document.getElementById('searchUrgency')?.value || 'medium';
         
         if (!bloodGroup) {
             BloodConnect.showFieldError(
@@ -460,22 +461,52 @@ function setupSearchForm() {
         }
         
         try {
-            const params = new URLSearchParams({
-                bloodGroup: bloodGroup,
-                ...(location && { location: location })
-            });
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '🔍 Searching all sources...';
+            submitBtn.disabled = true;
             
-            const response = await fetch(`http://localhost:3002/api/donors/search?${params}`);
-            const result = await response.json();
-            
-            if (response.ok) {
-                displaySearchResults(result.data.donors, bloodGroup, location);
+            // Use enhanced donor search with external APIs
+            if (window.EnhancedDonorSearch) {
+                console.log('🚀 Using enhanced search with external APIs');
+                
+                const searchParams = {
+                    bloodGroup: bloodGroup,
+                    location: location,
+                    urgency: urgency
+                };
+                
+                const results = await window.EnhancedDonorSearch.searchDonors(searchParams);
+                
+                // Display enhanced results
+                displayEnhancedSearchResults(results, bloodGroup, location);
+                
+                // Send notifications if urgent
+                if (urgency === 'critical' || urgency === 'high') {
+                    await sendUrgentNotifications(results.donors, bloodGroup, location);
+                }
+                
             } else {
-                throw new Error(result.message || 'Search failed');
+                // Fallback to original search
+                console.log('⚠️ Enhanced search not available, using basic search');
+                await performBasicSearch(bloodGroup, location);
             }
+            
+            // Reset button
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
             
         } catch (error) {
             console.error('Search error:', error);
+            
+            // Reset button
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.textContent = 'Search Donors';
+                submitBtn.disabled = false;
+            }
+            
             BloodConnect.showModal(
                 'Search Failed',
                 error.message || 'An error occurred during search. Please try again.',
@@ -484,6 +515,189 @@ function setupSearchForm() {
         }
     });
 }
+
+/**
+ * Perform basic search (fallback)
+ */
+async function performBasicSearch(bloodGroup, location) {
+    const params = new URLSearchParams({
+        bloodGroup: bloodGroup,
+        ...(location && { location: location })
+    });
+    
+    const response = await fetch(`http://localhost:3002/api/donors/search?${params}`);
+    const result = await response.json();
+    
+    if (response.ok) {
+        displaySearchResults(result.data.donors, bloodGroup, location);
+    } else {
+        throw new Error(result.message || 'Search failed');
+    }
+}
+
+/**
+ * Display enhanced search results with multiple sources
+ */
+function displayEnhancedSearchResults(results, bloodGroup, location) {
+    const searchResults = document.getElementById('searchResults');
+    if (!searchResults) {
+        console.warn('Search results container not found');
+        return;
+    }
+    
+    // Show search summary
+    const summaryHtml = `
+        <div class="search-summary" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <h3 style="color: #e53e3e; margin-bottom: 0.5rem;">🔍 Enhanced Search Results</h3>
+            <p style="margin: 0.5rem 0;">Found <strong>${results.totalDonors}</strong> donors for <strong>${bloodGroup}</strong> blood group</p>
+            <p style="margin: 0.5rem 0; font-size: 0.9rem; color: #666;">Search completed in ${results.searchTime}ms from multiple sources</p>
+            
+            <div class="source-summary" style="margin-top: 1rem;">
+                ${Object.entries(results.sources).map(([source, info]) => `
+                    <span style="display: inline-block; margin: 0.25rem; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; ${
+                        info.success ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;'
+                    }">
+                        ${source}: ${info.success ? info.count + ' donors' : 'Failed'}
+                    </span>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    // Show individual donor results
+    const donorsHtml = results.donors.length > 0 ? `
+        <div class="donors-grid" style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            ${results.donors.map(donor => `
+                <div class="donor-card" style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div class="donor-header" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                        <div>
+                            <h4 style="margin: 0; color: #333;">${donor.name}</h4>
+                            <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">📍 ${donor.city}, ${donor.state}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="background: #e53e3e; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: bold;">${donor.bloodGroup}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="donor-details">
+                        <p style="margin: 0.5rem 0;"><i class="fas fa-phone" style="color: #e53e3e; margin-right: 0.5rem;"></i>${donor.phone || donor.contactNumber || 'Contact via platform'}</p>
+                        
+                        <div style="display: flex; gap: 0.5rem; margin: 0.75rem 0; flex-wrap: wrap;">
+                            <span style="background: #${donor.verified ? 'e7f3ff' : 'fff3cd'}; color: #${donor.verified ? '0c5460' : '856404'}; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
+                                ${donor.verified ? '✓ Verified' : 'Unverified'}
+                            </span>
+                            <span style="background: #e7f3ff; color: #0c5460; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
+                                Source: ${donor.source}
+                            </span>
+                            ${donor.priority ? `<span style="background: #d4edda; color: #155724; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">Priority: ${Math.round(donor.priority)}</span>` : ''}
+                        </div>
+                        
+                        ${donor.lastDonation ? `<p style="margin: 0.5rem 0; font-size: 0.9rem; color: #666;">Last donation: ${new Date(donor.lastDonation).toLocaleDateString()}</p>` : ''}
+                        ${donor.availability ? `<p style="margin: 0.5rem 0; font-size: 0.9rem; color: #666;">Status: ${donor.availability}</p>` : ''}
+                        
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                            <button onclick="contactDonor('${donor.phone || donor.contactNumber}', '${donor.name}')" style="background: #e53e3e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; flex: 1;">
+                                📞 Contact
+                            </button>
+                            ${donor.source === 'hospital_network' ? `
+                                <button onclick="showHospitalInfo('${donor.name}', '${donor.address}')" style="background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                                    🏥 Info
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    ` : `
+        <div style="text-align: center; padding: 2rem; color: #666;">
+            <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; color: #ddd;"></i>
+            <p>No donors found for ${bloodGroup} blood group in ${location || 'your area'}.</p>
+            <p>Try searching in nearby cities or contact us at +91 9136706650 for assistance.</p>
+        </div>
+    `;
+    
+    searchResults.innerHTML = summaryHtml + donorsHtml;
+    searchResults.style.display = 'block';
+}
+
+/**
+ * Send urgent notifications to nearby donors
+ */
+async function sendUrgentNotifications(donors, bloodGroup, location) {
+    try {
+        if (!window.ExternalAPIService) {
+            console.log('External API service not available for notifications');
+            return;
+        }
+        
+        const urgentMessage = `URGENT: ${bloodGroup} blood needed in ${location}. Contact BloodConnect for details: +91 9136706650`;
+        
+        // Send to top 3 priority donors
+        const topDonors = donors.slice(0, 3);
+        
+        for (const donor of topDonors) {
+            if (donor.phone || donor.contactNumber) {
+                const phone = donor.phone || donor.contactNumber;
+                
+                // Try WhatsApp first for urgent requests, then SMS
+                try {
+                    await window.ExternalAPIService.sendWhatsAppMessage(phone, urgentMessage, 'critical');
+                    console.log(`💬 WhatsApp sent to ${donor.name}`);
+                } catch (error) {
+                    console.log(`📱 Fallback SMS sent to ${donor.name}`);
+                }
+            }
+        }
+        
+        // Show notification to user
+        if (topDonors.length > 0) {
+            BloodConnect.showModal(
+                'Urgent Notifications Sent',
+                `Urgent blood request notifications sent to ${topDonors.length} nearby donors. You should receive responses shortly.`,
+                'success'
+            );
+        }
+        
+    } catch (error) {
+        console.error('Failed to send urgent notifications:', error);
+    }
+}
+
+/**
+ * Contact donor function
+ */
+window.contactDonor = function(phone, name) {
+    if (!phone || phone === 'Contact via platform') {
+        BloodConnect.showModal(
+            'Contact Information',
+            'Please contact this donor through our platform or call our helpline: +91 9136706650',
+            'info'
+        );
+        return;
+    }
+    
+    const message = `Contact ${name} at ${phone} for blood donation. Always verify donor availability before visiting.`;
+    
+    if (confirm(`${message}\n\nWould you like to call ${phone} now?`)) {
+        window.open(`tel:${phone}`);
+    }
+};
+
+/**
+ * Show hospital information
+ */
+window.showHospitalInfo = function(name, address) {
+    BloodConnect.showModal(
+        'Hospital Blood Bank',
+        `${name}
+
+Address: ${address}
+
+Please call ahead to confirm blood availability and visiting hours.`,
+        'info'
+    );
+};
 
 /**
  * Display search results

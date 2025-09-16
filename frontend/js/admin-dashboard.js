@@ -439,40 +439,123 @@ function refreshRequests() {
 
 // Improved logout function
 function logout() {
-    // Create a custom modal-style confirmation instead of browser confirm
-    const confirmLogout = confirm('Are you sure you want to logout from the admin dashboard?');
+    debugLog('🚪 Logout button clicked');
+    
+    // Create a more reliable confirmation dialog
+    const confirmLogout = window.confirm('Are you sure you want to logout from the admin dashboard?');
     
     if (confirmLogout) {
-        debugLog('📝 Logging out admin user...');
+        debugLog('📝 User confirmed logout, proceeding...');
         
-        try {
-            // Clear all admin-related localStorage items
-            const adminKeys = [
-                'bloodconnect_admin',
-                'admin_email',
-                'admin_login_time',
-                'admin_session',
-                'admin_preferences'
-            ];
-            
-            adminKeys.forEach(key => {
+        // Call server-side logout endpoint first (for logging)
+        logoutFromServer().then(() => {
+            performClientLogout();
+        }).catch((error) => {
+            debugLog(`⚠️ Server logout failed: ${error.message}, proceeding with client logout`);
+            performClientLogout();
+        });
+    } else {
+        debugLog('❌ User cancelled logout');
+    }
+}
+
+// Server-side logout call
+async function logoutFromServer() {
+    try {
+        const apiUrl = `${getAPIBaseURL()}/admin/logout`;
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: getAdminAuthHeaders()
+        });
+        
+        if (response.ok) {
+            debugLog('✅ Server logout completed');
+        } else {
+            debugLog('⚠️ Server logout response not OK');
+        }
+    } catch (error) {
+        debugLog(`❌ Server logout error: ${error.message}`);
+        throw error;
+    }
+}
+
+// Client-side logout cleanup
+function performClientLogout() {
+    try {
+        // Clear all admin-related localStorage items
+        const adminKeys = [
+            'bloodconnect_admin',
+            'admin_email',
+            'admin_login_time',
+            'admin_session',
+            'admin_preferences'
+        ];
+        
+        debugLog('🧹 Clearing admin session data...');
+        adminKeys.forEach(key => {
+            if (localStorage.getItem(key)) {
                 localStorage.removeItem(key);
                 debugLog(`📝 Cleared localStorage key: ${key}`);
-            });
-            
-            // Clear any sessionStorage as well
+            } else {
+                debugLog(`📝 Key ${key} was already empty`);
+            }
+        });
+        
+        // Clear any sessionStorage as well
+        try {
             sessionStorage.clear();
-            
-            debugLog('✅ Admin logout completed successfully');
-            
-            // Redirect to admin login page
-            window.location.href = 'admin-login.html';
-            
-        } catch (error) {
-            debugLog(`❌ Error during logout: ${error.message}`);
-            // Force redirect even if cleanup fails
-            window.location.href = 'admin-login.html';
+            debugLog('🧹 SessionStorage cleared');
+        } catch (sessionError) {
+            debugLog(`⚠️ SessionStorage clear error: ${sessionError.message}`);
         }
+        
+        // Verify cleanup
+        const remainingAdminStatus = localStorage.getItem('bloodconnect_admin');
+        if (remainingAdminStatus) {
+            debugLog(`⚠️ Warning: Admin status still exists: ${remainingAdminStatus}`);
+            // Force remove it
+            localStorage.clear();
+            debugLog('🧹 Performed complete localStorage clear');
+        } else {
+            debugLog('✅ Admin session cleanup verified');
+        }
+        
+        debugLog('✅ Admin logout completed successfully');
+        
+        // Show logout message briefly before redirect
+        const logoutMessage = document.createElement('div');
+        logoutMessage.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 2px solid #e53e3e;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 10000;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+        `;
+        logoutMessage.innerHTML = `
+            <i class="fas fa-check-circle" style="color: #e53e3e; font-size: 2rem; margin-bottom: 10px;"></i>
+            <div style="color: #333; font-weight: 600;">Logout Successful!</div>
+            <div style="color: #666; font-size: 0.9rem; margin-top: 5px;">Redirecting to login page...</div>
+        `;
+        document.body.appendChild(logoutMessage);
+        
+        // Redirect to admin login page after a short delay
+        setTimeout(() => {
+            debugLog('🚀 Redirecting to admin login page...');
+            window.location.href = 'admin-login.html';
+        }, 1500);
+        
+    } catch (error) {
+        debugLog(`❌ Error during logout: ${error.message}`);
+        // Force redirect even if cleanup fails
+        alert('Logout completed. Redirecting to login page.');
+        window.location.href = 'admin-login.html';
     }
 }
 
@@ -483,6 +566,26 @@ function initializeAdminDashboard() {
     // Check authentication first
     if (!checkAdminAuthentication()) {
         return; // Will redirect to login
+    }
+    
+    // Set up logout button event listener as backup
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        debugLog('🔄 Setting up logout button event listener');
+        logoutButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            debugLog('🚪 Logout button clicked via event listener');
+            logout();
+        });
+    } else {
+        debugLog('⚠️ Warning: Logout button not found in DOM');
+    }
+    
+    // Test logout function availability
+    if (typeof logout === 'function') {
+        debugLog('✅ Logout function is available');
+    } else {
+        debugLog('❌ Error: Logout function is not available!');
     }
     
     // Initialize dashboard if authenticated
