@@ -258,7 +258,7 @@ class EmergencyPopupSystem {
                 ` : ''}
                 
                 <div style=\"margin-top: 25px; display: flex; gap: 15px; justify-content: center;\">
-                    <button onclick=\"window.emergencyPopup.respondToEmergency('${request._id}')\" style=\"
+                    <button onclick="window.emergencyPopup.respondToEmergency('${request._id}')\" style=\"
                         background: #dc2626;
                         color: white;
                         border: none;
@@ -272,7 +272,21 @@ class EmergencyPopupSystem {
                         🩸 I CAN HELP
                     </button>
                     
-                    <button onclick=\"window.emergencyPopup.closePopup()\" style=\"
+                    <button onclick="window.emergencyPopup.seeAllEmergencies()" style="
+                        background: #f59e0b;
+                        color: white;
+                        border: none;
+                        padding: 12px 25px;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        transition: all 0.3s;
+                    " onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
+                        📋 SEE ALL
+                    </button>
+                    
+                    <button onclick="window.emergencyPopup.closePopup()" style=\"
                         background: #6b7280;
                         color: white;
                         border: none;
@@ -290,7 +304,7 @@ class EmergencyPopupSystem {
                 <p style=\"
                     margin-top: 20px;
                     font-size: 0.9rem;
-                    color: #6b7280;
+                    color: #000000;
                     text-align: center;
                 \">
                     Every second counts. Your donation can save a life! 💝
@@ -331,6 +345,19 @@ class EmergencyPopupSystem {
         
         // Redirect to donation page or show contact info
         window.location.href = '/donate';
+    }
+    
+    /**
+     * Show all emergency requests
+     */
+    seeAllEmergencies() {
+        console.log('📋 User wants to see all emergency requests');
+        
+        // Close popup
+        this.closePopup();
+        
+        // Redirect to request page with emergency filter
+        window.location.href = '/request?filter=emergency';
     }
     
     /**
