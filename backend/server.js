@@ -21,6 +21,10 @@ const userProfileRoutes = require('./routes/userProfile');
 const contactRoutes = require('./routes/contact');
 const adminRoutes = require('./routes/admin');
 const statsRoutes = require('./routes/stats');
+const expirationRoutes = require('./routes/expiration');
+
+// Import services
+const requestExpirationService = require('./services/requestExpirationService');
 
 // Initialize Express app
 const app = express();
@@ -112,6 +116,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/external', require('./routes/external-config'));
+app.use('/api/expiration', expirationRoutes);
 console.log('✅ API routes loaded successfully');
 
 // Serve static files from frontend directory (AFTER API routes)
@@ -279,6 +284,11 @@ app.listen(PORT, () => {
     console.log(`🩸 Blood Donation Server running on port ${PORT}`);
     console.log(`🌐 Frontend: http://localhost:${PORT}`);
     console.log(`🔗 API: http://localhost:${PORT}/api`);
+    
+    // Start the request expiration service
+    console.log('🕐 Starting request expiration service...');
+    requestExpirationService.start();
+    console.log('✅ Request expiration service started successfully');
 });
 
 module.exports = app;

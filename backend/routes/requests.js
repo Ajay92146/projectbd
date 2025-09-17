@@ -441,4 +441,131 @@ router.get('/stats', async (req, res) => {
     }
 });
 
+/**
+ * @route   GET /api/requests/urgent
+ * @desc    Get urgent blood requests (High and Critical priority)
+ * @access  Public
+ */
+router.get('/urgent', async (req, res) => {
+    try {
+        // Find urgent requests (High and Critical urgency)
+        const urgentRequests = await Request.find({
+            urgency: { $in: ['High', 'Critical'] },
+            status: { $in: ['Pending', 'In Progress'] },
+            isActive: true,
+            requiredBy: { $gte: new Date() } // Not expired
+        })
+        .select('patientName bloodGroup requiredUnits hospitalName location urgency requiredBy additionalNotes contactPersonName relationship requestDate')
+        .sort({ urgency: -1, requiredBy: 1 })
+        .limit(10); // Limit to 10 most urgent
+
+        // Add calculated fields
+        const enrichedRequests = urgentRequests.map(request => {
+            const daysLeft = Math.ceil((request.requiredBy - new Date()) / (1000 * 60 * 60 * 24));
+            return {
+                ...request.toObject(),
+                daysLeft,
+                isEmergency: request.urgency === 'Critical' || daysLeft <= 1,
+                timeAgo: getTimeAgo(request.requestDate)
+            };
+        });
+
+        res.json({
+            success: true,
+            message: 'Urgent blood requests retrieved successfully',
+            data: {
+                urgentRequests: enrichedRequests,
+                totalUrgent: urgentRequests.length,
+                emergencyCount: enrichedRequests.filter(req => req.isEmergency).length
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching urgent blood requests:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching urgent blood requests',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/requests/emergency
+ * @desc    Get emergency blood requests (Critical urgency or expiring within 24 hours)
+ * @access  Public
+ */
+router.get('/emergency', async (req, res) => {
+    try {
+        const now = new Date();
+        const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+        // Find emergency requests
+        const emergencyRequests = await Request.find({
+            $or: [
+                { urgency: 'Critical' },
+                { requiredBy: { $lte: twentyFourHoursFromNow } }
+            ],
+            status: { $in: ['Pending', 'In Progress'] },
+            isActive: true,
+            requiredBy: { $gte: now } // Not expired
+        })
+        .select('patientName bloodGroup requiredUnits hospitalName location urgency requiredBy additionalNotes contactPersonName relationship requestDate')
+        .sort({ urgency: -1, requiredBy: 1 })
+        .limit(5); // Limit to 5 most critical
+
+        // Add calculated fields
+        const enrichedRequests = emergencyRequests.map(request => {
+            const hoursLeft = Math.ceil((request.requiredBy - now) / (1000 * 60 * 60));
+            const daysLeft = Math.ceil(hoursLeft / 24);
+            return {
+                ...request.toObject(),
+                hoursLeft,
+                daysLeft,
+                isCritical: request.urgency === 'Critical',
+                isExpiringSoon: hoursLeft <= 24,
+                timeAgo: getTimeAgo(request.requestDate)
+            };
+        });
+
+        res.json({
+            success: true,
+            message: 'Emergency blood requests retrieved successfully',
+            data: {
+                emergencyRequests: enrichedRequests,
+                totalEmergency: emergencyRequests.length,
+                criticalCount: enrichedRequests.filter(req => req.isCritical).length,
+                expiringSoonCount: enrichedRequests.filter(req => req.isExpiringSoon).length
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching emergency blood requests:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching emergency blood requests',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
+// Helper function to calculate time ago
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) {
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffHours > 0) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    } else if (diffMins > 0) {
+        return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    } else {
+        return 'Just now';
+    }
+}
+
 module.exports = router;
