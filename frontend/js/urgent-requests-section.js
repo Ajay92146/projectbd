@@ -165,15 +165,24 @@ class UrgentRequestsSection {
             console.log('🆘 Loading urgent blood requests...');
             this.lastUpdate = new Date();
             
+            console.log('📡 Making API request to /api/requests/urgent');
             const response = await fetch('/api/requests/urgent');
+            console.log('📥 Response status:', response.status, response.statusText);
+            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const result = await response.json();
+            console.log('📋 API Response:', result);
             
             if (result.success) {
-                this.urgentRequests = result.data.urgentRequests;
+                console.log('✅ API Success, checking data structure...');
+                console.log('📊 Result data:', result.data);
+                
+                this.urgentRequests = result.data.urgentRequests || [];
+                console.log(`📝 Urgent requests array:`, this.urgentRequests);
+                
                 this.renderUrgentRequests();
                 console.log(`✅ Loaded ${this.urgentRequests.length} urgent requests`);
             } else {
@@ -182,6 +191,10 @@ class UrgentRequestsSection {
             
         } catch (error) {
             console.error('❌ Error loading urgent requests:', error);
+            console.error('🔍 Error details:', {
+                message: error.message,
+                stack: error.stack
+            });
             this.renderErrorState();
         }
     }

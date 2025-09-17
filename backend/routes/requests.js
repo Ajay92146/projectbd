@@ -354,33 +354,7 @@ router.get('/search', [
     }
 });
 
-/**
- * @route   GET /api/requests/urgent
- * @desc    Get urgent blood requests
- * @access  Public
- */
-router.get('/urgent', async (req, res) => {
-    try {
-        // Use the static method to find urgent requests
-        const urgentRequests = await Request.findUrgentRequests();
 
-        res.json({
-            success: true,
-            message: `Found ${urgentRequests.length} urgent blood requests`,
-            data: {
-                requests: urgentRequests
-            }
-        });
-
-    } catch (error) {
-        console.error('Error fetching urgent requests:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching urgent requests',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-        });
-    }
-});
 
 /**
  * @route   GET /api/requests/stats

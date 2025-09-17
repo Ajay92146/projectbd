@@ -314,12 +314,12 @@ class EmergencyPopupSystem {
         
         this.popupContainer.style.display = 'flex';
         
-        // Auto-close after 30 seconds
+        // Auto-close after 10 seconds
         setTimeout(() => {
             if (this.isPopupVisible) {
                 this.closePopup();
             }
-        }, 30000);
+        }, 10000);
         
         // Play alert sound (if available)
         this.playAlertSound();
