@@ -926,7 +926,7 @@ function setupLoginForm() {
                 result = await response.json();
             }
             
-            if (response.ok) {
+            if (response.ok && result.success) {
                 // Handle login success with auth state manager
                 let redirectUrl = '/';
                 if (window.authStateManager) {
@@ -949,7 +949,9 @@ function setupLoginForm() {
                 }, 2000);
                 
             } else {
-                throw new Error(result.message || 'Login failed');
+                // Handle authentication failure
+                const errorMessage = result.message || 'Login failed';
+                throw new Error(errorMessage);
             }
             
         } catch (error) {
@@ -960,17 +962,33 @@ function setupLoginForm() {
             if (error.message) {
                 if (error.message.includes('fetch')) {
                     errorMessage = '🔌 Connection Error: Unable to connect to the server. Please check your internet connection.';
-                } else if (error.message.includes('401') || error.message.includes('Invalid')) {
-                    errorMessage = '🔐 Invalid email or password. Please check your credentials and try again.';
+                } else if (error.message.includes('401') || error.message.includes('Invalid') || error.message.includes('credentials') || error.message.includes('Unauthorized')) {
+                    errorMessage = '🔐 Invalid user or password. Please check your credentials and try again.';
+                } else if (error.message.includes('User not found') || error.message.includes('user does not exist')) {
+                    errorMessage = '🔐 Invalid user or password. Please check your credentials and try again.';
+                } else if (error.message.includes('password') && error.message.includes('incorrect')) {
+                    errorMessage = '🔐 Invalid user or password. Please check your credentials and try again.';
                 } else if (error.message.includes('500')) {
                     errorMessage = '🛠️ Server Error: Please try again later or contact support.';
                 } else {
-                    errorMessage = error.message;
+                    // For any authentication-related errors, show the generic invalid credentials message
+                    if (error.message.toLowerCase().includes('auth') || 
+                        error.message.toLowerCase().includes('login') ||
+                        error.message.toLowerCase().includes('password') ||
+                        error.message.toLowerCase().includes('email')) {
+                        errorMessage = '🔐 Invalid user or password. Please check your credentials and try again.';
+                    } else {
+                        errorMessage = error.message;
+                    }
                 }
             }
             
+            // Use the showMessage function from login.html if available
+            if (typeof showMessage === 'function') {
+                showMessage(errorMessage, 'error');
+            }
             // Check if we can use BloodConnect.showModal
-            if (typeof BloodConnect !== 'undefined' && BloodConnect.showModal) {
+            else if (typeof BloodConnect !== 'undefined' && BloodConnect.showModal) {
                 BloodConnect.showModal(
                     '❌ Login Failed',
                     errorMessage,

@@ -197,7 +197,30 @@ class EmergencyPopupSystem {
                 box-shadow: 0 20px 40px rgba(220, 38, 38, 0.3);
                 text-align: center;
                 border: 3px solid #dc2626;
+                position: relative;
             \">
+                <!-- Close X Button -->
+                <button onclick=\"window.emergencyPopup.closePopup()\" style=\"
+                    position: absolute;
+                    top: 10px;
+                    right: 15px;
+                    background: none;
+                    border: none;
+                    font-size: 24px;
+                    color: #6b7280;
+                    cursor: pointer;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    transition: all 0.3s;
+                    z-index: 1;
+                \" onmouseover=\"this.style.background='#f3f4f6'; this.style.color='#dc2626'\" onmouseout=\"this.style.background='none'; this.style.color='#6b7280'\">
+                    ×
+                </button>
+                
                 <div style=\"font-size: 3rem; margin-bottom: 15px;\">${urgencyIcon}</div>
                 
                 <h2 style=\"

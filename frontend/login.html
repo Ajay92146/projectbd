@@ -757,6 +757,21 @@
 
             <!-- Login Form -->
             <form class="login-form" id="loginForm">
+                <!-- Error Message Area -->
+                <div id="loginErrorMessage" class="login-message error" style="display: none;">
+                    <div class="message-content">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="loginErrorText"></span>
+                    </div>
+                </div>
+                
+                <!-- Success Message Area -->
+                <div id="loginSuccessMessage" class="login-message success" style="display: none;">
+                    <div class="message-content">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="loginSuccessText"></span>
+                    </div>
+                </div>
                 <!-- Email Address -->
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>
@@ -888,38 +903,65 @@
 
         // Login form will be handled by forms.js
 
-            // Event listeners will be handled by forms.js
-        });
-
         // Message display function
         function showMessage(message, type = 'info') {
-            // Remove existing messages
-            const existingMessage = document.querySelector('.login-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-
-            // Create message element
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `login-message ${type}`;
-            messageDiv.innerHTML = `
-                <div class="message-content">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
-                    <span>${message}</span>
-                </div>
-            `;
-
-            // Insert message after form
-            const form = document.getElementById('loginForm');
-            form.parentNode.insertBefore(messageDiv, form.nextSibling);
-
-            // Auto-remove success/info messages after 5 seconds
-            if (type !== 'error') {
+            // Use dedicated message areas if available
+            const errorDiv = document.getElementById('loginErrorMessage');
+            const successDiv = document.getElementById('loginSuccessMessage');
+            const errorText = document.getElementById('loginErrorText');
+            const successText = document.getElementById('loginSuccessText');
+            
+            // Hide all message areas first
+            if (errorDiv) errorDiv.style.display = 'none';
+            if (successDiv) successDiv.style.display = 'none';
+            
+            if (type === 'error' && errorDiv && errorText) {
+                errorText.textContent = message;
+                errorDiv.style.display = 'block';
+                
+                // Auto-hide error messages after 10 seconds
                 setTimeout(() => {
-                    if (messageDiv.parentNode) {
-                        messageDiv.remove();
-                    }
+                    if (errorDiv) errorDiv.style.display = 'none';
+                }, 10000);
+                
+            } else if (type === 'success' && successDiv && successText) {
+                successText.textContent = message;
+                successDiv.style.display = 'block';
+                
+                // Auto-hide success messages after 5 seconds
+                setTimeout(() => {
+                    if (successDiv) successDiv.style.display = 'none';
                 }, 5000);
+                
+            } else {
+                // Fallback: Remove existing messages and create new one
+                const existingMessage = document.querySelector('.login-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+
+                // Create message element
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `login-message ${type}`;
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                // Insert message after form
+                const form = document.getElementById('loginForm');
+                form.parentNode.insertBefore(messageDiv, form.nextSibling);
+
+                // Auto-remove success/info messages after 5 seconds
+                if (type !== 'error') {
+                    setTimeout(() => {
+                        if (messageDiv.parentNode) {
+                            messageDiv.remove();
+                        }
+                    }, 5000);
+                }
             }
         }
 
