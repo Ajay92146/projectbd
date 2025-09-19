@@ -520,10 +520,10 @@ function initializeProfileFunctionality() {
         logoutBtn.addEventListener('click', logout);
     }
 
-    // Settings form submission
+    // Settings form submission - using saveProfile function for consistency
     const settingsForm = document.getElementById('settingsForm');
     if (settingsForm) {
-        settingsForm.addEventListener('submit', saveSettings);
+        settingsForm.addEventListener('submit', saveProfile);
     }
 
     // Change password form submission
@@ -639,37 +639,7 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-async function saveSettings(event) {
-    event.preventDefault();
-    
-    const formData = {
-        name: document.getElementById('profileName').value,
-        email: document.getElementById('profileEmail').value,
-        phone: document.getElementById('profilePhone').value,
-        bloodType: document.getElementById('profileBloodType').value
-    };
-
-    try {
-        const response = await fetch('/api/profile', {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-        if (response.ok) {
-            alert('Settings saved successfully!');
-            loadProfileData();
-        } else {
-            alert('Failed to save settings');
-        }
-    } catch (error) {
-        console.error('Error saving settings:', error);
-        alert('Error saving settings');
-    }
-}
+// Removed duplicate saveSettings function - using saveProfile function instead for consistency
 
 async function changePassword(event) {
     event.preventDefault();
