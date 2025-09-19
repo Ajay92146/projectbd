@@ -2936,28 +2936,31 @@
             console.log('User data present:', !!userData);
 
             if (!token || !userData) {
-                // User is not logged in - show overlay and disable form
-                console.log('❌ User not authenticated - showing login overlay');
+                // User is not logged in - show overlay for form submission only
+                console.log('❌ User not authenticated - form viewable but submission locked');
                 if (loginOverlay) {
-                    loginOverlay.style.display = 'flex';
+                    loginOverlay.style.display = 'none'; // Don't show overlay by default
                 }
                 if (applicationContainer) {
-                    applicationContainer.classList.add('disabled');
+                    applicationContainer.classList.remove('disabled'); // Allow viewing
                 }
                 if (donorForm) {
-                    donorForm.style.pointerEvents = 'none';
-                    donorForm.style.opacity = '0.5';
+                    donorForm.style.pointerEvents = 'auto'; // Allow interaction
+                    donorForm.style.opacity = '1'; // Full visibility
                 }
                 
                 // Update auth indicator
                 if (authIndicator && authStatus) {
                     authIndicator.style.display = 'flex';
                     authIndicator.className = 'auth-indicator not-authenticated';
-                    authStatus.innerHTML = 'Please log in to apply for blood donation';
+                    authStatus.innerHTML = 'Please log in to submit your donation application';
                 }
+
+                // Add event listener to show login overlay only on form submission
+                addSubmissionAuthCheck();
             } else {
-                // User is logged in - hide overlay and enable form
-                console.log('✅ User authenticated - enabling donation form access');
+                // User is logged in - enable full form access
+                console.log('✅ User authenticated - enabling full donation form access');
                 if (loginOverlay) {
                     loginOverlay.style.display = 'none';
                 }
@@ -3029,6 +3032,45 @@
                 if (stateField && !stateField.value) {
                     stateField.value = user.state;
                 }
+            }
+        }
+
+        // Add authentication check only on form submission
+        function addSubmissionAuthCheck() {
+            const donorForm = document.getElementById('donorApplicationForm');
+            const loginOverlay = document.getElementById('loginRequiredOverlay');
+            
+            if (donorForm) {
+                // Remove any existing event listeners
+                donorForm.removeEventListener('submit', handleFormSubmission);
+                // Add new event listener
+                donorForm.addEventListener('submit', handleFormSubmission);
+            }
+            
+            function handleFormSubmission(event) {
+                const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+                const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+                
+                if (!token || !userData) {
+                    // Prevent form submission and show login overlay
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    console.log('🔒 Form submission blocked - authentication required');
+                    
+                    if (loginOverlay) {
+                        loginOverlay.style.display = 'flex';
+                    }
+                    
+                    // Scroll to top to make overlay visible
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    return false;
+                }
+                
+                // If authenticated, allow normal form submission
+                console.log('✅ Form submission allowed - user authenticated');
+                return true;
             }
         }
 
