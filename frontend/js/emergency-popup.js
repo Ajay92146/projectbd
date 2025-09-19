@@ -91,7 +91,65 @@ class EmergencyPopupSystem {
                 animation: emergencyAlert 1s infinite;
             }
             
-            /* Responsive Design for Emergency Popup */
+            /* Desktop and Large Screen Responsive Design */
+            @media (min-width: 1200px) {
+                .emergency-popup {
+                    max-width: 500px !important;
+                    padding: 25px !important;
+                }
+                
+                .emergency-popup h2 {
+                    font-size: 1.5rem !important;
+                }
+                
+                .emergency-popup .emergency-info {
+                    padding: 18px !important;
+                }
+                
+                .emergency-popup .emergency-buttons {
+                    gap: 12px !important;
+                }
+                
+                .emergency-popup .emergency-buttons button {
+                    padding: 12px 20px !important;
+                    font-size: 0.95rem !important;
+                }
+                
+                .emergency-popup .blood-info-item {
+                    padding: 6px 12px !important;
+                    font-size: 0.9rem !important;
+                }
+            }
+            
+            @media (min-width: 992px) and (max-width: 1199px) {
+                .emergency-popup {
+                    max-width: 450px !important;
+                    padding: 22px !important;
+                }
+                
+                .emergency-popup h2 {
+                    font-size: 1.4rem !important;
+                }
+                
+                .emergency-popup .emergency-buttons button {
+                    padding: 10px 18px !important;
+                    font-size: 0.9rem !important;
+                }
+            }
+            
+            @media (min-width: 769px) and (max-width: 991px) {
+                .emergency-popup {
+                    max-width: 420px !important;
+                    padding: 20px !important;
+                }
+                
+                .emergency-popup .emergency-buttons button {
+                    padding: 10px 16px !important;
+                    font-size: 0.88rem !important;
+                }
+            }
+            
+            /* Tablet and Mobile Responsive Design */
             @media (max-width: 768px) {
                 .emergency-popup {
                     max-width: 320px !important;
@@ -321,8 +379,8 @@ class EmergencyPopupSystem {
                 background: white;
                 padding: 20px;
                 border-radius: 12px;
-                max-width: 380px;
-                width: 85%;
+                max-width: 450px;
+                width: 90%;
                 max-height: 90vh;
                 overflow-y: auto;
                 box-shadow: 0 15px 35px rgba(220, 38, 38, 0.4);

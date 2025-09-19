@@ -18,7 +18,7 @@ Comprehensive plan to test the Emergency Blood Request Popup system on the Blood
 ### **Key Features Identified:**
 ✅ **Automatic Detection** - Checks every 2 minutes for emergency requests  
 ✅ **Smart Display** - Shows only new/unseen emergencies  
-✅ **Responsive Design** - Adapts: 380px (desktop) → 320px (tablet) → 300px (mobile)  
+✅ **Responsive Design** - Adapts: 500px (XL desktop) → 450px (large desktop) → 420px (medium desktop) → 320px (tablet) → 300px (mobile) → 280px (ultra-small)  
 ✅ **Auto-Close** - Closes automatically after 10 seconds  
 ✅ **Interactive Actions** - "I CAN HELP" and "SEE ALL" buttons  
 ✅ **Visual Effects** - Slide-in, pulse, and alert animations  
@@ -93,9 +93,12 @@ window.emergencyPopup.checkEmergencyRequests();
 **Objective:** Confirm popup adapts to different screen sizes
 
 **Breakpoints to Test:**
-- **Desktop (>768px):** 380px max-width, full features
+- **Extra Large Desktop (≥1200px):** 500px max-width, enhanced features
+- **Large Desktop (992px-1199px):** 450px max-width, optimized layout
+- **Medium Desktop (769px-991px):** 420px max-width, compact design
 - **Tablet (≤768px):** 320px width, stacked buttons  
 - **Mobile (≤480px):** 300px width, compact design
+- **Ultra-small (≤320px):** 280px width, minimal design
 
 ---
 
