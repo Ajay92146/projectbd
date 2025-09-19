@@ -1242,7 +1242,14 @@
         .auth-indicator.not-authenticated {
             background: rgba(239, 68, 68, 0.1);
             color: rgb(185, 28, 28);
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            font-weight: var(--font-weight-semibold);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .form-group.filled input,
@@ -2519,11 +2526,6 @@
 
             <div class="application-container">
                 <div class="application-header fade-in">
-                    <!-- Authentication Status Indicator -->
-                    <div id="authIndicator" class="auth-indicator not-authenticated" style="display: none;">
-                        <span id="authStatus">Authentication required to apply for donation</span>
-                    </div>
-                    
                     <h2>🩸 Apply to Donate Blood</h2>
                     <p>Join our life-saving community by applying to become a blood donor. Your application will be reviewed and you'll be contacted with next steps.</p>
                     <div class="application-stats">
@@ -2592,6 +2594,11 @@
                     </div>
 
                     <!-- Application Form -->
+                    <!-- Authentication Status Indicator -->
+                    <div id="authIndicator" class="auth-indicator not-authenticated" style="display: none; margin-bottom: var(--spacing-6);">
+                        <span id="authStatus">Authentication required to apply for donation</span>
+                    </div>
+                    
                     <form id="donorApplicationForm" class="application-form fade-in" data-delay="200">
                         <h3>Donor Application Form</h3>
 
@@ -2936,28 +2943,28 @@
             console.log('User data present:', !!userData);
 
             if (!token || !userData) {
-                // User is not logged in - show overlay for form submission only
-                console.log('❌ User not authenticated - form viewable but submission locked');
+                // User is not logged in - disable form and show message
+                console.log('❌ User not authenticated - form disabled');
                 if (loginOverlay) {
-                    loginOverlay.style.display = 'none'; // Don't show overlay by default
+                    loginOverlay.style.display = 'none'; // Don't show overlay initially
                 }
                 if (applicationContainer) {
-                    applicationContainer.classList.remove('disabled'); // Allow viewing
+                    applicationContainer.classList.remove('disabled');
                 }
                 if (donorForm) {
-                    donorForm.style.pointerEvents = 'auto'; // Allow interaction
-                    donorForm.style.opacity = '1'; // Full visibility
+                    donorForm.style.pointerEvents = 'none'; // Disable interaction
+                    donorForm.style.opacity = '0.6'; // Reduced visibility
                 }
                 
-                // Update auth indicator
+                // Show auth indicator prominently
                 if (authIndicator && authStatus) {
                     authIndicator.style.display = 'flex';
                     authIndicator.className = 'auth-indicator not-authenticated';
-                    authStatus.innerHTML = 'Please log in to submit your donation application';
+                    authStatus.innerHTML = '🔒 Please log in to fill and submit your donation application';
                 }
 
-                // Add event listener to show login overlay only on form submission
-                addSubmissionAuthCheck();
+                // Add click handler to show login overlay when trying to interact with form
+                addFormClickHandler();
             } else {
                 // User is logged in - enable full form access
                 console.log('✅ User authenticated - enabling full donation form access');
@@ -2978,7 +2985,7 @@
                     if (authIndicator && authStatus) {
                         authIndicator.style.display = 'flex';
                         authIndicator.className = 'auth-indicator authenticated';
-                        authStatus.innerHTML = `Logged in as ${user.firstName || user.email || 'User'}`;
+                        authStatus.innerHTML = `✅ Logged in as ${user.firstName || user.email || 'User'} - Ready to apply!`;
                     }
                     
                     prefillDonorUserData(user);
@@ -3035,28 +3042,30 @@
             }
         }
 
-        // Add authentication check only on form submission
-        function addSubmissionAuthCheck() {
+        // Add click handler to show login overlay when trying to interact with form
+        function addFormClickHandler() {
             const donorForm = document.getElementById('donorApplicationForm');
             const loginOverlay = document.getElementById('loginRequiredOverlay');
             
             if (donorForm) {
                 // Remove any existing event listeners
-                donorForm.removeEventListener('submit', handleFormSubmission);
-                // Add new event listener
-                donorForm.addEventListener('submit', handleFormSubmission);
+                donorForm.removeEventListener('click', handleFormClick);
+                donorForm.removeEventListener('focus', handleFormFocus, true);
+                
+                // Add event listeners for clicks and focus events
+                donorForm.addEventListener('click', handleFormClick);
+                donorForm.addEventListener('focus', handleFormFocus, true);
             }
             
-            function handleFormSubmission(event) {
+            function handleFormClick(event) {
                 const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
                 const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
                 
                 if (!token || !userData) {
-                    // Prevent form submission and show login overlay
                     event.preventDefault();
                     event.stopPropagation();
                     
-                    console.log('🔒 Form submission blocked - authentication required');
+                    console.log('🔒 Form interaction blocked - authentication required');
                     
                     if (loginOverlay) {
                         loginOverlay.style.display = 'flex';
@@ -3064,13 +3073,27 @@
                     
                     // Scroll to top to make overlay visible
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                    
-                    return false;
                 }
+            }
+            
+            function handleFormFocus(event) {
+                const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+                const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
                 
-                // If authenticated, allow normal form submission
-                console.log('✅ Form submission allowed - user authenticated');
-                return true;
+                if (!token || !userData) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.target.blur(); // Remove focus
+                    
+                    console.log('🔒 Form focus blocked - authentication required');
+                    
+                    if (loginOverlay) {
+                        loginOverlay.style.display = 'flex';
+                    }
+                    
+                    // Scroll to top to make overlay visible
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             }
         }
 
