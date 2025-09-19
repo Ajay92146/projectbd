@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Popup Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .test-button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+        }
+        .status {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .feature-list {
+            background: #f0fdf4;
+            border: 1px solid #16a34a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .feature-list h3 {
+            color: #16a34a;
+            margin-top: 0;
+        }
+        .feature-list li {
+            margin: 8px 0;
+        }
+        .responsive-info {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🚨 Emergency Popup System Test</h1>
+        
+        <div class="status">
+            <h3>📊 System Status</h3>
+            <p><strong>Status:</strong> <span id="system-status">Loading...</span></p>
+            <p><strong>Last Check:</strong> <span id="last-check">Never</span></p>
+            <p><strong>Popup Visible:</strong> <span id="popup-visible">No</span></p>
+        </div>
+        
+        <div class="feature-list">
+            <h3>✅ Implemented Features</h3>
+            <ul>
+                <li><strong>Responsive Design:</strong> Popup adapts to screen size (380px → 320px → 300px)</li>
+                <li><strong>Mobile-First:</strong> Optimized for mobile devices with touch-friendly buttons</li>
+                <li><strong>Close Button (×):</strong> Enhanced with hover effects and proper positioning</li>
+                <li><strong>Action Buttons:</strong> "I CAN HELP" and "SEE ALL" with responsive layout</li>
+                <li><strong>Auto-Close:</strong> Popup closes automatically after 10 seconds</li>
+                <li><strong>Background Blur:</strong> Professional backdrop blur effect</li>
+                <li><strong>Animations:</strong> Smooth slide-in and pulse animations</li>
+                <li><strong>Sound Alert:</strong> Audio notification on emergency popup</li>
+            </ul>
+        </div>
+        
+        <div class="responsive-info">
+            <h3>📱 Responsive Breakpoints</h3>
+            <ul>
+                <li><strong>Desktop:</strong> 380px max-width with full features</li>
+                <li><strong>Tablet (≤768px):</strong> 320px width, stacked buttons, reduced padding</li>
+                <li><strong>Mobile (≤480px):</strong> 300px width, compact design, smaller fonts</li>
+            </ul>
+        </div>
+        
+        <h2>🧪 Test Functions</h2>
+        <p>Click the buttons below to test different aspects of the emergency popup:</p>
+        
+        <button class="test-button" onclick="testEmergencyPopup()">
+            🚨 Test Emergency Popup
+        </button>
+        
+        <button class="test-button" onclick="testCloseButton()">
+            ❌ Test Close Button
+        </button>
+        
+        <button class="test-button" onclick="testResponsiveDesign()">
+            📱 Test Responsive Design
+        </button>
+        
+        <button class="test-button" onclick="checkSystemStatus()">
+            📊 Check System Status
+        </button>
+        
+        <button class="test-button" onclick="manualCheck()">
+            🔍 Manual Emergency Check
+        </button>
+        
+        <div id="test-results" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Include the emergency popup system -->
+    <script src="js/emergency-popup.js"></script>
+    
+    <script>
+        // Test functions
+        function testEmergencyPopup() {
+            if (window.emergencyPopup) {
+                window.emergencyPopup.testPopup();
+                logResult('✅ Emergency popup test triggered with sample data');
+            } else {
+                logResult('❌ Emergency popup system not loaded');
+            }
+        }
+        
+        function testCloseButton() {
+            if (window.emergencyPopup) {
+                // First show the popup, then test close
+                window.emergencyPopup.testPopup();
+                setTimeout(() => {
+                    logResult('ℹ️ Popup shown. Click the × button or CLOSE button to test closing functionality.');
+                }, 500);
+            } else {
+                logResult('❌ Emergency popup system not loaded');
+            }
+        }
+        
+        function testResponsiveDesign() {
+            if (window.emergencyPopup) {
+                window.emergencyPopup.testPopup();
+                logResult('📱 Popup shown with responsive design. Resize your browser window to test different breakpoints: 768px (tablet) and 480px (mobile)');
+            } else {
+                logResult('❌ Emergency popup system not loaded');
+            }
+        }
+        
+        function checkSystemStatus() {
+            if (window.emergencyPopup) {
+                const status = window.emergencyPopup.getStatus();
+                document.getElementById('system-status').textContent = status.isInitialized ? 'Initialized ✅' : 'Not Initialized ❌';
+                document.getElementById('last-check').textContent = status.lastEmergencyCheck ? status.lastEmergencyCheck.toLocaleString() : 'Never';
+                document.getElementById('popup-visible').textContent = status.isPopupVisible ? 'Yes 👁️' : 'No 👀';
+                
+                logResult(`📊 System Status:
+                • Initialized: ${status.isInitialized ? '✅' : '❌'}
+                • Popup Visible: ${status.isPopupVisible ? '✅' : '❌'}
+                • Check Interval: ${status.checkInterval / 1000 / 60} minutes
+                • Shown Emergencies: ${status.shownEmergenciesCount}
+                • Last Check: ${status.lastEmergencyCheck ? status.lastEmergencyCheck.toLocaleString() : 'Never'}`);
+            } else {
+                logResult('❌ Emergency popup system not loaded');
+            }
+        }
+        
+        function manualCheck() {
+            if (window.emergencyPopup) {
+                window.emergencyPopup.manualCheck();
+                logResult('🔍 Manual emergency check triggered. Since this is a test environment, no real API requests will be made.');
+            } else {
+                logResult('❌ Emergency popup system not loaded');
+            }
+        }
+        
+        function logResult(message) {
+            const results = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML = `<div style="
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                padding: 12px;
+                border-radius: 6px;
+                margin: 10px 0;
+                font-family: monospace;
+                font-size: 14px;
+            ">
+                <strong>[${timestamp}]</strong> ${message}
+            </div>` + results.innerHTML;
+        }
+        
+        // Initialize status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                checkSystemStatus();
+                logResult('🎉 Emergency Popup Test Page loaded successfully!');
+            }, 1000);
+        });
+        
+        // Listen for popup events
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('close-btn') || e.target.textContent === 'CLOSE') {
+                logResult('✅ Close button clicked successfully!');
+            }
+        });
+        
+        // Test responsive design by monitoring window resize
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const width = window.innerWidth;
+                let breakpoint = 'Desktop';
+                if (width <= 480) breakpoint = 'Mobile (≤480px)';
+                else if (width <= 768) breakpoint = 'Tablet (≤768px)';
+                
+                logResult(`📐 Window resized to ${width}px - Breakpoint: ${breakpoint}`);
+            }, 250);
+        });
+    </script>
+</body>
+</html>

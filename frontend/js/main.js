@@ -418,7 +418,7 @@ function setupFormValidation() {
  */
 function validateField(field) {
     const value = field.value.trim();
-    const fieldName = field.name;
+    const fieldName = field.name || field.id; // Fix: Fallback to id if name is not available
     const errorElement = document.getElementById(`${fieldName}-error`);
     
     let isValid = true;
@@ -459,12 +459,22 @@ function validateField(field) {
     
     // Password validation
     else if (field.type === 'password' && value) {
-        if (value.length < 6) {
+        const minLength = 8; // Increased minimum length
+        if (value.length < minLength) {
             isValid = false;
-            errorMessage = 'Password must be at least 6 characters long';
-        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
+            errorMessage = `Password must be at least ${minLength} characters long`;
+        } else if (!/(?=.*[a-z])/.test(value)) {
             isValid = false;
-            errorMessage = 'Password must contain uppercase, lowercase, and numbers';
+            errorMessage = 'Password must contain at least one lowercase letter';
+        } else if (!/(?=.*[A-Z])/.test(value)) {
+            isValid = false;
+            errorMessage = 'Password must contain at least one uppercase letter';
+        } else if (!/(?=.*\d)/.test(value)) {
+            isValid = false;
+            errorMessage = 'Password must contain at least one number';
+        } else if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(value)) {
+            isValid = false;
+            errorMessage = 'Password must contain at least one special character';
         }
     }
     
@@ -495,11 +505,13 @@ function validateField(field) {
  * @param {string} message - Error message
  */
 function showFieldError(field, message) {
-    const errorElement = document.getElementById(`${field.name}-error`);
+    const fieldName = field.name || field.id;
+    const errorElement = document.getElementById(`${fieldName}-error`);
     if (errorElement) {
         errorElement.textContent = message;
         errorElement.style.display = 'block';
         field.classList.add('error');
+        field.style.borderColor = '#e53e3e'; // Add visual feedback
     }
 }
 
@@ -508,10 +520,12 @@ function showFieldError(field, message) {
  * @param {HTMLElement} field - Form field
  */
 function clearFieldError(field) {
-    const errorElement = document.getElementById(`${field.name}-error`);
+    const fieldName = field.name || field.id;
+    const errorElement = document.getElementById(`${fieldName}-error`);
     if (errorElement) {
         errorElement.style.display = 'none';
         field.classList.remove('error');
+        field.style.borderColor = ''; // Reset border color
     }
 }
 

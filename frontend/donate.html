@@ -1150,6 +1150,93 @@
             box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
         }
 
+        /* Login Required Overlay Styles */
+        .login-required-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: var(--radius-2xl);
+        }
+
+        .overlay-content {
+            text-align: center;
+            padding: var(--spacing-12);
+            max-width: 400px;
+        }
+
+        .overlay-icon {
+            font-size: var(--font-size-4xl);
+            color: var(--primary-red);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .overlay-content h3 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-4);
+            font-size: var(--font-size-2xl);
+        }
+
+        .overlay-content p {
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-8);
+            line-height: 1.6;
+        }
+
+        .overlay-actions {
+            display: flex;
+            gap: var(--spacing-4);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .overlay-actions .btn {
+            min-width: 120px;
+        }
+
+        /* Form container positioning for overlay */
+        .application-container {
+            position: relative;
+        }
+
+        /* Disable form when overlay is shown */
+        .application-container.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Form authentication indicator */
+        .auth-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-3) var(--spacing-4);
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-6);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .auth-indicator.authenticated {
+            background: rgba(34, 197, 94, 0.1);
+            color: rgb(21, 128, 61);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .auth-indicator.not-authenticated {
+            background: rgba(239, 68, 68, 0.1);
+            color: rgb(185, 28, 28);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
         .form-group.filled input,
         .form-group.filled select {
             background: var(--gray-50);
@@ -2400,8 +2487,35 @@
     <!-- Apply to Donate Blood Form -->
     <section class="form-section" id="registration-form">
         <div class="container">
+            <!-- Login Required Overlay -->
+            <div id="loginRequiredOverlay" class="login-required-overlay" style="display: none;">
+                <div class="overlay-content">
+                    <div class="overlay-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Login Required</h3>
+                    <p>You need to be logged in to apply for blood donation. This helps us verify your identity and maintain your donor profile.</p>
+                    <div class="overlay-actions">
+                        <a href="login.html" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login Now
+                        </a>
+                        <a href="index.html#registration-section" class="btn btn-secondary">
+                            <i class="fas fa-user-plus"></i>
+                            Register
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <div class="application-container">
                 <div class="application-header fade-in">
+                    <!-- Authentication Status Indicator -->
+                    <div id="authIndicator" class="auth-indicator not-authenticated" style="display: none;">
+                        <i class="fas fa-lock"></i>
+                        <span id="authStatus">Authentication required to apply for donation</span>
+                    </div>
+                    
                     <h2>🩸 Apply to Donate Blood</h2>
                     <p>Join our life-saving community by applying to become a blood donor. Your application will be reviewed and you'll be contacted with next steps.</p>
                     <div class="application-stats">
@@ -2793,6 +2907,151 @@
 
     <!-- Page JavaScript (moved to external file to satisfy CSP) -->
     <script src="js/donate-page.js" defer></script>
+
+    <!-- Authentication Protection Script -->
+    <script>
+        // Authentication check for donation form access
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Donate page loaded - checking authentication...');
+            checkAuthenticationForDonationForm();
+        });
+
+        function checkAuthenticationForDonationForm() {
+            const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+            const loginOverlay = document.getElementById('loginRequiredOverlay');
+            const applicationContainer = document.querySelector('.application-container');
+            const donorForm = document.getElementById('donorApplicationForm');
+            const authIndicator = document.getElementById('authIndicator');
+            const authStatus = document.getElementById('authStatus');
+
+            console.log('Checking authentication for donation form access...');
+            console.log('Token present:', !!token);
+            console.log('User data present:', !!userData);
+
+            if (!token || !userData) {
+                // User is not logged in - show overlay and disable form
+                console.log('❌ User not authenticated - showing login overlay');
+                if (loginOverlay) {
+                    loginOverlay.style.display = 'flex';
+                }
+                if (applicationContainer) {
+                    applicationContainer.classList.add('disabled');
+                }
+                if (donorForm) {
+                    donorForm.style.pointerEvents = 'none';
+                    donorForm.style.opacity = '0.5';
+                }
+                
+                // Update auth indicator
+                if (authIndicator && authStatus) {
+                    authIndicator.style.display = 'flex';
+                    authIndicator.className = 'auth-indicator not-authenticated';
+                    authStatus.innerHTML = '<i class="fas fa-lock"></i> Please log in to apply for blood donation';
+                }
+            } else {
+                // User is logged in - hide overlay and enable form
+                console.log('✅ User authenticated - enabling donation form access');
+                if (loginOverlay) {
+                    loginOverlay.style.display = 'none';
+                }
+                if (applicationContainer) {
+                    applicationContainer.classList.remove('disabled');
+                }
+                if (donorForm) {
+                    donorForm.style.pointerEvents = 'auto';
+                    donorForm.style.opacity = '1';
+                }
+
+                // Update auth indicator and pre-fill user information
+                try {
+                    const user = JSON.parse(userData);
+                    if (authIndicator && authStatus) {
+                        authIndicator.style.display = 'flex';
+                        authIndicator.className = 'auth-indicator authenticated';
+                        authStatus.innerHTML = `<i class="fas fa-check-circle"></i> Logged in as ${user.firstName || user.email || 'User'}`;
+                    }
+                    
+                    prefillDonorUserData(user);
+                } catch (error) {
+                    console.warn('Error parsing user data:', error);
+                }
+            }
+        }
+
+        // Pre-fill user data in the donation form
+        function prefillDonorUserData(user) {
+            console.log('Pre-filling donor user data:', user);
+            
+            if (user.firstName) {
+                const firstNameField = document.getElementById('firstName');
+                if (firstNameField && !firstNameField.value) {
+                    firstNameField.value = user.firstName;
+                }
+            }
+            
+            if (user.lastName) {
+                const lastNameField = document.getElementById('lastName');
+                if (lastNameField && !lastNameField.value) {
+                    lastNameField.value = user.lastName;
+                }
+            }
+            
+            if (user.email) {
+                const emailField = document.getElementById('email');
+                if (emailField && !emailField.value) {
+                    emailField.value = user.email;
+                }
+            }
+            
+            if (user.phoneNumber) {
+                const phoneField = document.getElementById('phoneNumber');
+                if (phoneField && !phoneField.value) {
+                    phoneField.value = user.phoneNumber;
+                }
+            }
+            
+            if (user.city) {
+                const cityField = document.getElementById('city');
+                if (cityField && !cityField.value) {
+                    cityField.value = user.city;
+                }
+            }
+            
+            if (user.state) {
+                const stateField = document.getElementById('state');
+                if (stateField && !stateField.value) {
+                    stateField.value = user.state;
+                }
+            }
+        }
+
+        // Re-check authentication when storage changes
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'authToken' || e.key === 'userData') {
+                console.log('Auth state changed - rechecking donation form access');
+                checkAuthenticationForDonationForm();
+            }
+        });
+
+        // Check when page becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkAuthenticationForDonationForm();
+            }
+        });
+
+        // Periodic authentication check
+        setInterval(function() {
+            const currentToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            const loginOverlay = document.getElementById('loginRequiredOverlay');
+            
+            if (!currentToken && loginOverlay && loginOverlay.style.display === 'none') {
+                console.log('🔄 Token expired - showing login overlay');
+                checkAuthenticationForDonationForm();
+            }
+        }, 30000); // Check every 30 seconds
+    </script>
 
     <!-- Fallback JavaScript Files -->
     <script src="js/main.js"></script>

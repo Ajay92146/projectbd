@@ -181,16 +181,30 @@ function initializeAdminLogin() {
             const email = document.getElementById('adminEmail')?.value || '';
             const password = document.getElementById('adminPassword')?.value || '';
             
-            if (email && password) {
-                await processAdminLogin(email, password);
-            } else {
+            // Basic validation
+            if (!email || !password) {
                 debugLog('❌ Email or password is empty');
                 const errorMessage = document.getElementById('errorMessage');
                 if (errorMessage) {
                     errorMessage.textContent = 'Please enter both email and password.';
                     errorMessage.style.display = 'block';
                 }
+                return;
             }
+            
+            // Email format validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                debugLog('❌ Invalid email format');
+                const errorMessage = document.getElementById('errorMessage');
+                if (errorMessage) {
+                    errorMessage.textContent = 'Please enter a valid email address.';
+                    errorMessage.style.display = 'block';
+                }
+                return;
+            }
+            
+            await processAdminLogin(email, password);
         });
         
         debugLog('✅ Form submission handler attached');

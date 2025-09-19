@@ -530,6 +530,91 @@
             box-shadow: var(--shadow-2xl);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        .login-required-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: var(--radius-2xl);
+        }
+
+        .overlay-content {
+            text-align: center;
+            padding: var(--spacing-12);
+            max-width: 400px;
+        }
+
+        .overlay-icon {
+            font-size: var(--font-size-4xl);
+            color: var(--primary-red);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .overlay-content h3 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-4);
+            font-size: var(--font-size-2xl);
+        }
+
+        .overlay-content p {
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-8);
+            line-height: 1.6;
+        }
+
+        .overlay-actions {
+            display: flex;
+            gap: var(--spacing-4);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .overlay-actions .btn {
+            min-width: 120px;
+        }
+
+        /* Form container positioning for overlay */
+        .form-container {
+            position: relative;
+        }
+
+        /* Disable form when overlay is shown */
+        .form-container.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        /* Form authentication indicator */
+        .auth-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-3) var(--spacing-4);
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-6);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .auth-indicator.authenticated {
+            background: rgba(34, 197, 94, 0.1);
+            color: rgb(21, 128, 61);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .auth-indicator.not-authenticated {
+            background: rgba(239, 68, 68, 0.1);
+            color: rgb(185, 28, 28);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
         .form-title {
             text-align: center;
             margin-bottom: var(--spacing-8);
@@ -1236,8 +1321,35 @@
     <!-- Blood Request Form Section -->
     <section class="form-section">
         <div class="container">
+            <!-- Login Required Overlay -->
+            <div id="loginRequiredOverlay" class="login-required-overlay" style="display: none;">
+                <div class="overlay-content">
+                    <div class="overlay-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Login Required</h3>
+                    <p>You need to be logged in to submit a blood request. This helps us verify your identity and contact you regarding the request.</p>
+                    <div class="overlay-actions">
+                        <a href="login.html" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login Now
+                        </a>
+                        <a href="index.html#registration-section" class="btn btn-secondary">
+                            <i class="fas fa-user-plus"></i>
+                            Register
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-container">
                 <div class="form-header fade-in">
+                    <!-- Authentication Status Indicator -->
+                    <div id="authIndicator" class="auth-indicator not-authenticated" style="display: none;">
+                        <i class="fas fa-lock"></i>
+                        <span id="authStatus">Authentication required to submit forms</span>
+                    </div>
+                    
                     <h2>Submit Blood Request</h2>
                     <p>Fill out this form to submit an urgent blood request</p>
                 </div>
@@ -1941,10 +2053,118 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Auth state manager will automatically handle navigation updates
             console.log('Request page loaded - auth state manager active');
+            
+            // Check authentication status for form access
+            checkAuthenticationForForm();
+        });
+
+        // Authentication check for form access
+        function checkAuthenticationForForm() {
+            const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+            const loginOverlay = document.getElementById('loginRequiredOverlay');
+            const formContainer = document.querySelector('.form-container');
+            const requestForm = document.getElementById('requestForm');
+            const authIndicator = document.getElementById('authIndicator');
+            const authStatus = document.getElementById('authStatus');
+
+            console.log('Checking authentication for form access...');
+            console.log('Token present:', !!token);
+            console.log('User data present:', !!userData);
+
+            if (!token || !userData) {
+                // User is not logged in - show overlay and disable form
+                console.log('❌ User not authenticated - showing login overlay');
+                loginOverlay.style.display = 'flex';
+                formContainer.classList.add('disabled');
+                
+                if (requestForm) {
+                    requestForm.style.pointerEvents = 'none';
+                    requestForm.style.opacity = '0.5';
+                }
+                
+                // Update auth indicator
+                if (authIndicator && authStatus) {
+                    authIndicator.style.display = 'flex';
+                    authIndicator.className = 'auth-indicator not-authenticated';
+                    authStatus.innerHTML = '<i class="fas fa-lock"></i> Please log in to submit blood requests';
+                }
+            } else {
+                // User is logged in - hide overlay and enable form
+                console.log('✅ User authenticated - enabling form access');
+                loginOverlay.style.display = 'none';
+                formContainer.classList.remove('disabled');
+                
+                if (requestForm) {
+                    requestForm.style.pointerEvents = 'auto';
+                    requestForm.style.opacity = '1';
+                }
+
+                // Update auth indicator
+                try {
+                    const user = JSON.parse(userData);
+                    if (authIndicator && authStatus) {
+                        authIndicator.style.display = 'flex';
+                        authIndicator.className = 'auth-indicator authenticated';
+                        authStatus.innerHTML = `<i class="fas fa-check-circle"></i> Logged in as ${user.firstName || user.email || 'User'}`;
+                    }
+                    
+                    // Pre-fill user information if available
+                    prefillUserData(user);
+                } catch (error) {
+                    console.warn('Error parsing user data:', error);
+                }
+            }
+        }
+
+        // Pre-fill user data in the form
+        function prefillUserData(user) {
+            console.log('Pre-filling user data:', user);
+            
+            if (user.phoneNumber) {
+                const contactNumberField = document.getElementById('contactNumber');
+                if (contactNumberField && !contactNumberField.value) {
+                    contactNumberField.value = user.phoneNumber;
+                }
+            }
+            
+            if (user.firstName && user.lastName) {
+                const contactPersonField = document.getElementById('contactPersonName');
+                if (contactPersonField && !contactPersonField.value) {
+                    contactPersonField.value = `${user.firstName} ${user.lastName}`;
+                }
+            }
+        }
+
+        // Re-check authentication when storage changes (e.g., user logs in/out)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'authToken' || e.key === 'userData') {
+                console.log('Auth state changed - rechecking form access');
+                checkAuthenticationForForm();
+            }
+        });
+
+        // Also check when page becomes visible (in case user logged in on another tab)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkAuthenticationForForm();
+            }
         });
     </script>
 
-    <!-- Include JavaScript Files -->
+    <!-- Include enhanced authentication check -->
+    <script>
+        // Additional authentication monitoring for real-time updates
+        setInterval(function() {
+            const currentToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            const loginOverlay = document.getElementById('loginRequiredOverlay');
+            
+            if (!currentToken && loginOverlay && loginOverlay.style.display === 'none') {
+                console.log('🔄 Token expired - showing login overlay');
+                checkAuthenticationForForm();
+            }
+        }, 30000); // Check every 30 seconds
+    </script>
     <script src="js/api-config-loader.js"></script>
     <script src="js/enhanced-donor-search.js"></script>
     <script src="js/external-api-service.js"></script>

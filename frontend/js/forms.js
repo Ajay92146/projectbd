@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             showFieldError: function(field, message) {
                 console.error('Field validation error:', field.name || field.id, message);
-                field.style.borderColor = 'red';
+                field.style.borderColor = '#e53e3e';
+                field.classList.add('error');
                 
                 // Create or update error message element
                 let errorDiv = document.getElementById((field.name || field.id) + '-error');
@@ -33,13 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorDiv = document.createElement('div');
                     errorDiv.id = (field.name || field.id) + '-error';
                     errorDiv.className = 'field-error';
-                    errorDiv.style.cssText = 'color: red; font-size: 12px; margin-top: 4px; display: block;';
+                    errorDiv.style.cssText = 'color: #e53e3e; font-size: 12px; margin-top: 4px; display: block; font-weight: 500;';
                     field.parentNode.appendChild(errorDiv);
                 }
                 errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
             },
             clearFieldError: function(field) {
                 field.style.borderColor = '';
+                field.classList.remove('error');
                 const errorDiv = document.getElementById((field.name || field.id) + '-error');
                 if (errorDiv) {
                     errorDiv.textContent = '';
@@ -61,10 +64,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     isValid = false;
                     errorMessage = 'Please enter a valid email address';
                 }
-                // Password validation (minimum length)
-                else if (field.type === 'password' && value && value.length < 1) {
+                // Password validation (enhanced)
+                else if (field.type === 'password' && value) {
+                    const minLength = 8;
+                    if (value.length < minLength) {
+                        isValid = false;
+                        errorMessage = `Password must be at least ${minLength} characters long`;
+                    } else if (!/(?=.*[a-z])/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Password must contain at least one lowercase letter';
+                    } else if (!/(?=.*[A-Z])/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Password must contain at least one uppercase letter';
+                    } else if (!/(?=.*\d)/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Password must contain at least one number';
+                    }
+                }
+                // Phone validation
+                else if (field.type === 'tel' && value && !/^[6-9]\d{9}$/.test(value)) {
                     isValid = false;
-                    errorMessage = 'Password is required';
+                    errorMessage = 'Please enter a valid 10-digit mobile number';
                 }
                 
                 if (!isValid) {
@@ -83,6 +103,51 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
+ * Check authentication for form access
+ * @param {string} formType - Type of form ('donation' or 'request')
+ * @returns {Object} Authentication status and message
+ */
+function checkFormAuthentication(formType) {
+    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+    
+    console.log('Checking form authentication:', {
+        formType,
+        hasToken: !!token,
+        hasUserData: !!userData
+    });
+    
+    if (!token || !userData) {
+        const formTypeText = formType === 'donation' ? 'blood donation application' : 'blood request';
+        return {
+            isAuthenticated: false,
+            message: `You must be logged in to submit a ${formTypeText}. Please log in to your account first.
+
+Why do we require login?
+• To verify your identity
+• To contact you about your ${formType}
+• To maintain a secure database
+• To track your ${formType} history`
+        };
+    }
+    
+    try {
+        const user = JSON.parse(userData);
+        return {
+            isAuthenticated: true,
+            user: user,
+            token: token
+        };
+    } catch (error) {
+        console.error('Error parsing user data:', error);
+        return {
+            isAuthenticated: false,
+            message: 'Invalid user session. Please log in again.'
+        };
+    }
+}
+
+/**
  * Setup all form handlers
  */
 function setupFormHandlers() {
@@ -98,11 +163,22 @@ function setupFormHandlers() {
  * Setup donor registration form
  */
 function setupDonorForm() {
-    const donorForm = document.getElementById('donorForm');
+    const donorForm = document.getElementById('donorForm') || document.getElementById('donorApplicationForm');
     if (!donorForm) return;
     
     donorForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        // Check authentication before processing form
+        const authCheck = checkFormAuthentication('donation');
+        if (!authCheck.isAuthenticated) {
+            BloodConnect.showModal(
+                '🔒 Authentication Required',
+                authCheck.message,
+                'error'
+            );
+            return;
+        }
         
         if (!validateDonorForm()) {
             return;
@@ -279,6 +355,17 @@ function setupRequestForm() {
     
     requestForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        // Check authentication before processing form
+        const authCheck = checkFormAuthentication('request');
+        if (!authCheck.isAuthenticated) {
+            BloodConnect.showModal(
+                '🔒 Authentication Required',
+                authCheck.message,
+                'error'
+            );
+            return;
+        }
         
         if (!validateRequestForm()) {
             return;
