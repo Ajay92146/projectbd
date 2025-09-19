@@ -264,31 +264,29 @@ class UrgentRequestsManager {
                     <h4 class="patient-name">${request.patientName}</h4>
                     <div class="request-details">
                         <div class="detail-row">
-                            <i class="fas fa-vial"></i>
                             <span>${request.requiredUnits} unit${request.requiredUnits > 1 ? 's' : ''} needed</span>
                         </div>
                         <div class="detail-row">
-                            <i class="fas fa-hospital"></i>
                             <span>${request.hospitalName}</span>
                         </div>
                         <div class="detail-row">
-                            <i class="fas fa-map-marker-alt"></i>
                             <span>${request.location}</span>
                         </div>
                         <div class="detail-row">
-                            <i class="fas fa-clock"></i>
                             <span class="time-remaining ${timeInfo.class}">${timeInfo.text}</span>
                         </div>
+                        ${request.contactNumber ? `
+                        <div class="detail-row">
+                            <a href="tel:${request.contactNumber}" class="contact-link">${request.contactNumber}</a>
+                        </div>` : ''}
                     </div>
                 </div>
                 <div class="card-footer">
                     <div class="card-actions">
                         <button class="btn btn-primary" onclick="urgentRequestsManager.helpWithRequest('${request._id}', '${request.patientName}', '${request.bloodGroup}')">
-                            <i class="fas fa-hand-holding-heart"></i>
                             I Can Help
                         </button>
                         <button class="btn btn-secondary" onclick="urgentRequestsManager.shareRequest('${request._id}')">
-                            <i class="fas fa-share"></i>
                             Share
                         </button>
                     </div>
@@ -309,29 +307,27 @@ class UrgentRequestsManager {
                     <h4 class="patient-name">${request.patientName}</h4>
                     <div class="request-details">
                         <div class="detail-row">
-                            <i class="fas fa-vial"></i>
                             <span>${request.requiredUnits} unit${request.requiredUnits > 1 ? 's' : ''} needed</span>
                         </div>
                         <div class="detail-row">
-                            <i class="fas fa-hospital"></i>
                             <span>${request.hospitalName}</span>
                         </div>
                         <div class="detail-row">
-                            <i class="fas fa-map-marker-alt"></i>
                             <span>${request.location}</span>
                         </div>
                         <div class="detail-row">
-                            <i class="fas fa-clock"></i>
                             <span class="time-remaining ${timeInfo.class}">${timeInfo.text}</span>
                         </div>
+                        ${request.contactNumber ? `
+                        <div class="detail-row">
+                            <a href="tel:${request.contactNumber}" class="contact-link">${request.contactNumber}</a>
+                        </div>` : ''}
                         ${request.contactPersonName ? `
                         <div class="detail-row">
-                            <i class="fas fa-user"></i>
                             <span>${request.contactPersonName} (${request.relationship})</span>
                         </div>` : ''}
                         ${request.additionalNotes ? `
                         <div class="detail-row">
-                            <i class="fas fa-info-circle"></i>
                             <span>${request.additionalNotes}</span>
                         </div>` : ''}
                     </div>
@@ -339,11 +335,9 @@ class UrgentRequestsManager {
                 <div class="card-footer">
                     <div class="card-actions">
                         <button class="btn btn-primary" onclick="urgentRequestsManager.helpWithRequest('${request._id}', '${request.patientName}', '${request.bloodGroup}')">
-                            <i class="fas fa-hand-holding-heart"></i>
                             I Can Help
                         </button>
                         <button class="btn btn-secondary" onclick="urgentRequestsManager.shareRequest('${request._id}')">
-                            <i class="fas fa-share"></i>
                             Share
                         </button>
                     </div>
@@ -426,7 +420,7 @@ class UrgentRequestsManager {
         html += `
             <button class="pagination-btn" ${this.currentPage <= 1 ? 'disabled' : ''} 
                     onclick="urgentRequestsManager.changePage(${this.currentPage - 1})">
-                <i class="fas fa-chevron-left"></i>
+                Previous
             </button>
         `;
         
@@ -452,7 +446,7 @@ class UrgentRequestsManager {
         html += `
             <button class="pagination-btn" ${this.currentPage >= this.totalPages ? 'disabled' : ''} 
                     onclick="urgentRequestsManager.changePage(${this.currentPage + 1})">
-                <i class="fas fa-chevron-right"></i>
+                Next
             </button>
         `;
         

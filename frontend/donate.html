@@ -1157,31 +1157,39 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 1000;
             border-radius: var(--radius-2xl);
         }
 
         .overlay-content {
             text-align: center;
             padding: var(--spacing-12);
-            max-width: 400px;
+            max-width: 500px;
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid var(--gray-200);
         }
 
         .overlay-icon {
-            font-size: var(--font-size-4xl);
+            font-size: 4rem;
             color: var(--primary-red);
             margin-bottom: var(--spacing-6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .overlay-content h3 {
             color: var(--gray-900);
             margin-bottom: var(--spacing-4);
-            font-size: var(--font-size-2xl);
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
         }
 
         .overlay-content p {
@@ -2400,56 +2408,47 @@
                 <ul class="nav-menu" id="nav-menu">
                     <li class="nav-item">
                         <a href="index.html" class="nav-link">
-                            <i class="fas fa-home"></i>
                             <span>Home</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="donate.html" class="nav-link active">
-                            <i class="fas fa-hand-holding-heart"></i>
                             <span>Want to Donate Blood</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="urgent-requests.html" class="nav-link">
-                            <i class="fas fa-exclamation-triangle"></i>
                             <span>Urgent Requests</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="request.html" class="nav-link">
-                            <i class="fas fa-search"></i>
                             <span>Request Blood</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="about.html" class="nav-link">
-                            <i class="fas fa-info-circle"></i>
                             <span>About</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="contact.html" class="nav-link">
-                            <i class="fas fa-phone"></i>
                             <span>Contact</span>
                         </a>
                     </li>
                     <!-- Auth Navigation (will be updated by JavaScript) -->
                     <li class="nav-item" id="registerNav">
                         <a href="index.html#registration-section" class="nav-link">
-                            <i class="fas fa-user-plus"></i>
                             <span>Register</span>
                         </a>
                     </li>
                     <li class="nav-item" id="loginNav">
                         <a href="login.html" class="nav-link login-btn">
-                            <i class="fas fa-user"></i>
                             <span>Login</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="admin-login.html" class="nav-link" style="background: linear-gradient(135deg, var(--gray-700), var(--gray-800)); color: var(--white);">
-                            <i class="fas fa-user-shield"></i>
                             <span>Admin</span>
                         </a>
                     </li>
@@ -2503,18 +2502,16 @@
             <div id="loginRequiredOverlay" class="login-required-overlay" style="display: none;">
                 <div class="overlay-content">
                     <div class="overlay-icon">
-                        <i class="fas fa-lock"></i>
+                        🔒
                     </div>
                     <h3>Login Required</h3>
                     <p>You need to be logged in to apply for blood donation. This helps us verify your identity and maintain your donor profile.</p>
                     <div class="overlay-actions">
                         <a href="login.html" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Login Now
+                            LOGIN NOW
                         </a>
                         <a href="index.html#registration-section" class="btn btn-secondary">
-                            <i class="fas fa-user-plus"></i>
-                            Register
+                            REGISTER
                         </a>
                     </div>
                 </div>
@@ -2524,7 +2521,6 @@
                 <div class="application-header fade-in">
                     <!-- Authentication Status Indicator -->
                     <div id="authIndicator" class="auth-indicator not-authenticated" style="display: none;">
-                        <i class="fas fa-lock"></i>
                         <span id="authStatus">Authentication required to apply for donation</span>
                     </div>
                     
@@ -2597,10 +2593,10 @@
 
                     <!-- Application Form -->
                     <form id="donorApplicationForm" class="application-form fade-in" data-delay="200">
-                        <h3><i class="fas fa-hand-holding-heart"></i> Donor Application Form</h3>
+                        <h3>Donor Application Form</h3>
 
                         <div class="form-section-group">
-                            <h4><i class="fas fa-user"></i> Personal Information</h4>
+                            <h4>Personal Information</h4>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="firstName">First Name *</label>
@@ -2638,7 +2634,7 @@
                         </div>
 
                         <div class="form-section-group">
-                            <h4><i class="fas fa-phone"></i> Contact Information</h4>
+                            <h4>Contact Information</h4>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="email">Email Address *</label>
@@ -2730,7 +2726,7 @@
                         </div>
 
                         <div class="form-section-group">
-                            <h4><i class="fas fa-calendar"></i> Availability & Preferences</h4>
+                            <h4>Availability & Preferences</h4>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="preferredDate">Preferred Donation Date *</label>
@@ -2759,7 +2755,7 @@
                         </div>
 
                         <div class="form-section-group">
-                            <h4><i class="fas fa-check-circle"></i> Consent & Agreement</h4>
+                            <h4>Consent & Agreement</h4>
                             <div class="consent-checkboxes">
                                 <label class="checkbox-label">
                                     <input type="checkbox" id="healthConsent" name="healthConsent" required>
@@ -2783,11 +2779,9 @@
 
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary" id="submitApplicationBtn">
-                                <i class="fas fa-paper-plane"></i>
                                 Submit Application
                             </button>
                             <button type="reset" class="btn btn-secondary">
-                                <i class="fas fa-redo"></i>
                                 Clear Form
                             </button>
                         </div>
@@ -2959,7 +2953,7 @@
                 if (authIndicator && authStatus) {
                     authIndicator.style.display = 'flex';
                     authIndicator.className = 'auth-indicator not-authenticated';
-                    authStatus.innerHTML = '<i class="fas fa-lock"></i> Please log in to apply for blood donation';
+                    authStatus.innerHTML = 'Please log in to apply for blood donation';
                 }
             } else {
                 // User is logged in - hide overlay and enable form
@@ -2981,7 +2975,7 @@
                     if (authIndicator && authStatus) {
                         authIndicator.style.display = 'flex';
                         authIndicator.className = 'auth-indicator authenticated';
-                        authStatus.innerHTML = `<i class="fas fa-check-circle"></i> Logged in as ${user.firstName || user.email || 'User'}`;
+                        authStatus.innerHTML = `Logged in as ${user.firstName || user.email || 'User'}`;
                     }
                     
                     prefillDonorUserData(user);

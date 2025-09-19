@@ -1824,56 +1824,47 @@
             <ul class="nav-menu" id="nav-menu">
                 <li class="nav-item">
                     <a href="index.html" class="nav-link active">
-                        <i class="fas fa-home"></i>
                         <span>Home</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="donate.html" class="nav-link">
-                        <i class="fas fa-hand-holding-heart"></i>
                         <span>Want to Donate Blood</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="urgent-requests.html" class="nav-link">
-                        <i class="fas fa-exclamation-triangle"></i>
                         <span>Urgent Requests</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="request.html" class="nav-link">
-                        <i class="fas fa-search"></i>
                         <span>Request Blood</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="about.html" class="nav-link">
-                        <i class="fas fa-info-circle"></i>
                         <span>About</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="contact.html" class="nav-link">
-                        <i class="fas fa-phone"></i>
                         <span>Contact</span>
                     </a>
                 </li>
                 <!-- Auth Navigation (will be updated by JavaScript) -->
                 <li class="nav-item" id="registerNav">
                     <a href="#registration-section" class="nav-link">
-                        <i class="fas fa-user-plus"></i>
                         <span>Register</span>
                     </a>
                 </li>
                 <li class="nav-item" id="loginNav">
                     <a href="login.html" class="nav-link login-btn">
-                        <i class="fas fa-user"></i>
                         <span>Login</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="admin-login.html" class="nav-link" style="background: linear-gradient(135deg, var(--gray-700), var(--gray-800)); color: var(--white);">
-                        <i class="fas fa-user-shield"></i>
                         <span>Admin</span>
                     </a>
                 </li>
@@ -2003,13 +1994,11 @@
                             <div class="form-group">
                                 <label for="firstName">First Name</label>
                                 <input type="text" id="firstName" name="firstName" class="form-input" placeholder="Enter your first name" required>
-                                <i class="fas fa-user input-icon"></i>
                                 <div id="firstName-error" class="error-message" style="display: none;"></div>
                             </div>
                             <div class="form-group">
                                 <label for="lastName">Last Name</label>
                                 <input type="text" id="lastName" name="lastName" class="form-input" placeholder="Enter your last name" required>
-                                <i class="fas fa-user input-icon"></i>
                                 <div id="lastName-error" class="error-message" style="display: none;"></div>
                             </div>
                         </div>
@@ -2017,14 +2006,12 @@
                         <div class="form-group">
                             <label for="regEmail">Email Address</label>
                             <input type="email" id="regEmail" name="email" class="form-input" placeholder="Enter your email address" required>
-                            <i class="fas fa-envelope input-icon"></i>
                             <div id="email-error" class="error-message" style="display: none;"></div>
                         </div>
 
                         <div class="form-group">
                             <label for="registerPassword">Password</label>
                             <input type="password" id="registerPassword" name="password" class="form-input" placeholder="Create a strong password" required>
-                            <i class="fas fa-lock input-icon"></i>
                             <button type="button" class="password-toggle" onclick="toggleRegPassword()">
                                 <i class="fas fa-eye"></i>
                             </button>
@@ -2035,7 +2022,6 @@
                             <div class="form-group">
                                 <label for="phoneNumber">Contact Number</label>
                                 <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input" placeholder="Enter your phone number" pattern="[6-9][0-9]{9}">
-                                <i class="fas fa-phone input-icon"></i>
                                 <div id="phoneNumber-error" class="error-message" style="display: none;"></div>
                             </div>
                             <div class="form-group">
@@ -2051,7 +2037,6 @@
                                     <option value="O+">O+</option>
                                     <option value="O-">O-</option>
                                 </select>
-                                <i class="fas fa-tint input-icon"></i>
                                 <div id="bloodGroup-error" class="error-message" style="display: none;"></div>
                             </div>
                         </div>
@@ -2059,7 +2044,6 @@
                         <div class="form-group">
                             <label for="address">Address</label>
                             <textarea id="address" name="address" class="form-input" placeholder="Enter your complete address" rows="3"></textarea>
-                            <i class="fas fa-map-marker-alt input-icon"></i>
                             <div id="address-error" class="error-message" style="display: none;"></div>
                         </div>
 
@@ -2067,13 +2051,11 @@
                             <div class="form-group">
                                 <label for="city">City</label>
                                 <input type="text" id="city" name="city" class="form-input" placeholder="Enter your city" required>
-                                <i class="fas fa-city input-icon"></i>
                                 <div id="city-error" class="error-message" style="display: none;"></div>
                             </div>
                             <div class="form-group">
                                 <label for="state">State</label>
                                 <input type="text" id="state" name="state" class="form-input" placeholder="Enter your state" required>
-                                <i class="fas fa-map input-icon"></i>
                                 <div id="state-error" class="error-message" style="display: none;"></div>
                             </div>
                         </div>
@@ -2087,7 +2069,6 @@
                         </div>
 
                         <button type="submit" id="registerSubmitBtn" class="btn btn-primary registration-btn">
-                            <i class="fas fa-user-plus"></i>
                             Create Account
                         </button>
                     </form>

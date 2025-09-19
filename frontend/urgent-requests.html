@@ -504,6 +504,22 @@
             color: var(--primary-red);
         }
 
+        .contact-link {
+            color: var(--primary-red);
+            text-decoration: none;
+            font-weight: 600;
+            padding: var(--spacing-1) var(--spacing-2);
+            border-radius: var(--radius);
+            background: rgba(229, 62, 62, 0.1);
+            transition: all var(--transition-normal);
+        }
+
+        .contact-link:hover {
+            background: var(--primary-red);
+            color: var(--white);
+            transform: translateY(-1px);
+        }
+
         .card-footer {
             padding: var(--spacing-6);
             background: var(--gray-50);
@@ -709,6 +725,178 @@
                 font-size: 1.1rem;
             }
         }
+
+        /* Footer Styles */
+        .footer {
+            background: var(--gray-800);
+            color: var(--gray-300);
+            padding: var(--spacing-16) 0 var(--spacing-8) 0;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: var(--spacing-12);
+            margin-bottom: var(--spacing-12);
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-6);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .footer-logo i {
+            font-size: 1.8rem;
+        }
+
+        .footer-description {
+            color: var(--gray-400);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-6);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: var(--spacing-3);
+        }
+
+        .footer-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: color var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-red);
+        }
+
+        .contact-info {
+            list-style: none;
+            padding: 0;
+        }
+
+        .contact-info li {
+            margin-bottom: var(--spacing-3);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            color: var(--gray-400);
+        }
+
+        .contact-info i {
+            color: var(--primary-red);
+            width: 16px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--gray-700);
+            padding-top: var(--spacing-8);
+            text-align: center;
+            color: var(--gray-500);
+        }
+
+        /* Mobile Footer */
+        @media (max-width: 768px) {
+            .footer {
+                padding: var(--spacing-12) 0 var(--spacing-6) 0;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-8);
+            }
+            
+            .footer-section {
+                text-align: center;
+            }
+            
+            .footer-logo {
+                justify-content: center;
+            }
+            
+            .contact-info {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        /* Tablet Footer */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: var(--spacing-10);
+            }
+            
+            .footer-section:first-child {
+                grid-column: 1 / -1;
+                text-align: center;
+                margin-bottom: var(--spacing-6);
+            }
+        }
+        
+        /* Small Mobile Footer */
+        @media (max-width: 480px) {
+            .footer {
+                padding: var(--spacing-8) 0 var(--spacing-4) 0;
+            }
+            
+            .footer-content {
+                gap: var(--spacing-6);
+            }
+            
+            .footer-section h3 {
+                font-size: 1.1rem;
+                margin-bottom: var(--spacing-4);
+            }
+            
+            .footer-logo {
+                font-size: 1.3rem;
+                margin-bottom: var(--spacing-3);
+            }
+            
+            .footer-description {
+                font-size: 0.9rem;
+                margin-bottom: var(--spacing-4);
+            }
+            
+            .footer-links a {
+                font-size: 0.9rem;
+                padding: var(--spacing-1) 0;
+            }
+            
+            .contact-info li {
+                font-size: 0.9rem;
+                margin-bottom: var(--spacing-2);
+            }
+            
+            .footer-bottom {
+                padding-top: var(--spacing-4);
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -724,56 +912,47 @@
                 <ul class="nav-menu" id="nav-menu">
                     <li class="nav-item">
                         <a href="index.html" class="nav-link">
-                            <i class="fas fa-home"></i>
                             <span>Home</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="donate.html" class="nav-link">
-                            <i class="fas fa-hand-holding-heart"></i>
                             <span>Donate</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="urgent-requests.html" class="nav-link active">
-                            <i class="fas fa-exclamation-triangle"></i>
                             <span>Urgent Requests</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="request.html" class="nav-link">
-                            <i class="fas fa-search"></i>
                             <span>Request Blood</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="about.html" class="nav-link">
-                            <i class="fas fa-info-circle"></i>
                             <span>About</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="contact.html" class="nav-link">
-                            <i class="fas fa-phone"></i>
                             <span>Contact</span>
                         </a>
                     </li>
                     <!-- Auth Navigation -->
                     <li class="nav-item" id="registerNav">
                         <a href="index.html#registration-section" class="nav-link">
-                            <i class="fas fa-user-plus"></i>
                             <span>Register</span>
                         </a>
                     </li>
                     <li class="nav-item" id="loginNav">
                         <a href="login.html" class="nav-link login-btn">
-                            <i class="fas fa-user"></i>
                             <span>Login</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="admin-login.html" class="nav-link" style="background: linear-gradient(135deg, var(--gray-700), var(--gray-800)); color: var(--white);">
-                            <i class="fas fa-user-shield"></i>
                             <span>Admin</span>
                         </a>
                     </li>
@@ -938,6 +1117,61 @@
             <!-- Pagination will be populated here -->
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- BloodConnect Section -->
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-heart"></i>
+                        <span>BloodConnect</span>
+                    </div>
+                    <p class="footer-description">
+                        Connecting lives through blood donation. Join our community and help save lives every day.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a href="donate.html"><i class="fas fa-hand-holding-heart"></i> Donate Blood</a></li>
+                        <li><a href="request.html"><i class="fas fa-search"></i> Request Blood</a></li>
+                        <li><a href="about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
+                        <li><a href="contact.html"><i class="fas fa-phone"></i> Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Help Center</a></li>
+                        <li><a href="#"><i class="fas fa-file-alt"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+                        <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-phone"></i> 9136706650</li>
+                        <li><i class="fas fa-envelope"></i> blooddonation1627@gmail.com</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Emergency Support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 BloodConnect. All rights reserved. | Saving lives through blood donation</p>
+            </div>
+        </div>
+    </footer>
 
     <!-- Include JavaScript Files -->
     <script src="js/main.js"></script>
