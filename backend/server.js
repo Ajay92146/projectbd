@@ -1,4 +1,4 @@
-/**
+ /**
  * Blood Donation Website - Main Server File
  * This file sets up the Express server and handles all routing
  */
@@ -22,6 +22,8 @@ const contactRoutes = require('./routes/contact');
 const adminRoutes = require('./routes/admin');
 const statsRoutes = require('./routes/stats');
 const expirationRoutes = require('./routes/expiration');
+const locationRoutes = require('./routes/location');
+const emergencyRoutes = require('./routes/emergency');
 
 // Import services
 const requestExpirationService = require('./services/requestExpirationService');
@@ -117,6 +119,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/external', require('./routes/external-config'));
 app.use('/api/expiration', expirationRoutes);
+app.use('/api/location', locationRoutes);
+app.use('/api/emergency', emergencyRoutes);
 console.log('✅ API routes loaded successfully');
 
 // Serve static files from frontend directory (AFTER API routes)
