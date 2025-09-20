@@ -64,7 +64,6 @@ router.get('/', [
 
         // Execute search with pagination
         const requests = await Request.find(searchCriteria)
-            .select('-contactNumber') // Hide sensitive information
             .sort({ urgency: -1, requiredBy: 1, requestDate: -1 })
             .skip(skip)
             .limit(parseInt(limit));
@@ -429,7 +428,7 @@ router.get('/urgent', async (req, res) => {
             isActive: true,
             requiredBy: { $gte: new Date() } // Not expired
         })
-        .select('patientName bloodGroup requiredUnits hospitalName location urgency requiredBy additionalNotes contactPersonName relationship requestDate')
+        .select('patientName bloodGroup requiredUnits hospitalName location urgency requiredBy additionalNotes contactPersonName relationship contactNumber requestDate')
         .sort({ urgency: -1, requiredBy: 1 })
         .limit(10); // Limit to 10 most urgent
 
@@ -484,7 +483,7 @@ router.get('/emergency', async (req, res) => {
             isActive: true,
             requiredBy: { $gte: now } // Not expired
         })
-        .select('patientName bloodGroup requiredUnits hospitalName location urgency requiredBy additionalNotes contactPersonName relationship requestDate')
+        .select('patientName bloodGroup requiredUnits hospitalName location urgency requiredBy additionalNotes contactPersonName relationship contactNumber requestDate')
         .sort({ urgency: -1, requiredBy: 1 })
         .limit(5); // Limit to 5 most critical
 

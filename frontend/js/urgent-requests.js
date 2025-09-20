@@ -256,6 +256,14 @@ class UrgentRequestsManager {
         const timeInfo = this.getTimeInfo(request);
         const urgencyClass = request.urgency.toLowerCase();
         
+        // Debug log to check request data
+        console.log('🩸 Emergency Request Data:', {
+            patientName: request.patientName,
+            contactNumber: request.contactNumber,
+            hospitalName: request.hospitalName,
+            location: request.location
+        });
+        
         return `
             <div class="request-card ${urgencyClass}" style="margin-bottom: var(--spacing-4);">
                 <div class="card-header">
@@ -264,20 +272,28 @@ class UrgentRequestsManager {
                     <h4 class="patient-name">${request.patientName}</h4>
                     <div class="request-details">
                         <div class="detail-row">
+                            <i class="fas fa-tint"></i>
                             <span>${request.requiredUnits} unit${request.requiredUnits > 1 ? 's' : ''} needed</span>
                         </div>
                         <div class="detail-row">
+                            <i class="fas fa-hospital"></i>
                             <span>${request.hospitalName}</span>
                         </div>
                         <div class="detail-row">
+                            <i class="fas fa-map-marker-alt"></i>
                             <span>${request.location}</span>
                         </div>
                         <div class="detail-row">
+                            <i class="fas fa-clock"></i>
                             <span class="time-remaining ${timeInfo.class}">${timeInfo.text}</span>
                         </div>
                         ${request.contactNumber ? `
                         <div class="detail-row">
-                            <a href="tel:${request.contactNumber}" class="contact-link">${request.contactNumber}</a>
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:${request.contactNumber}" class="contact-link">
+                                <i class="fas fa-phone-alt"></i>
+                                ${request.contactNumber}
+                            </a>
                         </div>` : ''}
                     </div>
                 </div>
@@ -299,6 +315,14 @@ class UrgentRequestsManager {
         const timeInfo = this.getTimeInfo(request);
         const urgencyClass = request.urgency.toLowerCase();
         
+        // Debug log to check request data
+        console.log('🩸 Regular Request Data:', {
+            patientName: request.patientName,
+            contactNumber: request.contactNumber,
+            hospitalName: request.hospitalName,
+            location: request.location
+        });
+        
         return `
             <div class="request-card ${urgencyClass}">
                 <div class="card-header">
@@ -307,27 +331,37 @@ class UrgentRequestsManager {
                     <h4 class="patient-name">${request.patientName}</h4>
                     <div class="request-details">
                         <div class="detail-row">
+                            <i class="fas fa-tint"></i>
                             <span>${request.requiredUnits} unit${request.requiredUnits > 1 ? 's' : ''} needed</span>
                         </div>
                         <div class="detail-row">
+                            <i class="fas fa-hospital"></i>
                             <span>${request.hospitalName}</span>
                         </div>
                         <div class="detail-row">
+                            <i class="fas fa-map-marker-alt"></i>
                             <span>${request.location}</span>
                         </div>
                         <div class="detail-row">
+                            <i class="fas fa-clock"></i>
                             <span class="time-remaining ${timeInfo.class}">${timeInfo.text}</span>
                         </div>
                         ${request.contactNumber ? `
                         <div class="detail-row">
-                            <a href="tel:${request.contactNumber}" class="contact-link">${request.contactNumber}</a>
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:${request.contactNumber}" class="contact-link">
+                                <i class="fas fa-phone-alt"></i>
+                                ${request.contactNumber}
+                            </a>
                         </div>` : ''}
                         ${request.contactPersonName ? `
                         <div class="detail-row">
+                            <i class="fas fa-user"></i>
                             <span>${request.contactPersonName} (${request.relationship})</span>
                         </div>` : ''}
                         ${request.additionalNotes ? `
                         <div class="detail-row">
+                            <i class="fas fa-sticky-note"></i>
                             <span>${request.additionalNotes}</span>
                         </div>` : ''}
                     </div>
@@ -583,6 +617,15 @@ class UrgentRequestsManager {
         
         if (emptyState) emptyState.style.display = 'none';
         this.hideLoading();
+    }
+    
+    // Format phone number for display with partial masking for privacy
+    formatPhoneNumber(phoneNumber) {
+        if (!phoneNumber || phoneNumber.length !== 10) {
+            return phoneNumber;
+        }
+        // Show first 3 digits, mask middle 4, show last 3: 987****210
+        return `${phoneNumber.slice(0, 3)}****${phoneNumber.slice(-3)}`;
     }
 }
 
