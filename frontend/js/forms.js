@@ -539,15 +539,29 @@ function setupSearchForm() {
     searchForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const bloodGroup = document.getElementById('searchBloodGroup').value;
-        const location = document.getElementById('searchLocation').value;
-        const urgency = document.getElementById('searchUrgency')?.value || 'medium';
+        const bloodGroupElement = document.getElementById('searchBloodGroup');
+        const locationElement = document.getElementById('searchLocation');
+        const urgencyElement = document.getElementById('searchUrgency');
+        
+        // Check if elements exist before accessing properties
+        if (!bloodGroupElement) {
+            console.error('Search form elements not found');
+            return;
+        }
+        
+        const bloodGroup = bloodGroupElement.value;
+        const location = locationElement?.value || '';
+        const urgency = urgencyElement?.value || 'medium';
         
         if (!bloodGroup) {
-            BloodConnect.showFieldError(
-                document.getElementById('searchBloodGroup'),
-                'Please select a blood group'
-            );
+            if (window.BloodConnect && window.BloodConnect.showFieldError) {
+                window.BloodConnect.showFieldError(
+                    bloodGroupElement,
+                    'Please select a blood group'
+                );
+            } else {
+                alert('Please select a blood group');
+            }
             return;
         }
         
@@ -616,11 +630,17 @@ async function performBasicSearch(bloodGroup, location) {
         ...(location && { location: location })
     });
     
-    const response = await fetch('http://localhost:3002/api/donors/search?' + params);
+    // Use dynamic API URL
+    const apiBaseURL = window.getAPIBaseURL ? window.getAPIBaseURL() : '/api';
+    const apiUrl = `${apiBaseURL}/donors/search?${params}`;
+    
+    console.log('🔍 Basic search API URL:', apiUrl);
+    
+    const response = await fetch(apiUrl);
     const result = await response.json();
     
     if (response.ok) {
-        displaySearchResults(result.data.donors, bloodGroup, location);
+        displaySearchResults(result.data?.donors || [], bloodGroup, location);
     } else {
         throw new Error(result.message || 'Search failed');
     }
@@ -687,11 +707,11 @@ function displayEnhancedSearchResults(results, bloodGroup, location) {
                         ${donor.availability ? `<p style="margin: 0.5rem 0; font-size: 0.9rem; color: #666;">Status: ${donor.availability}</p>` : ''}
                         
                         <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                            <button onclick="contactDonor('${donor.phone || donor.contactNumber}', '${donor.name}')" style="background: #e53e3e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; flex: 1;">
+                            <button class="contact-donor-btn" data-phone="${donor.phone || donor.contactNumber}" data-name="${donor.name}" style="background: #e53e3e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; flex: 1;">
                                 📞 Contact
                             </button>
                             ${donor.source === 'hospital_network' ? `
-                                <button onclick="showHospitalInfo('${donor.name}', '${donor.address}')" style="background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                                <button class="hospital-info-btn" data-name="${donor.name}" data-address="${donor.address}" style="background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
                                     🏥 Info
                                 </button>
                             ` : ''}
@@ -710,6 +730,27 @@ function displayEnhancedSearchResults(results, bloodGroup, location) {
     
     searchResults.innerHTML = summaryHtml + donorsHtml;
     searchResults.style.display = 'block';
+    
+    // Add event listeners for contact and hospital info buttons (CSP-compliant)
+    setTimeout(() => {
+        // Contact donor buttons
+        document.querySelectorAll('.contact-donor-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const phone = this.getAttribute('data-phone');
+                const name = this.getAttribute('data-name');
+                contactDonor(phone, name);
+            });
+        });
+        
+        // Hospital info buttons
+        document.querySelectorAll('.hospital-info-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const name = this.getAttribute('data-name');
+                const address = this.getAttribute('data-address');
+                showHospitalInfo(name, address);
+            });
+        });
+    }, 100);
 }
 
 /**
@@ -1340,4 +1381,70 @@ function validateRegisterForm() {
     }
     
     return isValid;
+}
+
+/**
+ * Contact donor function
+ */
+function contactDonor(phone, name) {
+    if (!phone || phone === 'Contact via platform') {
+        alert(`Please contact ${name} through the BloodConnect platform. Call +91 9136706650 for assistance.`);
+        return;
+    }
+    
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    
+    if (confirm(`Contact ${name} at ${phone}?
+
+Options:
+1. Call directly
+2. Send WhatsApp message
+
+Click OK to open contact options.`)) {
+        // Create contact options modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); z-index: 10000; 
+            display: flex; align-items: center; justify-content: center;
+        `;
+        
+        modal.innerHTML = `
+            <div style="background: white; padding: 2rem; border-radius: 8px; max-width: 400px; width: 90%;">
+                <h3 style="margin: 0 0 1rem 0; color: #e53e3e;">Contact ${name}</h3>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <a href="tel:${cleanPhone}" style="background: #28a745; color: white; padding: 1rem; text-decoration: none; border-radius: 4px; text-align: center;">
+                        📞 Call ${phone}
+                    </a>
+                    <a href="https://wa.me/91${cleanPhone}?text=Hi ${name}, I found your contact through BloodConnect. I need blood. Can you help?" target="_blank" style="background: #25d366; color: white; padding: 1rem; text-decoration: none; border-radius: 4px; text-align: center;">
+                        💬 WhatsApp Message
+                    </a>
+                    <button class="close-modal-btn" style="background: #6c757d; color: white; padding: 0.5rem; border: none; border-radius: 4px; cursor: pointer;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add event listener for close button
+        modal.querySelector('.close-modal-btn').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+}
+
+/**
+ * Show hospital info function
+ */
+function showHospitalInfo(name, address) {
+    alert(`Hospital: ${name}\nAddress: ${address}\n\nPlease contact the hospital directly for blood availability and procedures.`);
 }

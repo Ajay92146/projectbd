@@ -70,7 +70,11 @@ class AuthStateManager {
         if (!token) return;
 
         try {
-            const response = await fetch('http://localhost:3002/api/auth/profile', {
+            // Use dynamic API URL
+            const apiBaseURL = window.getAPIBaseURL ? window.getAPIBaseURL() : '/api';
+            const apiUrl = `${apiBaseURL}/auth/profile`;
+            
+            const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

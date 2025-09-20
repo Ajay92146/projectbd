@@ -1378,7 +1378,7 @@
                                 FIND BLOOD DONORS
                             </h2>
                             <p>Advanced search to find available blood donors in your area</p>
-                            <button type="button" onclick="showSearchTips()" class="btn" style="font-size: 0.75rem; padding: 0.25rem 0.75rem; background: var(--gray-400); color: white; margin-top: 0.5rem;">
+                            <button type="button" class="show-search-tips-btn" class="btn" style="font-size: 0.75rem; padding: 0.25rem 0.75rem; background: var(--gray-400); color: white; margin-top: 0.5rem;">
                                 <i class="fas fa-question-circle"></i> Search Tips
                             </button>
                         </div>
@@ -1464,7 +1464,7 @@
                             
                             <!-- Advanced Filters Section -->
                             <div class="advanced-filters">
-                                <button type="button" class="toggle-filters" onclick="toggleAdvancedFilters()">
+                                <button type="button" class="toggle-filters">
                                     <i class="fas fa-sliders-h"></i> Advanced Filters
                                     <i class="fas fa-chevron-down toggle-icon"></i>
                                 </button>
@@ -1546,7 +1546,7 @@
                                     <i class="fas fa-redo"></i>
                                     RESET FILTERS
                                 </button>
-                                <button type="button" class="reset-btn" onclick="clearAllFilters()">
+                                <button type="button" class="clear-all-btn reset-btn">
                                     <i class="fas fa-times"></i>
                                     CLEAR ALL
                                 </button>
@@ -1559,7 +1559,7 @@
                                 <h4 style="color: var(--primary-red); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                                     <i class="fas fa-history"></i> Recent Searches
                                 </h4>
-                                <button onclick="window.EnhancedExternalAPI.clearSearchHistory()" class="btn" style="background: var(--gray-400); color: white; font-size: 0.75rem; padding: 0.25rem 0.75rem;">
+                                <button class="clear-search-history-btn btn" style="background: var(--gray-400); color: white; font-size: 0.75rem; padding: 0.25rem 0.75rem;">
                                     <i class="fas fa-trash"></i> Clear
                                 </button>
                             </div>
@@ -3150,6 +3150,51 @@
             }
         }
 
+        // Setup event listeners for CSP-compliant interactions
+        function setupEventListeners() {
+            // Search tips button
+            const searchTipsBtn = document.querySelector('.show-search-tips-btn');
+            if (searchTipsBtn) {
+                searchTipsBtn.addEventListener('click', showSearchTips);
+            }
+            
+            // Toggle advanced filters button
+            const toggleFiltersBtn = document.querySelector('.toggle-filters');
+            if (toggleFiltersBtn) {
+                toggleFiltersBtn.addEventListener('click', toggleAdvancedFilters);
+            }
+            
+            // Clear all filters button
+            const clearAllBtn = document.querySelector('.clear-all-btn');
+            if (clearAllBtn) {
+                clearAllBtn.addEventListener('click', clearAllFilters);
+            }
+            
+            // Clear search history button
+            const clearHistoryBtn = document.querySelector('.clear-search-history-btn');
+            if (clearHistoryBtn) {
+                clearHistoryBtn.addEventListener('click', function() {
+                    if (window.EnhancedExternalAPI && window.EnhancedExternalAPI.clearSearchHistory) {
+                        window.EnhancedExternalAPI.clearSearchHistory();
+                    }
+                });
+            }
+        }
+        
+        // Clear all filters function
+        function clearAllFilters() {
+            document.getElementById('searchForm').reset();
+            // Also clear any dynamic dropdowns
+            const selects = ['searchState', 'searchDistrict', 'searchCity'];
+            selects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    select.innerHTML = '<option value="">-----Select-----</option>';
+                    select.disabled = true;
+                }
+            });
+        }
+
         // Initialize on page load - enhanced navigation and auth state
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Request page loaded - initializing enhanced navigation and auth state');
@@ -3159,6 +3204,9 @@
             
             // Initialize scroll animations if elements exist
             initializeScrollAnimations();
+            
+            // Add event listeners for CSP-compliant buttons
+            setupEventListeners();
         });
 
         // Scroll animations initialization
