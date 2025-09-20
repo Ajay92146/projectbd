@@ -136,6 +136,16 @@
         *::after {
             box-sizing: border-box;
         }
+        
+        /* Prevent horizontal overflow */
+        .application-container,
+        .application-content,
+        .application-form,
+        .instructions-panel {
+            max-width: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
 
         html {
             scroll-behavior: smooth;
@@ -756,17 +766,36 @@
             font-size: var(--font-size-base);
         }
 
-        /* Two Column Layout */
+        /* Two Column Layout - Enhanced for Better Responsiveness */
         .application-content {
             display: grid;
-            grid-template-columns: 400px 1fr;
+            grid-template-columns: minmax(320px, 400px) 1fr;
             gap: var(--spacing-8);
             align-items: flex-start;
             max-width: 1400px;
             margin: 0 auto;
+            padding: 0 var(--spacing-4);
+            min-height: 100vh;
         }
 
-        /* Instructions Panel */
+        /* Ensure proper grid behavior on smaller containers */
+        @media (max-width: 1400px) {
+            .application-content {
+                grid-template-columns: minmax(300px, 350px) 1fr;
+                gap: var(--spacing-6);
+            }
+        }
+
+        /* Better intermediate breakpoint */
+        @media (max-width: 1300px) {
+            .application-content {
+                grid-template-columns: minmax(280px, 320px) 1fr;
+                gap: var(--spacing-5);
+                padding: 0 var(--spacing-3);
+            }
+        }
+
+        /* Instructions Panel - Improved for Better Layout */
         .instructions-panel {
             background: var(--white);
             padding: var(--spacing-6);
@@ -776,8 +805,12 @@
             position: sticky;
             top: calc(80px + var(--spacing-4));
             height: fit-content;
-            max-height: calc(100vh - 100px);
+            max-height: calc(100vh - 120px);
             overflow-y: auto;
+            min-width: 280px;
+            flex-shrink: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .instructions-panel h3 {
@@ -884,6 +917,9 @@
             position: relative;
             overflow: hidden;
             width: 100%;
+            min-width: 0;
+            flex-grow: 1;
+            box-sizing: border-box;
         }
 
         .application-form::before {
@@ -969,10 +1005,14 @@
             gap: var(--spacing-5);
             margin-bottom: var(--spacing-5);
             align-items: start;
+            width: 100%;
         }
 
         .form-group {
             position: relative;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .form-group.full-width {
@@ -986,6 +1026,7 @@
             color: var(--gray-700);
             font-size: var(--font-size-sm);
             flex-shrink: 0;
+            width: 100%;
         }
 
         .form-group input,
@@ -1633,11 +1674,14 @@
             }
         }
 
-        /* Responsive Design */
+        /* Enhanced Responsive Design for Better Form Layout */
         @media (max-width: 1200px) {
             .application-content {
-                grid-template-columns: 1fr;
+                display: flex;
+                flex-direction: column;
                 gap: var(--spacing-6);
+                padding: 0 var(--spacing-3);
+                max-width: 100%;
             }
 
             .instructions-panel {
@@ -1646,10 +1690,37 @@
                 margin-top: var(--spacing-6);
                 max-height: none;
                 overflow-y: visible;
+                min-width: auto;
+                width: 100%;
+                padding: var(--spacing-5);
             }
 
             .application-form {
                 order: 1;
+                margin-bottom: var(--spacing-4);
+                width: 100%;
+                max-width: none;
+            }
+            
+            .application-container {
+                padding: 0 var(--spacing-4);
+            }
+        }
+
+        /* Prevent layout collapse on very small screens */
+        @media (max-width: 992px) {
+            .application-content {
+                padding: 0 var(--spacing-2);
+            }
+            
+            .application-form {
+                padding: var(--spacing-5);
+                margin-bottom: var(--spacing-3);
+            }
+            
+            .instructions-panel {
+                padding: var(--spacing-4);
+                margin-top: var(--spacing-4);
             }
         }
 
@@ -1767,10 +1838,52 @@
 
             .form-group {
                 min-height: 60px;
+                width: 100%;
             }
 
             .application-form {
                 padding: var(--spacing-4);
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            .application-content {
+                padding: 0 var(--spacing-2);
+                gap: var(--spacing-4);
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .instructions-panel {
+                margin: var(--spacing-4) 0;
+                padding: var(--spacing-4);
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            .application-container {
+                padding: 0 var(--spacing-2);
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            /* Ensure form fields don't overflow */
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Prevent horizontal scroll */
+            .form-section-group {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
             }
         }
 

@@ -218,7 +218,9 @@ function setupDonorForm() {
                 throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
             }
 
-            const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+            const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:3002/api' 
+                : `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
             const response = await fetch(`${apiBase}/donors`, {
                 method: 'POST',
                 headers: {
@@ -410,7 +412,9 @@ function setupRequestForm() {
                 console.log('👤 User is not logged in, submitting blood request as guest');
             }
 
-            const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+            const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:3002/api' 
+                : `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
             const response = await fetch(`${apiBase}/requests`, {
                 method: 'POST',
                 headers: headers,
@@ -612,7 +616,7 @@ async function performBasicSearch(bloodGroup, location) {
         ...(location && { location: location })
     });
     
-    const response = await fetch(`http://localhost:3002/api/donors/search?${params}`);
+    const response = await fetch('http://localhost:3002/api/donors/search?' + params);
     const result = await response.json();
     
     if (response.ok) {
@@ -997,7 +1001,12 @@ function setupLoginForm() {
                 response = { ok: result.success };
             } else {
                 console.log('🔧 Using direct fetch for login...');
-                const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+                
+                // Use fixed backend port for local development
+                const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                    ? 'http://localhost:3002/api' 
+                    : `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+                    
                 console.log('🌐 API Base URL:', apiBase);
                 console.log('📤 Making login request to:', `${apiBase}/auth/login`);
                 
@@ -1014,14 +1023,60 @@ function setupLoginForm() {
             }
             
             if (response.ok && result.success) {
+                console.log('🎉 Login successful, processing response...');
+                
                 // Handle login success with auth state manager
-                let redirectUrl = '/';
-                if (window.authStateManager) {
-                    redirectUrl = window.authStateManager.handleLoginSuccess(result.data.user, result.data.token);
-                } else {
-                    // Fallback if auth state manager not available
-                    localStorage.setItem('bloodconnect_token', result.data.token);
-                    localStorage.setItem('bloodconnect_user', JSON.stringify(result.data.user));
+                let redirectUrl = '/index.html';
+                
+                // Store user data immediately
+                try {
+                    localStorage.setItem('authToken', result.data.token);
+                    localStorage.setItem('userData', JSON.stringify(result.data.user));
+                    
+                    // Handle admin login with special redirect logic
+                    if (result.data.user.role === 'admin') {
+                        localStorage.setItem('bloodconnect_admin', 'true');
+                        localStorage.setItem('admin_email', result.data.user.email);
+                        localStorage.setItem('admin_login_time', new Date().toISOString());
+                        
+                        // Verify storage was set before redirect
+                        setTimeout(() => {
+                            const adminStatus = localStorage.getItem('bloodconnect_admin');
+                            const adminEmail = localStorage.getItem('admin_email');
+                            
+                            console.log('🔍 Verifying admin storage:', { adminStatus, adminEmail });
+                            
+                            if (adminStatus === 'true' && adminEmail) {
+                                console.log('✅ Admin storage verified, redirecting to dashboard...');
+                                redirectUrl = 'admin-dashboard.html';
+                                window.location.href = redirectUrl;
+                            } else {
+                                console.error('❌ Admin storage verification failed');
+                                // Retry storage and redirect
+                                localStorage.setItem('bloodconnect_admin', 'true');
+                                localStorage.setItem('admin_email', result.data.user.email);
+                                setTimeout(() => {
+                                    window.location.href = 'admin-dashboard.html';
+                                }, 200);
+                            }
+                        }, 150); // Give storage time to complete
+                        
+                        BloodConnect.showModal(
+                            '👑 Admin Login Successful!',
+                            `Welcome back, Administrator! Redirecting to admin dashboard...`,
+                            'success'
+                        );
+                        return; // Don't execute normal user login flow
+                    }
+                    
+                    // Normal user login flow
+                    if (window.authStateManager) {
+                        redirectUrl = window.authStateManager.handleLoginSuccess(result.data.user, result.data.token);
+                    }
+                    
+                } catch (storageError) {
+                    console.error('❌ Storage error:', storageError);
+                    // Continue with login but show warning
                 }
 
                 BloodConnect.showModal(
@@ -1030,7 +1085,7 @@ function setupLoginForm() {
                     'success'
                 );
 
-                // Redirect after 2 seconds
+                // Redirect after 2 seconds for normal users
                 setTimeout(() => {
                     window.location.href = redirectUrl;
                 }, 2000);
@@ -1045,29 +1100,38 @@ function setupLoginForm() {
             console.error('❌ Login error:', error);
             
             let errorMessage = 'An error occurred during login. Please try again.';
+            let isConnectionError = false;
             
             if (error.message) {
-                if (error.message.includes('fetch')) {
-                    errorMessage = '🔌 Connection Error: Unable to connect to the server. Please check your internet connection.';
+                if (error.message.includes('fetch') || error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                    errorMessage = '🔌 Connection Error: Unable to connect to the server. Please check your internet connection and ensure the backend is running.';
+                    isConnectionError = true;
                 } else if (error.message.includes('401') || error.message.includes('Invalid') || error.message.includes('credentials') || error.message.includes('Unauthorized')) {
-                    errorMessage = '🔐 Invalid user or password. Please check your credentials and try again.';
+                    errorMessage = '🔐 Invalid email or password. Please check your credentials and try again.';
                 } else if (error.message.includes('User not found') || error.message.includes('user does not exist')) {
-                    errorMessage = '🔐 Invalid user or password. Please check your credentials and try again.';
+                    errorMessage = '🔐 Invalid email or password. Please check your credentials and try again.';
                 } else if (error.message.includes('password') && error.message.includes('incorrect')) {
-                    errorMessage = '🔐 Invalid user or password. Please check your credentials and try again.';
-                } else if (error.message.includes('500')) {
+                    errorMessage = '🔐 Invalid email or password. Please check your credentials and try again.';
+                } else if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
                     errorMessage = '🛠️ Server Error: Please try again later or contact support.';
+                } else if (error.message.includes('timeout') || error.message.includes('TIMEOUT')) {
+                    errorMessage = '⏱️ Request Timeout: The server is taking too long to respond. Please try again.';
                 } else {
                     // For any authentication-related errors, show the generic invalid credentials message
                     if (error.message.toLowerCase().includes('auth') || 
                         error.message.toLowerCase().includes('login') ||
                         error.message.toLowerCase().includes('password') ||
                         error.message.toLowerCase().includes('email')) {
-                        errorMessage = '🔐 Invalid user or password. Please check your credentials and try again.';
+                        errorMessage = '🔐 Invalid email or password. Please check your credentials and try again.';
                     } else {
                         errorMessage = error.message;
                     }
                 }
+            }
+            
+            // Add debug information for connection errors
+            if (isConnectionError) {
+                errorMessage += '\n\nDebug Info:\n- Backend should be running on http://localhost:3002\n- Check browser console for more details';
             }
             
             // Use the showMessage function from login.html if available
@@ -1123,19 +1187,25 @@ function validateLoginForm() {
             BloodConnect.showFieldError(email, 'Email is required');
             isValid = false;
         } else if (!emailRegex.test(emailValue)) {
-            BloodConnect.showFieldError(email, 'Please enter a valid email address');
+            BloodConnect.showFieldError(email, 'Please enter a valid email address (e.g., user@example.com)');
+            isValid = false;
+        } else if (emailValue.length > 254) {
+            BloodConnect.showFieldError(email, 'Email address is too long');
             isValid = false;
         } else {
             BloodConnect.clearFieldError(email);
         }
 
-        // Password validation (simplified for login)
+        // Enhanced password validation
         const passwordValue = password.value.trim();
         if (!passwordValue) {
             BloodConnect.showFieldError(password, 'Password is required');
             isValid = false;
         } else if (passwordValue.length < 1) {
             BloodConnect.showFieldError(password, 'Password cannot be empty');
+            isValid = false;
+        } else if (passwordValue.length > 128) {
+            BloodConnect.showFieldError(password, 'Password is too long');
             isValid = false;
         } else {
             BloodConnect.clearFieldError(password);
@@ -1194,7 +1264,9 @@ function setupRegisterForm() {
             const registerData = Object.fromEntries(formData.entries());
             
             console.log('📤 Registration data being sent:', registerData);
-            const apiBase = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+            const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:3002/api' 
+                : `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
             console.log('🌐 Making request to:', `${apiBase}/auth/register`);
             
             const response = await fetch(`${apiBase}/auth/register`, {
