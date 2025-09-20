@@ -26,19 +26,7 @@ function toggleAdminPassword() {
     }
 }
 
-// Get dynamic API base URL
-function getAPIBaseURL() {
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-    
-    // If on localhost, use the same port as the frontend (3002)
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return `${protocol}//${hostname}:3002/api`;
-    }
-    
-    return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
-}
+// Use global getAPIBaseURL from api.js
 
 // Admin login process
 async function processAdminLogin(email, password) {

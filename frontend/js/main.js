@@ -31,11 +31,9 @@ function initializeApp() {
  * Initialize authentication state manager
  */
 function initializeAuthState() {
-    // Initialize global auth state manager if not already done
-    if (typeof AuthStateManager !== 'undefined' && !window.authStateManager) {
-        window.authStateManager = new AuthStateManager();
-        console.log('🔐 Auth State Manager initialized');
-    }
+    // AuthStateManager will be initialized by auth-state.js
+    // This function is kept for compatibility but auth-state.js handles initialization
+    console.log('🔐 Auth state initialization delegated to auth-state.js');
 }
 
 /**

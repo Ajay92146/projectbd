@@ -1871,10 +1871,10 @@
     </div>
 
     <!-- JavaScript Files -->
+    <script src="js/api.js"></script>  <!-- Load API first for getAPIBaseURL -->
     <script src="js/main.js"></script>
     <script src="js/forms.js"></script>
     <script src="js/animations.js"></script>
-    <script src="js/api.js"></script>
     <script src="js/auth-state.js"></script>
 
     <!-- Load Enhanced External API Service -->
@@ -3044,10 +3044,9 @@
             }, 500);
         }
 
-        // Enhanced Mobile menu toggle (matching main.js functionality)
+        // Enhanced Mobile menu toggle (using global isMenuOpen from main.js)
         const hamburger = document.querySelector('.hamburger');
         const navMenu = document.querySelector('.nav-menu');
-        let isMenuOpen = false;
 
         if (hamburger && navMenu) {
             // Hamburger click handler
@@ -3066,14 +3065,16 @@
 
             // Close menu when clicking outside
             document.addEventListener('click', function(event) {
-                if (isMenuOpen && !navMenu.contains(event.target) && !hamburger.contains(event.target)) {
+                const currentMenuState = window.isMenuOpen || false;
+                if (currentMenuState && !navMenu.contains(event.target) && !hamburger.contains(event.target)) {
                     closeMobileMenu();
                 }
             });
 
             // Handle window resize
             window.addEventListener('resize', function() {
-                if (window.innerWidth > 768 && isMenuOpen) {
+                const currentMenuState = window.isMenuOpen || false;
+                if (window.innerWidth > 768 && currentMenuState) {
                     closeMobileMenu();
                 }
             });
@@ -3120,22 +3121,28 @@
             });
         });
 
-        // Mobile menu functions
+        // Mobile menu functions (using global isMenuOpen from main.js)
         function toggleMobileMenu() {
             if (hamburger && navMenu) {
-                isMenuOpen = !isMenuOpen;
+                // Use global isMenuOpen if available, otherwise initialize locally
+                if (typeof window.isMenuOpen === 'undefined') {
+                    window.isMenuOpen = false;
+                }
+                window.isMenuOpen = !window.isMenuOpen;
                 hamburger.classList.toggle('active');
                 navMenu.classList.toggle('active');
                 
                 // Prevent body scroll when menu is open
-                document.body.style.overflow = isMenuOpen ? 'hidden' : '';
-                console.log('Mobile menu toggled:', isMenuOpen);
+                document.body.style.overflow = window.isMenuOpen ? 'hidden' : '';
+                console.log('Mobile menu toggled:', window.isMenuOpen);
             }
         }
 
         function closeMobileMenu() {
             if (hamburger && navMenu) {
-                isMenuOpen = false;
+                if (typeof window.isMenuOpen !== 'undefined') {
+                    window.isMenuOpen = false;
+                }
                 hamburger.classList.remove('active');
                 navMenu.classList.remove('active');
                 document.body.style.overflow = '';
@@ -3283,12 +3290,6 @@
             }
         }, 30000); // Check every 30 seconds
     </script>
-    <script src="js/api-config-loader.js"></script>
-    <script src="js/enhanced-donor-search.js"></script>
-    <script src="js/external-api-service.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/auth-state.js"></script>
-    <script src="js/forms.js"></script>
+    <!-- Scripts already loaded above - removing duplicates -->
 </body>
 </html>
