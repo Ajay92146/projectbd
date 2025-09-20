@@ -50,6 +50,17 @@ async function processAdminLogin(email, password) {
         // Call backend API for admin authentication
         debugLog('🔍 Calling backend API for authentication...');
         
+        // Get API base URL with fallback
+        const getAPIBaseURL = window.getAPIBaseURL || (() => {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return `${protocol}//${hostname}:3002/api`;
+            }
+            return `${protocol}//${hostname}/api`;
+        });
+        
         const apiUrl = `${getAPIBaseURL()}/admin/login`;
         debugLog(`API URL: ${apiUrl}`);
         

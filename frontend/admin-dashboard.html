@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -354,31 +353,410 @@
             color: var(--gray-300);
         }
 
+        /* Advanced Search Panel Styles */
+        .advanced-search-panel {
+            background: rgba(247, 250, 252, 0.95);
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .advanced-search-panel.active {
+            display: block;
+        }
+        
+        .advanced-search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 0.25rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 0.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .advanced-search-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+        
+        .toggle-advanced-search {
+            background: none;
+            border: none;
+            color: var(--primary-red);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem;
+        }
+        
+        .toggle-advanced-search:hover {
+            text-decoration: underline;
+        }
+        
+        /* Bulk Operations Styles */
+        .bulk-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        .export-btn {
+            margin-left: auto;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-500);
+        }
+        
+        .modal-body {
+            padding: 1rem;
+        }
+        
+        .modal-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        
+        /* Detail View Styles */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+        }
+        
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        /* Chart Container Styles */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(229, 62, 62, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-100);
+        }
+        
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .chart-title i {
+            color: var(--primary-red);
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .chart-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+            text-align: center;
+        }
+        
+        /* Responsive improvements */
+        @media (max-width: 1200px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Mobile Optimization Styles */
         @media (max-width: 768px) {
             .main-content {
                 padding: 1rem;
             }
-
+            
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-
+            
             .search-filter {
                 flex-direction: column;
             }
-
+            
             .search-box {
                 min-width: 100%;
             }
-
+            
             .data-table {
                 font-size: 0.8rem;
             }
-
+            
             .data-table th,
             .data-table td {
                 padding: 0.5rem;
             }
+            
+            .bulk-actions {
+                flex-direction: column;
+            }
+            
+            .export-btn {
+                margin-left: 0;
+            }
+            
+            .advanced-search-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .admin-logo {
+                justify-content: center;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .section-title {
+                justify-content: center;
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .stat-label {
+                font-size: 0.8rem;
+            }
+            
+            .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            
+            .search-input,
+            .filter-select {
+                font-size: 0.9rem;
+                padding: 0.5rem;
+            }
+            
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Touch-friendly styles */
+        @media (hover: none) and (pointer: coarse) {
+            .btn,
+            .status-badge,
+            .search-input,
+            .filter-select {
+                min-height: 44px; /* Minimum touch target size */
+                padding: 0.75rem 1rem;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem;
+            }
+        }
+        
+        /* Pagination Styles */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .pagination-controls .btn {
+            min-width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Lazy Loading Styles */
+        .lazy-load-placeholder {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
         }
     </style>
 </head>
@@ -392,7 +770,7 @@
             </a>
             <button class="logout-btn" onclick="logout()" id="logoutButton">
                 <i class="fas fa-sign-out-alt"></i>
-                Logout
+                <span class="logout-text">Logout</span>
             </button>
         </div>
     </header>
@@ -441,7 +819,43 @@
                 <div class="stat-label">Blood Units Available</div>
             </div>
         </div>
-
+        
+        <!-- Charts Section -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2 class="chart-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Data Visualization
+                </h2>
+                <button class="btn btn-primary" onclick="refreshCharts()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh Charts
+                </button>
+            </div>
+            
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="chart-card-title">User Registrations by Month</div>
+                    <canvas id="userRegistrationsChart" height="300"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-card-title">Blood Donations by Blood Group</div>
+                    <canvas id="donationsByGroupChart" height="300"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-card-title">Blood Requests by Urgency</div>
+                    <canvas id="requestsByUrgencyChart" height="300"></canvas>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-card-title">Donor Availability Status</div>
+                    <canvas id="donorAvailabilityChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
         <!-- Users Section -->
         <div class="dashboard-section">
             <div class="section-header">
@@ -450,10 +864,76 @@
                     User Registrations
                     <span class="data-count" id="usersCount">(0 users)</span>
                 </h2>
-                <button class="btn btn-primary" onclick="refreshUsers()">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" onclick="refreshUsers()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="toggle-advanced-search" onclick="toggleAdvancedSearch('users')">
+                        <i class="fas fa-sliders-h"></i>
+                        Advanced Search
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Bulk Actions for Users -->
+            <div class="bulk-actions">
+                <button class="btn btn-success btn-sm" onclick="bulkApprove('users')">
+                    <i class="fas fa-check"></i> Approve Selected
                 </button>
+                <button class="btn btn-warning btn-sm" onclick="bulkReject('users')">
+                    <i class="fas fa-times"></i> Reject Selected
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="bulkDelete('users')">
+                    <i class="fas fa-trash"></i> Delete Selected
+                </button>
+                <button class="btn btn-primary btn-sm export-btn" onclick="exportDataToCSV('users')">
+                    <i class="fas fa-file-export"></i> Export to CSV
+                </button>
+            </div>
+            
+            <!-- Advanced Search Panel for Users -->
+            <div class="advanced-search-panel" id="usersAdvancedSearch">
+                <div class="advanced-search-grid">
+                    <div class="form-group">
+                        <label for="usersBloodGroup">Blood Group</label>
+                        <select id="usersBloodGroup">
+                            <option value="">All Blood Groups</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="usersCity">City</label>
+                        <input type="text" id="usersCity" placeholder="Enter city">
+                    </div>
+                    <div class="form-group">
+                        <label for="usersStatus">Status</label>
+                        <select id="usersStatus">
+                            <option value="">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="usersDateFrom">Joined From</label>
+                        <input type="date" id="usersDateFrom">
+                    </div>
+                    <div class="form-group">
+                        <label for="usersDateTo">Joined To</label>
+                        <input type="date" id="usersDateTo">
+                    </div>
+                </div>
+                <div class="advanced-search-actions">
+                    <button class="btn btn-secondary" onclick="clearAdvancedSearch('users')">Clear</button>
+                    <button class="btn btn-primary" onclick="applyAdvancedSearch('users')">Apply Filters</button>
+                </div>
             </div>
 
             <div class="search-filter">
@@ -488,6 +968,9 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Users Pagination -->
+            <div class="pagination-container" id="usersPagination"></div>
         </div>
 
         <!-- Donations Section -->
@@ -498,10 +981,68 @@
                     Blood Donations
                     <span class="data-count" id="donationsCount">(0 donations)</span>
                 </h2>
-                <button class="btn btn-primary" onclick="refreshDonations()">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" onclick="refreshDonations()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="toggle-advanced-search" onclick="toggleAdvancedSearch('donations')">
+                        <i class="fas fa-sliders-h"></i>
+                        Advanced Search
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Bulk Actions for Donations -->
+            <div class="bulk-actions">
+                <button class="btn btn-success btn-sm" onclick="bulkApprove('donations')">
+                    <i class="fas fa-check"></i> Approve Selected
                 </button>
+                <button class="btn btn-warning btn-sm" onclick="bulkReject('donations')">
+                    <i class="fas fa-times"></i> Reject Selected
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="bulkDelete('donations')">
+                    <i class="fas fa-trash"></i> Delete Selected
+                </button>
+                <button class="btn btn-primary btn-sm export-btn" onclick="exportDataToCSV('donations')">
+                    <i class="fas fa-file-export"></i> Export to CSV
+                </button>
+            </div>
+            
+            <!-- Advanced Search Panel for Donations -->
+            <div class="advanced-search-panel" id="donationsAdvancedSearch">
+                <div class="advanced-search-grid">
+                    <div class="form-group">
+                        <label for="donationsBloodGroup">Blood Group</label>
+                        <select id="donationsBloodGroup">
+                            <option value="">All Blood Groups</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="donationsCity">City</label>
+                        <input type="text" id="donationsCity" placeholder="Enter city">
+                    </div>
+                    <div class="form-group">
+                        <label for="donationsDateFrom">Date From</label>
+                        <input type="date" id="donationsDateFrom">
+                    </div>
+                    <div class="form-group">
+                        <label for="donationsDateTo">Date To</label>
+                        <input type="date" id="donationsDateTo">
+                    </div>
+                </div>
+                <div class="advanced-search-actions">
+                    <button class="btn btn-secondary" onclick="clearAdvancedSearch('donations')">Clear</button>
+                    <button class="btn btn-primary" onclick="applyAdvancedSearch('donations')">Apply Filters</button>
+                </div>
             </div>
 
             <div class="search-filter">
@@ -535,6 +1076,9 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Donations Pagination -->
+            <div class="pagination-container" id="donationsPagination"></div>
         </div>
 
         <!-- Requests Section -->
@@ -545,10 +1089,82 @@
                     Blood Requests
                     <span class="data-count" id="requestsCount">(0 requests)</span>
                 </h2>
-                <button class="btn btn-primary" onclick="refreshRequests()">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" onclick="refreshRequests()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="toggle-advanced-search" onclick="toggleAdvancedSearch('requests')">
+                        <i class="fas fa-sliders-h"></i>
+                        Advanced Search
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Bulk Actions for Requests -->
+            <div class="bulk-actions">
+                <button class="btn btn-success btn-sm" onclick="bulkApprove('requests')">
+                    <i class="fas fa-check"></i> Approve Selected
                 </button>
+                <button class="btn btn-warning btn-sm" onclick="bulkReject('requests')">
+                    <i class="fas fa-times"></i> Reject Selected
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="bulkDelete('requests')">
+                    <i class="fas fa-trash"></i> Delete Selected
+                </button>
+                <button class="btn btn-primary btn-sm export-btn" onclick="exportDataToCSV('requests')">
+                    <i class="fas fa-file-export"></i> Export to CSV
+                </button>
+            </div>
+            
+            <!-- Advanced Search Panel for Requests -->
+            <div class="advanced-search-panel" id="requestsAdvancedSearch">
+                <div class="advanced-search-grid">
+                    <div class="form-group">
+                        <label for="requestsBloodGroup">Blood Group</label>
+                        <select id="requestsBloodGroup">
+                            <option value="">All Blood Groups</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="requestsHospital">Hospital</label>
+                        <input type="text" id="requestsHospital" placeholder="Enter hospital">
+                    </div>
+                    <div class="form-group">
+                        <label for="requestsCity">City</label>
+                        <input type="text" id="requestsCity" placeholder="Enter city">
+                    </div>
+                    <div class="form-group">
+                        <label for="requestsStatus">Status</label>
+                        <select id="requestsStatus">
+                            <option value="">All Statuses</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="requestsDateFrom">Date From</label>
+                        <input type="date" id="requestsDateFrom">
+                    </div>
+                    <div class="form-group">
+                        <label for="requestsDateTo">Date To</label>
+                        <input type="date" id="requestsDateTo">
+                    </div>
+                </div>
+                <div class="advanced-search-actions">
+                    <button class="btn btn-secondary" onclick="clearAdvancedSearch('requests')">Clear</button>
+                    <button class="btn btn-primary" onclick="applyAdvancedSearch('requests')">Apply Filters</button>
+                </div>
             </div>
 
             <div class="search-filter">
@@ -583,11 +1199,137 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Requests Pagination -->
+            <div class="pagination-container" id="requestsPagination"></div>
         </div>
     </main>
 
     <!-- Load external JavaScript to avoid CSP issues -->
+    <script src="js/api.js"></script>  <!-- Load API functions first -->
     <script src="js/admin-dashboard.js"></script>
     <script src="js/auto-refresh.js"></script>
+    <script>
+        // Toggle advanced search panels
+        function toggleAdvancedSearch(section) {
+            const panel = document.getElementById(`${section}AdvancedSearch`);
+            panel.classList.toggle('active');
+        }
+        
+        // Apply advanced search filters
+        function applyAdvancedSearch(section) {
+            const advancedFilters = {};
+            
+            switch(section) {
+                case 'users':
+                    advancedFilters.bloodGroup = document.getElementById('usersBloodGroup').value;
+                    advancedFilters.city = document.getElementById('usersCity').value;
+                    advancedFilters.status = document.getElementById('usersStatus').value;
+                    advancedFilters.dateFrom = document.getElementById('usersDateFrom').value;
+                    advancedFilters.dateTo = document.getElementById('usersDateTo').value;
+                    
+                    const userSearch = document.getElementById('userSearch');
+                    const userFilter = document.getElementById('userFilter');
+                    const searchTerm = userSearch ? userSearch.value.trim() : '';
+                    const roleFilter = userFilter ? userFilter.value : '';
+                    
+                    loadUsers(searchTerm, roleFilter, advancedFilters);
+                    break;
+                    
+                case 'donations':
+                    advancedFilters.bloodGroup = document.getElementById('donationsBloodGroup').value;
+                    advancedFilters.city = document.getElementById('donationsCity').value;
+                    advancedFilters.dateFrom = document.getElementById('donationsDateFrom').value;
+                    advancedFilters.dateTo = document.getElementById('donationsDateTo').value;
+                    
+                    const donationSearch = document.getElementById('donationSearch');
+                    const donationFilter = document.getElementById('donationFilter');
+                    const donationSearchTerm = donationSearch ? donationSearch.value.trim() : '';
+                    const donationStatusFilter = donationFilter ? donationFilter.value : '';
+                    
+                    loadDonations(donationSearchTerm, donationStatusFilter, advancedFilters);
+                    break;
+                    
+                case 'requests':
+                    advancedFilters.bloodGroup = document.getElementById('requestsBloodGroup').value;
+                    advancedFilters.hospital = document.getElementById('requestsHospital').value;
+                    advancedFilters.city = document.getElementById('requestsCity').value;
+                    advancedFilters.status = document.getElementById('requestsStatus').value;
+                    advancedFilters.dateFrom = document.getElementById('requestsDateFrom').value;
+                    advancedFilters.dateTo = document.getElementById('requestsDateTo').value;
+                    
+                    const requestSearch = document.getElementById('requestSearch');
+                    const requestFilter = document.getElementById('requestFilter');
+                    const requestSearchTerm = requestSearch ? requestSearch.value.trim() : '';
+                    const requestUrgencyFilter = requestFilter ? requestFilter.value : '';
+                    
+                    loadRequests(requestSearchTerm, requestUrgencyFilter, advancedFilters);
+                    break;
+            }
+        }
+        
+        // Clear advanced search filters
+        function clearAdvancedSearch(section) {
+            switch(section) {
+                case 'users':
+                    document.getElementById('usersBloodGroup').value = '';
+                    document.getElementById('usersCity').value = '';
+                    document.getElementById('usersStatus').value = '';
+                    document.getElementById('usersDateFrom').value = '';
+                    document.getElementById('usersDateTo').value = '';
+                    break;
+                    
+                case 'donations':
+                    document.getElementById('donationsBloodGroup').value = '';
+                    document.getElementById('donationsCity').value = '';
+                    document.getElementById('donationsDateFrom').value = '';
+                    document.getElementById('donationsDateTo').value = '';
+                    break;
+                    
+                case 'requests':
+                    document.getElementById('requestsBloodGroup').value = '';
+                    document.getElementById('requestsHospital').value = '';
+                    document.getElementById('requestsCity').value = '';
+                    document.getElementById('requestsStatus').value = '';
+                    document.getElementById('requestsDateFrom').value = '';
+                    document.getElementById('requestsDateTo').value = '';
+                    break;
+            }
+            
+            // Refresh the section with cleared filters
+            switch(section) {
+                case 'users':
+                    refreshUsers();
+                    break;
+                case 'donations':
+                    refreshDonations();
+                    break;
+                case 'requests':
+                    refreshRequests();
+                    break;
+            }
+        }
+        
+        // Refresh all charts
+        function refreshCharts() {
+            loadChartStats();
+        }
+        
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+    
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </body>
 </html>
