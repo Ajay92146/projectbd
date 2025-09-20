@@ -725,18 +725,47 @@ function initializeDashboard() {
     // Initialize WebSocket for real-time notifications
     initializeWebSocket();
     
-    // Auto-refresh data every 5 minutes
-    setInterval(() => {
-        loadStats();
-        loadChartStats();
-    }, 300000); // 5 minutes
+    // Set up auto-refresh based on user preferences
+    setupAutoRefresh();
+}
+
+// Set up auto-refresh based on user preferences
+function setupAutoRefresh() {
+    // Clear any existing intervals
+    if (window.statsRefreshInterval) {
+        clearInterval(window.statsRefreshInterval);
+    }
+    if (window.dataRefreshInterval) {
+        clearInterval(window.dataRefreshInterval);
+    }
     
-    // Auto-refresh tables every 10 minutes
-    setInterval(() => {
-        loadUsers();
-        loadDonations();
-        loadRequests();
-    }, 600000); // 10 minutes
+    // Check user preferences
+    const savedPrefs = localStorage.getItem('admin_dashboard_prefs');
+    let autoRefresh = true;
+    
+    if (savedPrefs) {
+        const prefs = JSON.parse(savedPrefs);
+        autoRefresh = prefs.autoRefresh !== false;
+    }
+    
+    if (autoRefresh) {
+        // Auto-refresh data every 5 minutes
+        window.statsRefreshInterval = setInterval(() => {
+            loadStats();
+            loadChartStats();
+        }, 300000); // 5 minutes
+        
+        // Auto-refresh tables every 10 minutes
+        window.dataRefreshInterval = setInterval(() => {
+            loadUsers();
+            loadDonations();
+            loadRequests();
+        }, 600000); // 10 minutes
+        
+        debugLog('Auto-refresh enabled');
+    } else {
+        debugLog('Auto-refresh disabled');
+    }
 }
 
 // Set up search and filter functionality
@@ -916,6 +945,63 @@ async function logoutFromServer() {
     }
 }
 
+// Admin logout function
+async function logoutAdmin() {
+    debugLog('🔐 Starting admin logout process...');
+    
+    try {
+        // Get API base URL
+        const getAPIBaseURL = ensureAPIBaseURL();
+        const apiUrl = `${getAPIBaseURL()}/admin/logout`;
+        debugLog(`API URL: ${apiUrl}`);
+        
+        // Call backend API for admin logout
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: getAdminAuthHeaders()
+        });
+        
+        debugLog(`Response status: ${response.status}`);
+        
+        // Clear admin session from both localStorage and sessionStorage
+        localStorage.removeItem('bloodconnect_admin');
+        localStorage.removeItem('admin_email');
+        localStorage.removeItem('admin_login_time');
+        localStorage.removeItem('admin_last_activity');
+        sessionStorage.removeItem('bloodconnect_admin');
+        sessionStorage.removeItem('admin_email');
+        sessionStorage.removeItem('admin_login_time');
+        
+        debugLog('✅ Admin session cleared!');
+        
+        // Show notification
+        showNotification('Logged out successfully', 'success');
+        
+        // Redirect to admin login page after a short delay
+        setTimeout(() => {
+            window.location.href = 'admin-login.html';
+        }, 1500);
+        
+    } catch (error) {
+        debugLog(`❌ Logout failed: ${error.message}`);
+        
+        // Even if API call fails, clear local session data
+        localStorage.removeItem('bloodconnect_admin');
+        localStorage.removeItem('admin_email');
+        localStorage.removeItem('admin_login_time');
+        localStorage.removeItem('admin_last_activity');
+        sessionStorage.removeItem('bloodconnect_admin');
+        sessionStorage.removeItem('admin_email');
+        sessionStorage.removeItem('admin_login_time');
+        
+        // Show notification
+        showNotification('Logged out successfully', 'success');
+        
+        // Redirect to admin login page
+        window.location.href = 'admin-login.html';
+    }
+}
+
 // Client-side logout cleanup
 function performClientLogout() {
     try {
@@ -997,9 +1083,154 @@ function performClientLogout() {
     }
 }
 
-// Initialize admin dashboard
+// Toggle dark mode
+function toggleDarkMode() {
+    const body = document.body;
+    const isDarkMode = body.classList.toggle('dark-mode');
+    
+    // Save preference to localStorage
+    localStorage.setItem('admin_dark_mode', isDarkMode ? 'true' : 'false');
+    
+    // Update icon
+    const toggleButton = document.querySelector('.dark-mode-toggle i');
+    if (toggleButton) {
+        toggleButton.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    
+    debugLog(`Dark mode ${isDarkMode ? 'enabled' : 'disabled'}`);
+}
+
+// Apply saved dark mode preference
+function applyDarkModePreference() {
+    const savedDarkMode = localStorage.getItem('admin_dark_mode');
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Apply dark mode if saved preference is true or if user prefers dark mode and no preference is saved
+    const shouldEnableDarkMode = savedDarkMode === 'true' || (savedDarkMode === null && prefersDarkScheme);
+    
+    if (shouldEnableDarkMode) {
+        document.body.classList.add('dark-mode');
+        const toggleButton = document.querySelector('.dark-mode-toggle i');
+        if (toggleButton) {
+            toggleButton.className = 'fas fa-sun';
+        }
+    }
+}
+
+// Load recent activity logs
+async function loadRecentActivity() {
+    try {
+        debugLog('Loading recent activity logs...');
+        const getAPIBaseURL = ensureAPIBaseURL();
+        const apiUrl = `${getAPIBaseURL()}/admin/activity-logs?limit=10`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayRecentActivity(data.data.logs);
+        } else {
+            throw new Error(data.message || 'Failed to load activity logs');
+        }
+    } catch (error) {
+        debugLog(`Error loading activity logs: ${error.message}`);
+    }
+}
+
+// Display recent activity logs
+function displayRecentActivity(logs) {
+    // Create activity panel if it doesn't exist
+    let activityPanel = document.getElementById('activityPanel');
+    if (!activityPanel) {
+        activityPanel = document.createElement('div');
+        activityPanel.id = 'activityPanel';
+        activityPanel.className = 'customization-panel';
+        activityPanel.style.bottom = '90px';
+        activityPanel.style.left = '20px';
+        activityPanel.style.right = 'auto';
+        activityPanel.style.width = '350px';
+        activityPanel.innerHTML = `
+            <h3>Recent Activity</h3>
+            <div id="activityList" style="max-height: 300px; overflow-y: auto;"></div>
+        `;
+        document.body.appendChild(activityPanel);
+    }
+    
+    const activityList = document.getElementById('activityList');
+    if (!activityList) return;
+    
+    if (logs.length === 0) {
+        activityList.innerHTML = '<div class="empty-state">No recent activity</div>';
+        return;
+    }
+    
+    activityList.innerHTML = logs.map(log => `
+        <div style="padding: 8px 0; border-bottom: 1px solid #eee;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <strong>${log.action}</strong>
+                <span style="font-size: 0.8rem; color: #718096;">${new Date(log.timestamp).toLocaleTimeString()}</span>
+            </div>
+            <div style="font-size: 0.9rem; color: #4a5568;">${log.details}</div>
+            <div style="font-size: 0.8rem; color: #a0aec0; margin-top: 4px;">${log.adminEmail}</div>
+        </div>
+    `).join('');
+}
+
+// Toggle activity panel
+function toggleActivityPanel() {
+    const panel = document.getElementById('activityPanel');
+    if (panel) {
+        panel.classList.toggle('active');
+        if (panel.classList.contains('active')) {
+            loadRecentActivity();
+        }
+    }
+}
+
+// Add activity button to header
+function addActivityButton() {
+    const headerContainer = document.querySelector('.header-container');
+    if (headerContainer) {
+        const activityButton = document.createElement('button');
+        activityButton.className = 'dark-mode-toggle';
+        activityButton.title = 'Recent Activity';
+        activityButton.innerHTML = '<i class="fas fa-history"></i>';
+        activityButton.onclick = toggleActivityPanel;
+        
+        // Insert after the system info button
+        const infoButton = headerContainer.querySelector('[title="System Information"]');
+        if (infoButton) {
+            headerContainer.insertBefore(activityButton, infoButton.nextSibling);
+        } else {
+            // If no info button, add to the left side
+            const logoContainer = headerContainer.querySelector('.admin-logo').parentElement;
+            if (logoContainer) {
+                logoContainer.appendChild(activityButton);
+            }
+        }
+    }
+}
+
+// Enhanced initializeAdminDashboard function
 function initializeAdminDashboard() {
     debugLog('🚀 Admin dashboard page loaded');
+    
+    // Apply dark mode preference
+    applyDarkModePreference();
+    
+    // Add system info button
+    addSystemInfoButton();
+    
+    // Add activity button
+    addActivityButton();
     
     // Check authentication first
     if (!checkAdminAuthentication()) {
@@ -1008,6 +1239,15 @@ function initializeAdminDashboard() {
     
     // Initialize session timeout checker
     initializeSessionTimeout();
+    
+    // Set up keyboard shortcuts
+    setupKeyboardShortcuts();
+    
+    // Add print button
+    addPrintButton();
+    
+    // Add help button
+    addHelpButton();
     
     // Log dashboard access
     logAdminActivity('dashboard_access', 'Admin accessed dashboard');
@@ -1019,14 +1259,14 @@ function initializeAdminDashboard() {
         logoutButton.addEventListener('click', function(e) {
             e.preventDefault();
             debugLog('🚪 Logout button clicked via event listener');
-            logout();
+            logoutAdmin();
         });
     } else {
         debugLog('⚠️ Warning: Logout button not found in DOM');
     }
     
     // Test logout function availability
-    if (typeof logout === 'function') {
+    if (typeof logoutAdmin === 'function') {
         debugLog('✅ Logout function is available');
     } else {
         debugLog('❌ Error: Logout function is not available!');
@@ -1043,7 +1283,7 @@ document.addEventListener('DOMContentLoaded', initializeAdminDashboard);
 window.refreshUsers = refreshUsers;
 window.refreshDonations = refreshDonations;
 window.refreshRequests = refreshRequests;
-window.logout = logout;
+window.logoutAdmin = logoutAdmin;
 
 // Add this new function for updating last updated time
 function updateLastUpdatedTime() {
@@ -1333,6 +1573,18 @@ function clearApiCache() {
     debugLog('API cache cleared');
 }
 
+// Add a function to manually clear cache and refresh data
+function clearCacheAndRefresh() {
+    clearApiCache();
+    // Refresh all data
+    loadStats();
+    loadChartStats();
+    refreshUsers();
+    refreshDonations();
+    refreshRequests();
+    showNotification('All data refreshed', 'success');
+}
+
 // Toggle select all checkboxes
 function toggleSelectAll(section) {
     let checkboxes = [];
@@ -1361,45 +1613,503 @@ function toggleSelectAll(section) {
 }
 
 // View user details
-function viewUserDetails(userId) {
+async function viewUserDetails(userId) {
     debugLog(`Viewing details for user: ${userId}`);
-    showNotification('User details feature coming soon', 'info');
+    
+    try {
+        const getAPIBaseURL = ensureAPIBaseURL();
+        const apiUrl = `${getAPIBaseURL()}/admin/users/${userId}`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayUserDetails(data.data.user);
+        } else {
+            throw new Error(data.message || 'Failed to load user details');
+        }
+    } catch (error) {
+        debugLog(`Error loading user details: ${error.message}`);
+        showNotification(`Failed to load user details: ${error.message}`, 'error');
+    }
+}
+
+// Display user details in modal
+function displayUserDetails(user) {
+    const modal = document.getElementById('userDetailModal');
+    const content = document.getElementById('userDetailContent');
+    
+    if (!modal || !content) {
+        debugLog('User detail modal elements not found');
+        return;
+    }
+    
+    content.innerHTML = `
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Name</span>
+                <span class="detail-value">${user.firstName} ${user.lastName}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Email</span>
+                <span class="detail-value">${user.email}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Phone</span>
+                <span class="detail-value">${user.phoneNumber || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Blood Group</span>
+                <span class="detail-value">${user.bloodGroup || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">City</span>
+                <span class="detail-value">${user.city || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Role</span>
+                <span class="detail-value">${user.role}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Status</span>
+                <span class="detail-value">${user.isActive ? 'Active' : 'Inactive'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Joined Date</span>
+                <span class="detail-value">${new Date(user.createdAt).toLocaleDateString()}</span>
+            </div>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
 }
 
 // View donation details
-function viewDonationDetails(donationId) {
+async function viewDonationDetails(donationId) {
     debugLog(`Viewing details for donation: ${donationId}`);
-    showNotification('Donation details feature coming soon', 'info');
+    
+    try {
+        const getAPIBaseURL = ensureAPIBaseURL();
+        const apiUrl = `${getAPIBaseURL()}/admin/donations/${donationId}`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayDonationDetails(data.data.donation);
+        } else {
+            throw new Error(data.message || 'Failed to load donation details');
+        }
+    } catch (error) {
+        debugLog(`Error loading donation details: ${error.message}`);
+        showNotification(`Failed to load donation details: ${error.message}`, 'error');
+    }
+}
+
+// Display donation details in modal
+function displayDonationDetails(donation) {
+    const modal = document.getElementById('donationDetailModal');
+    const content = document.getElementById('donationDetailContent');
+    
+    if (!modal || !content) {
+        debugLog('Donation detail modal elements not found');
+        return;
+    }
+    
+    content.innerHTML = `
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Donor Name</span>
+                <span class="detail-value">${donation.name || 'Unknown Donor'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Blood Group</span>
+                <span class="detail-value">${donation.bloodGroup || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Donation Date</span>
+                <span class="detail-value">${donation.dateOfDonation ? new Date(donation.dateOfDonation).toLocaleDateString() : 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Location</span>
+                <span class="detail-value">${donation.city ? `${donation.city}, ${donation.state}` : 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Status</span>
+                <span class="detail-value">${donation.isAvailable ? 'Available' : 'Unavailable'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Application Status</span>
+                <span class="detail-value">${donation.applicationStatus || 'Approved'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Age</span>
+                <span class="detail-value">${donation.age || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Gender</span>
+                <span class="detail-value">${donation.gender || 'N/A'}</span>
+            </div>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
 }
 
 // View request details
-function viewRequestDetails(requestId) {
+async function viewRequestDetails(requestId) {
     debugLog(`Viewing details for request: ${requestId}`);
-    showNotification('Request details feature coming soon', 'info');
+    
+    try {
+        const getAPIBaseURL = ensureAPIBaseURL();
+        const apiUrl = `${getAPIBaseURL()}/admin/requests/${requestId}`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            displayRequestDetails(data.data.request);
+        } else {
+            throw new Error(data.message || 'Failed to load request details');
+        }
+    } catch (error) {
+        debugLog(`Error loading request details: ${error.message}`);
+        showNotification(`Failed to load request details: ${error.message}`, 'error');
+    }
+}
+
+// Display request details in modal
+function displayRequestDetails(request) {
+    const modal = document.getElementById('requestDetailModal');
+    const content = document.getElementById('requestDetailContent');
+    
+    if (!modal || !content) {
+        debugLog('Request detail modal elements not found');
+        return;
+    }
+    
+    content.innerHTML = `
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Patient Name</span>
+                <span class="detail-value">${request.patientName || 'Unknown Patient'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Blood Group</span>
+                <span class="detail-value">${request.bloodGroup || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Units Needed</span>
+                <span class="detail-value">${request.requiredUnits || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Urgency</span>
+                <span class="detail-value">${request.urgency || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Hospital</span>
+                <span class="detail-value">${request.hospitalName || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">City</span>
+                <span class="detail-value">${request.hospitalCity || 'N/A'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Status</span>
+                <span class="detail-value">${request.status || 'Pending'}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Request Date</span>
+                <span class="detail-value">${request.requestDate ? new Date(request.requestDate).toLocaleDateString() : 'N/A'}</span>
+            </div>
+        </div>
+    `;
+    
+    modal.style.display = 'flex';
 }
 
 // Export data to CSV
-function exportDataToCSV(dataType) {
+async function exportDataToCSV(dataType) {
     debugLog(`Exporting ${dataType} data to CSV`);
-    showNotification(`${dataType} export feature coming soon`, 'info');
+    
+    try {
+        // Show loading notification
+        showNotification(`Preparing ${dataType} export...`, 'info');
+        
+        const getAPIBaseURL = ensureAPIBaseURL();
+        let apiUrl = `${getAPIBaseURL()}/admin/${dataType}/export`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Convert data to CSV format
+            const csvContent = convertToCSV(data.data);
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `${dataType}_export_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification(`${dataType} data exported successfully!`, 'success');
+        } else {
+            throw new Error(data.message || 'Failed to export data');
+        }
+    } catch (error) {
+        debugLog(`Error exporting ${dataType} data: ${error.message}`);
+        showNotification(`Failed to export ${dataType} data: ${error.message}`, 'error');
+    }
+}
+
+// Convert array of objects to CSV format
+function convertToCSV(data) {
+    if (!data || data.length === 0) return '';
+    
+    // Get headers from first object
+    const headers = Object.keys(data[0]);
+    
+    // Create CSV header row
+    const csvHeader = headers.join(',') + '\n';
+    
+    // Create CSV data rows
+    const csvRows = data.map(row => {
+        return headers.map(header => {
+            let value = row[header];
+            // Handle values that might contain commas or quotes
+            if (typeof value === 'string') {
+                // Escape quotes and wrap in quotes if needed
+                if (value.includes(',') || value.includes('"')) {
+                    value = `"${value.replace(/"/g, '""')}"`;
+                }
+            }
+            return value;
+        }).join(',');
+    }).join('\n');
+    
+    return csvHeader + csvRows;
 }
 
 // Bulk approve selected items
-function bulkApprove(dataType) {
+async function bulkApprove(dataType) {
     debugLog(`Bulk approving ${dataType}`);
-    showNotification(`${dataType} bulk approval feature coming soon`, 'info');
+    
+    // Get selected items
+    const selectedItems = getSelectedItems(dataType);
+    
+    if (selectedItems.length === 0) {
+        showNotification('Please select items to approve', 'warning');
+        return;
+    }
+    
+    try {
+        showNotification(`Approving ${selectedItems.length} ${dataType}...`, 'info');
+        
+        const getAPIBaseURL = ensureAPIBaseURL();
+        const apiUrl = `${getAPIBaseURL()}/admin/${dataType}/bulk-approve`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                ...getAdminAuthHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids: selectedItems })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(`${data.data.updatedCount} ${dataType} approved successfully!`, 'success');
+            // Refresh the data
+            refreshCurrentSection(dataType);
+        } else {
+            throw new Error(data.message || 'Failed to approve items');
+        }
+    } catch (error) {
+        debugLog(`Error bulk approving ${dataType}: ${error.message}`);
+        showNotification(`Failed to approve ${dataType}: ${error.message}`, 'error');
+    }
 }
 
 // Bulk reject selected items
-function bulkReject(dataType) {
+async function bulkReject(dataType) {
     debugLog(`Bulk rejecting ${dataType}`);
-    showNotification(`${dataType} bulk rejection feature coming soon`, 'info');
+    
+    // Get selected items
+    const selectedItems = getSelectedItems(dataType);
+    
+    if (selectedItems.length === 0) {
+        showNotification('Please select items to reject', 'warning');
+        return;
+    }
+    
+    try {
+        showNotification(`Rejecting ${selectedItems.length} ${dataType}...`, 'info');
+        
+        const getAPIBaseURL = ensureAPIBaseURL();
+        const apiUrl = `${getAPIBaseURL()}/admin/${dataType}/bulk-reject`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                ...getAdminAuthHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids: selectedItems })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(`${data.data.updatedCount} ${dataType} rejected successfully!`, 'success');
+            // Refresh the data
+            refreshCurrentSection(dataType);
+        } else {
+            throw new Error(data.message || 'Failed to reject items');
+        }
+    } catch (error) {
+        debugLog(`Error bulk rejecting ${dataType}: ${error.message}`);
+        showNotification(`Failed to reject ${dataType}: ${error.message}`, 'error');
+    }
 }
 
 // Bulk delete selected items
-function bulkDelete(dataType) {
+async function bulkDelete(dataType) {
     debugLog(`Bulk deleting ${dataType}`);
-    showNotification(`${dataType} bulk deletion feature coming soon`, 'info');
+    
+    // Get selected items
+    const selectedItems = getSelectedItems(dataType);
+    
+    if (selectedItems.length === 0) {
+        showNotification('Please select items to delete', 'warning');
+        return;
+    }
+    
+    // Confirm deletion
+    const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedItems.length} ${dataType}? This action cannot be undone.`);
+    
+    if (!confirmDelete) {
+        debugLog('Bulk delete cancelled by user');
+        return;
+    }
+    
+    try {
+        showNotification(`Deleting ${selectedItems.length} ${dataType}...`, 'info');
+        
+        const getAPIBaseURL = ensureAPIBaseURL();
+        const apiUrl = `${getAPIBaseURL()}/admin/${dataType}/bulk-delete`;
+        
+        const response = await fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+                ...getAdminAuthHeaders(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids: selectedItems })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(`${data.data.deletedCount} ${dataType} deleted successfully!`, 'success');
+            // Refresh the data
+            refreshCurrentSection(dataType);
+        } else {
+            throw new Error(data.message || 'Failed to delete items');
+        }
+    } catch (error) {
+        debugLog(`Error bulk deleting ${dataType}: ${error.message}`);
+        showNotification(`Failed to delete ${dataType}: ${error.message}`, 'error');
+    }
+}
+
+// Get selected items based on data type
+function getSelectedItems(dataType) {
+    let checkboxes = [];
+    
+    switch(dataType) {
+        case 'users':
+            checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            break;
+        case 'donations':
+            checkboxes = document.querySelectorAll('.donation-checkbox:checked');
+            break;
+        case 'requests':
+            checkboxes = document.querySelectorAll('.request-checkbox:checked');
+            break;
+        default:
+            return [];
+    }
+    
+    return Array.from(checkboxes).map(checkbox => checkbox.dataset[`${dataType.slice(0, -1)}Id`]);
+}
+
+// Refresh current section based on data type
+function refreshCurrentSection(dataType) {
+    switch(dataType) {
+        case 'users':
+            refreshUsers();
+            break;
+        case 'donations':
+            refreshDonations();
+            break;
+        case 'requests':
+            refreshRequests();
+            break;
+    }
 }
 
 // Update last activity time
@@ -1420,3 +2130,393 @@ function initializeSessionTimeout() {
     document.addEventListener('keypress', updateLastActivity);
     document.addEventListener('scroll', updateLastActivity);
 }
+
+// Add keyboard shortcuts for common actions
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', function(event) {
+        // Only trigger shortcuts when not in an input field
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        // Ctrl+R or F5 to refresh all data
+        if ((event.ctrlKey && event.key === 'r') || event.key === 'F5') {
+            event.preventDefault();
+            clearCacheAndRefresh();
+        }
+        
+        // Ctrl+E to export current view
+        if (event.ctrlKey && event.key === 'e') {
+            event.preventDefault();
+            // Determine which section is currently active
+            const activeSection = determineActiveSection();
+            if (activeSection) {
+                exportDataToCSV(activeSection);
+            }
+        }
+    });
+}
+
+// Determine which section is currently active based on scroll position
+function determineActiveSection() {
+    const sections = ['users', 'donations', 'requests'];
+    const scrollTop = window.scrollY;
+    
+    // Find the section that is currently in view
+    for (let i = sections.length - 1; i >= 0; i--) {
+        const sectionElement = document.querySelector(`#${sections[i]}TableContainer`);
+        if (sectionElement) {
+            const sectionTop = sectionElement.offsetTop;
+            if (scrollTop >= sectionTop - 100) {
+                return sections[i];
+            }
+        }
+    }
+    
+    return 'users'; // Default to users
+}
+
+// Print current view
+function printCurrentView() {
+    window.print();
+}
+
+// Add print button to header
+function addPrintButton() {
+    const headerContainer = document.querySelector('.header-container');
+    if (headerContainer) {
+        const printButton = document.createElement('button');
+        printButton.className = 'logout-btn';
+        printButton.style.marginRight = '0.5rem';
+        printButton.title = 'Print Dashboard';
+        printButton.innerHTML = '<i class="fas fa-print"></i> <span class="logout-text">Print</span>';
+        printButton.onclick = printCurrentView;
+        
+        // Insert before the help button
+        const helpButton = headerContainer.querySelector('button[title="Show Keyboard Shortcuts"]');
+        if (helpButton) {
+            headerContainer.insertBefore(printButton, helpButton);
+        } else {
+            // If no help button, insert before refresh button
+            const refreshButton = headerContainer.querySelector('button[onclick="clearCacheAndRefresh()"]');
+            if (refreshButton) {
+                headerContainer.insertBefore(printButton, refreshButton);
+            } else {
+                headerContainer.appendChild(printButton);
+            }
+        }
+    }
+}
+
+// Add a function to show a help modal with keyboard shortcuts
+function showHelpModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'helpModal';
+    modal.style.cssText = `
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Keyboard Shortcuts</h3>
+                <button class="modal-close" onclick="document.getElementById('helpModal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                        <span><kbd>Ctrl</kbd> + <kbd>R</kbd> or <kbd>F5</kbd></span>
+                        <span>Refresh all data</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                        <span><kbd>Ctrl</kbd> + <kbd>E</kbd></span>
+                        <span>Export current view to CSV</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                        <span><kbd>Esc</kbd></span>
+                        <span>Close modal dialogs</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('helpModal').remove()">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Enhanced addHelpButton function
+function addHelpButton() {
+    const headerContainer = document.querySelector('.header-container');
+    if (headerContainer) {
+        const helpButton = document.createElement('button');
+        helpButton.className = 'logout-btn';
+        helpButton.style.marginRight = '0.5rem';
+        helpButton.title = 'Show Keyboard Shortcuts';
+        helpButton.innerHTML = '<i class="fas fa-question-circle"></i> <span class="logout-text">Help</span>';
+        helpButton.onclick = showHelpModal;
+        
+        // Insert before the refresh button
+        const refreshButton = headerContainer.querySelector('button[onclick="clearCacheAndRefresh()"]');
+        if (refreshButton) {
+            headerContainer.insertBefore(helpButton, refreshButton);
+        } else {
+            headerContainer.appendChild(helpButton);
+        }
+    }
+}
+
+// Show system information modal
+function showSystemInfo() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'systemInfoModal';
+    modal.style.cssText = `
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    // Get system information
+    const userAgent = navigator.userAgent;
+    const platform = navigator.platform;
+    const language = navigator.language;
+    const cookiesEnabled = navigator.cookieEnabled;
+    const onlineStatus = navigator.onLine ? 'Online' : 'Offline';
+    
+    // Get dashboard version (you can update this as needed)
+    const dashboardVersion = '1.2.0';
+    
+    // Get current date and time
+    const now = new Date();
+    const dateTime = now.toLocaleString();
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">System Information</h3>
+                <button class="modal-close" onclick="document.getElementById('systemInfoModal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 1rem 0;">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Dashboard Version</span>
+                            <span class="detail-value">v${dashboardVersion}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Current Date & Time</span>
+                            <span class="detail-value">${dateTime}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Browser</span>
+                            <span class="detail-value">${userAgent}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Platform</span>
+                            <span class="detail-value">${platform}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Language</span>
+                            <span class="detail-value">${language}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Cookies</span>
+                            <span class="detail-value">${cookiesEnabled ? 'Enabled' : 'Disabled'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Network Status</span>
+                            <span class="detail-value">${onlineStatus}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Admin Email</span>
+                            <span class="detail-value">${localStorage.getItem('admin_email') || 'Not available'}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('systemInfoModal').remove()">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Add system info button to header
+function addSystemInfoButton() {
+    const headerContainer = document.querySelector('.header-container');
+    if (headerContainer) {
+        const infoButton = document.createElement('button');
+        infoButton.className = 'dark-mode-toggle';
+        infoButton.title = 'System Information';
+        infoButton.innerHTML = '<i class="fas fa-info-circle"></i>';
+        infoButton.onclick = showSystemInfo;
+        
+        // Insert after the dark mode toggle
+        const darkModeToggle = headerContainer.querySelector('.dark-mode-toggle');
+        if (darkModeToggle) {
+            headerContainer.insertBefore(infoButton, darkModeToggle.nextSibling);
+        } else {
+            // If no dark mode toggle, add to the left side
+            const logoContainer = headerContainer.querySelector('.admin-logo').parentElement;
+            if (logoContainer) {
+                logoContainer.appendChild(infoButton);
+            }
+        }
+    }
+}
+
+// Check server status
+async function checkServerStatus() {
+    try {
+        const getAPIBaseURL = ensureAPIBaseURL();
+        const apiUrl = `${getAPIBaseURL()}/health`;
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+            return { status: 'online', message: 'Server is running' };
+        } else {
+            return { status: 'offline', message: `Server error: ${response.status}` };
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            return { status: 'offline', message: 'Server timeout' };
+        }
+        return { status: 'offline', message: `Connection error: ${error.message}` };
+    }
+}
+
+// Show server status indicator
+async function showServerStatus() {
+    const status = await checkServerStatus();
+    
+    // Create or update status indicator
+    let statusIndicator = document.getElementById('serverStatusIndicator');
+    if (!statusIndicator) {
+        statusIndicator = document.createElement('div');
+        statusIndicator.id = 'serverStatusIndicator';
+        statusIndicator.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: ${status.status === 'online' ? '#10b981' : '#ef4444'};
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        `;
+        statusIndicator.innerHTML = `
+            <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
+            <span>${status.message}</span>
+        `;
+        document.body.appendChild(statusIndicator);
+    } else {
+        // Update existing indicator
+        statusIndicator.style.background = status.status === 'online' ? '#10b981' : '#ef4444';
+        statusIndicator.querySelector('span').textContent = status.message;
+    }
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        if (statusIndicator && statusIndicator.parentElement) {
+            statusIndicator.remove();
+        }
+    }, 5000);
+}
+
+// Enhanced initializeAdminDashboard function
+function initializeAdminDashboard() {
+    debugLog('🚀 Admin dashboard page loaded');
+    
+    // Apply dark mode preference
+    applyDarkModePreference();
+    
+    // Add system info button
+    addSystemInfoButton();
+    
+    // Add activity button
+    addActivityButton();
+    
+    // Check authentication first
+    if (!checkAdminAuthentication()) {
+        return; // Will redirect to login
+    }
+    
+    // Initialize session timeout checker
+    initializeSessionTimeout();
+    
+    // Set up keyboard shortcuts
+    setupKeyboardShortcuts();
+    
+    // Add print button
+    addPrintButton();
+    
+    // Add help button
+    addHelpButton();
+    
+    // Check server status
+    showServerStatus();
+    
+    // Log dashboard access
+    logAdminActivity('dashboard_access', 'Admin accessed dashboard');
+    
+    // Set up logout button event listener as backup
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        debugLog('🔄 Setting up logout button event listener');
+        logoutButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            debugLog('🚪 Logout button clicked via event listener');
+            logout();
+        });
+    } else {
+        debugLog('⚠️ Warning: Logout button not found in DOM');
+    }
+    
+    // Test logout function availability
+    if (typeof logout === 'function') {
+        debugLog('✅ Logout function is available');
+    } else {
+        debugLog('❌ Error: Logout function is not available!');
+    }
+    
+    // Initialize dashboard if authenticated
+    initializeDashboard();
+}
+

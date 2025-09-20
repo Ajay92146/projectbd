@@ -22,8 +22,107 @@
             --gray-900: #171923;
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            
+            /* Dark mode variables */
+            --dark-bg: #1a202c;
+            --dark-card-bg: #2d3748;
+            --dark-text: #e2e8f0;
+            --dark-border: #4a5568;
+            --dark-header: #2d3748;
         }
-
+        
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: var(--dark-text);
+        }
+        
+        body.dark-mode .admin-header {
+            background: rgba(45, 55, 72, 0.95);
+            border-bottom: 1px solid var(--dark-border);
+        }
+        
+        body.dark-mode .stat-card,
+        body.dark-mode .dashboard-section,
+        body.dark-mode .chart-container,
+        body.dark-mode .chart-card {
+            background: rgba(45, 55, 72, 0.95);
+            border: 1px solid var(--dark-border);
+            color: var(--dark-text);
+        }
+        
+        body.dark-mode .stat-label,
+        body.dark-mode .data-count,
+        body.dark-mode .detail-label {
+            color: #a0aec0;
+        }
+        
+        body.dark-mode .search-input,
+        body.dark-mode .filter-select {
+            background: #4a5568;
+            border: 1px solid var(--dark-border);
+            color: var(--dark-text);
+        }
+        
+        body.dark-mode .data-table th {
+            background: #4a5568;
+            color: var(--dark-text);
+        }
+        
+        body.dark-mode .data-table tr:hover {
+            background: #4a5568;
+        }
+        
+        body.dark-mode .advanced-search-panel {
+            background: rgba(45, 55, 72, 0.95);
+            border: 1px solid var(--dark-border);
+        }
+        
+        body.dark-mode .form-group label {
+            color: #a0aec0;
+        }
+        
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select {
+            background: #4a5568;
+            border: 1px solid var(--dark-border);
+            color: var(--dark-text);
+        }
+        
+        body.dark-mode .btn-secondary {
+            background: #4a5568;
+            color: var(--dark-text);
+        }
+        
+        body.dark-mode .btn-secondary:hover {
+            background: #718096;
+        }
+        
+        body.dark-mode .empty-state {
+            color: #a0aec0;
+        }
+        
+        body.dark-mode .empty-state i {
+            color: #718096;
+        }
+        
+        body.dark-mode .loading {
+            color: #a0aec0;
+        }
+        
+        /* Dark mode toggle button */
+        .dark-mode-toggle {
+            background: none;
+            border: none;
+            color: var(--gray-700);
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+        
+        body.dark-mode .dark-mode-toggle {
+            color: var(--dark-text);
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -758,20 +857,264 @@
             justify-content: center;
             color: var(--gray-500);
         }
+        
+        /* Print Styles */
+        @media print {
+            .admin-header {
+                position: static;
+                box-shadow: none;
+            }
+            
+            .logout-btn, 
+            .toggle-advanced-search,
+            .bulk-actions,
+            .search-filter,
+            .pagination-container,
+            #lastUpdated,
+            #notificationContainer {
+                display: none !important;
+            }
+            
+            .section-header {
+                border-bottom: 1px solid #000;
+            }
+            
+            .stat-card {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+            
+            .data-table {
+                border: 1px solid #000;
+            }
+            
+            .data-table th,
+            .data-table td {
+                border: 1px solid #000;
+            }
+            
+            .status-badge {
+                border: 1px solid #000;
+                background: transparent !important;
+                color: #000 !important;
+            }
+            
+            .chart-container {
+                page-break-inside: avoid;
+            }
+            
+            .chart-card {
+                border: 1px solid #000;
+            }
+        }
+        
+        /* Dashboard customization styles */
+        .customize-dashboard {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .customize-dashboard:hover {
+            transform: scale(1.1);
+            background: rgba(229, 62, 62, 0.9);
+            color: white;
+        }
+        
+        body.dark-mode .customize-dashboard {
+            background: rgba(45, 55, 72, 0.9);
+            color: #e2e8f0;
+        }
+        
+        body.dark-mode .customize-dashboard:hover {
+            background: rgba(229, 62, 62, 0.9);
+        }
+        
+        /* Customization panel */
+        .customization-panel {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            width: 300px;
+            display: none;
+        }
+        
+        body.dark-mode .customization-panel {
+            background: rgba(45, 55, 72, 0.95);
+            color: #e2e8f0;
+        }
+        
+        .customization-panel.active {
+            display: block;
+        }
+        
+        .customization-panel h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        body.dark-mode .customization-panel h3 {
+            border-bottom: 1px solid #4a5568;
+        }
+        
+        .toggle-switch {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-switch label {
+            font-weight: 500;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #e53e3e;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Compact view styles */
+        body.compact-view .stat-card {
+            padding: 1rem;
+        }
+        
+        body.compact-view .stat-number {
+            font-size: 2rem;
+        }
+        
+        body.compact-view .stat-label {
+            font-size: 0.8rem;
+        }
+        
+        body.compact-view .dashboard-section {
+            padding: 1rem;
+        }
+        
+        body.compact-view .section-header {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        body.compact-view .section-title {
+            font-size: 1.25rem;
+        }
+        
+        body.compact-view .data-table th,
+        body.compact-view .data-table td {
+            padding: 0.5rem;
+        }
+        
+        body.compact-view .btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+        
+        body.compact-view .search-input,
+        body.compact-view .filter-select {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        body.compact-view .chart-card {
+            padding: 0.75rem;
+        }
+        
+        body.compact-view .chart-card-title {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
     </style>
 </head>
 <body>
     <!-- Admin Header -->
     <header class="admin-header">
         <div class="header-container">
-            <a href="index.html" class="admin-logo">
-                <i class="fas fa-heart"></i>
-                <span>BloodConnect</span>
-            </a>
-            <button class="logout-btn" onclick="logout()" id="logoutButton">
-                <i class="fas fa-sign-out-alt"></i>
-                <span class="logout-text">Logout</span>
-            </button>
+            <div style="display: flex; align-items: center;">
+                <a href="index.html" class="admin-logo">
+                    <i class="fas fa-heart"></i>
+                    <span>BloodConnect</span>
+                </a>
+                <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="logout-btn" onclick="printCurrentView()" title="Print Dashboard">
+                    <i class="fas fa-print"></i>
+                    <span class="logout-text">Print</span>
+                </button>
+                <button class="logout-btn" onclick="clearCacheAndRefresh()" title="Clear Cache and Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                    <span class="logout-text">Refresh</span>
+                </button>
+                <button class="logout-btn" onclick="showHelpModal()" title="Show Keyboard Shortcuts">
+                    <i class="fas fa-question-circle"></i>
+                    <span class="logout-text">Help</span>
+                </button>
+                <button class="logout-btn" onclick="logout()" id="logoutButton" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="logout-text">Logout</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -1326,10 +1669,94 @@
                 event.target.style.display = 'none';
             }
         }
+        
+        // Toggle customization panel
+        function toggleCustomizationPanel() {
+            const panel = document.getElementById('customizationPanel');
+            panel.classList.toggle('active');
+        }
+        
+        // Close customization panel when clicking outside
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('customizationPanel');
+            const button = document.querySelector('.customize-dashboard');
+            
+            if (panel.classList.contains('active') && 
+                !panel.contains(event.target) && 
+                event.target !== button && 
+                !button.contains(event.target)) {
+                panel.classList.remove('active');
+            }
+        });
+        
+        // Apply customizations
+        function applyCustomizations() {
+            // Get toggle states
+            const showCharts = document.getElementById('showChartsToggle').checked;
+            const showStats = document.getElementById('showStatsToggle').checked;
+            const autoRefresh = document.getElementById('autoRefreshToggle').checked;
+            const compactView = document.getElementById('compactViewToggle').checked;
+            
+            // Apply customizations
+            const chartsSection = document.querySelector('.chart-container');
+            const statsGrid = document.querySelector('.stats-grid');
+            
+            if (chartsSection) {
+                chartsSection.style.display = showCharts ? 'block' : 'none';
+            }
+            
+            if (statsGrid) {
+                statsGrid.style.display = showStats ? 'grid' : 'none';
+            }
+            
+            // Save preferences to localStorage
+            localStorage.setItem('admin_dashboard_prefs', JSON.stringify({
+                showCharts,
+                showStats,
+                autoRefresh,
+                compactView
+            }));
+            
+            // Apply compact view
+            if (compactView) {
+                document.body.classList.add('compact-view');
+            } else {
+                document.body.classList.remove('compact-view');
+            }
+            
+            // Show notification
+            showNotification('Dashboard customizations applied!', 'success');
+        }
+        
+        // Load saved customizations
+        function loadCustomizations() {
+            const savedPrefs = localStorage.getItem('admin_dashboard_prefs');
+            
+            if (savedPrefs) {
+                const prefs = JSON.parse(savedPrefs);
+                
+                // Set toggle states
+                document.getElementById('showChartsToggle').checked = prefs.showCharts !== false;
+                document.getElementById('showStatsToggle').checked = prefs.showStats !== false;
+                document.getElementById('autoRefreshToggle').checked = prefs.autoRefresh !== false;
+                document.getElementById('compactViewToggle').checked = prefs.compactView || false;
+                
+                // Apply customizations
+                applyCustomizations();
+            }
+        }
+        
+        // Run when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCustomizations();
+        });
     </script>
     
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Admin Logout Script -->
+    <script src="js/admin-logout.js"></script>
 
 </body>
 </html>

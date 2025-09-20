@@ -18,20 +18,67 @@ function toggleAdminPassword() {
             passwordInput.type = 'text';
             toggleButton.classList.remove('fa-eye');
             toggleButton.classList.add('fa-eye-slash');
+            toggleButton.parentElement.setAttribute('aria-label', 'Hide password');
         } else {
             passwordInput.type = 'password';
             toggleButton.classList.remove('fa-eye-slash');
             toggleButton.classList.add('fa-eye');
+            toggleButton.parentElement.setAttribute('aria-label', 'Show password');
         }
+    }
+}
+
+// Password strength checker
+function checkPasswordStrength(password) {
+    const strengthMeter = document.getElementById('strengthMeter');
+    const strengthText = document.getElementById('strengthText');
+    
+    if (!strengthMeter || !strengthText) return;
+    
+    if (password.length === 0) {
+        strengthMeter.className = 'strength-meter';
+        strengthText.textContent = 'Password strength: None';
+        strengthText.className = 'strength-text';
+        return;
+    }
+    
+    let strength = 0;
+    
+    // Length check
+    if (password.length >= 8) strength++;
+    
+    // Character variety checks
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    // Update UI based on strength
+    strengthMeter.className = 'strength-meter';
+    strengthText.className = 'strength-text';
+    
+    if (strength <= 2) {
+        strengthMeter.classList.add('strength-weak');
+        strengthText.textContent = 'Password strength: Weak';
+        strengthText.classList.add('strength-weak-text');
+    } else if (strength <= 3) {
+        strengthMeter.classList.add('strength-medium');
+        strengthText.textContent = 'Password strength: Medium';
+        strengthText.classList.add('strength-medium-text');
+    } else {
+        strengthMeter.classList.add('strength-strong');
+        strengthText.textContent = 'Password strength: Strong';
+        strengthText.classList.add('strength-strong-text');
     }
 }
 
 // Use global getAPIBaseURL from api.js
 
 // Admin login process
-async function processAdminLogin(email, password) {
+async function processAdminLogin(email, password, rememberMe) {
     debugLog('🔐 Starting admin login process...');
     debugLog(`📧 Email: ${email}`);
+    debugLog(`💾 Remember me: ${rememberMe}`);
     
     const loginBtn = document.getElementById('adminLoginBtn');
     const loadingSpinner = document.getElementById('loadingSpinner');
@@ -88,15 +135,19 @@ async function processAdminLogin(email, password) {
                 localStorage.removeItem('bloodconnect_admin');
                 localStorage.removeItem('admin_email');
                 localStorage.removeItem('admin_login_time');
+                sessionStorage.removeItem('bloodconnect_admin');
+                sessionStorage.removeItem('admin_email');
+                sessionStorage.removeItem('admin_login_time');
                 
-                // Set new admin session data
-                localStorage.setItem('bloodconnect_admin', 'true');
-                localStorage.setItem('admin_email', email);
-                localStorage.setItem('admin_login_time', new Date().toISOString());
+                // Set new admin session data based on remember me preference
+                const storage = rememberMe ? localStorage : sessionStorage;
+                storage.setItem('bloodconnect_admin', 'true');
+                storage.setItem('admin_email', email);
+                storage.setItem('admin_login_time', new Date().toISOString());
                 
                 // Verify storage was successful
-                const storedStatus = localStorage.getItem('bloodconnect_admin');
-                const storedEmail = localStorage.getItem('admin_email');
+                const storedStatus = storage.getItem('bloodconnect_admin');
+                const storedEmail = storage.getItem('admin_email');
                 
                 debugLog(`💾 Stored admin status: ${storedStatus}`);
                 debugLog(`💾 Stored admin email: ${storedEmail}`);
@@ -117,10 +168,10 @@ async function processAdminLogin(email, password) {
                     }, 2000);
                     
                 } else {
-                    throw new Error('Failed to store admin session in localStorage');
+                    throw new Error('Failed to store admin session in storage');
                 }
             } catch (storageError) {
-                debugLog(`❌ LocalStorage error: ${storageError.message}`);
+                debugLog(`❌ Storage error: ${storageError.message}`);
                 throw new Error('Session storage failed. Please try again.');
             }
             
@@ -151,13 +202,27 @@ async function processAdminLogin(email, password) {
 
 // Check if already logged in
 function checkExistingAdminLogin() {
-    const adminStatus = localStorage.getItem('bloodconnect_admin');
+    // Check both localStorage and sessionStorage
+    const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
     if (adminStatus === 'true') {
         debugLog('Already logged in as admin, redirecting to dashboard');
         window.location.href = 'admin-dashboard.html';
         return true;
     }
     return false;
+}
+
+// Validate email format
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Validate password
+function validatePassword(password) {
+    // At least 8 characters, contains uppercase, lowercase, number, and special character
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
 }
 
 // Initialize admin login page
@@ -179,32 +244,74 @@ function initializeAdminLogin() {
             
             const email = document.getElementById('adminEmail')?.value || '';
             const password = document.getElementById('adminPassword')?.value || '';
+            const rememberMe = document.getElementById('rememberMe')?.checked || false;
+            
+            // Reset error messages
+            const emailError = document.getElementById('email-error');
+            const passwordError = document.getElementById('password-error');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (emailError) emailError.style.display = 'none';
+            if (passwordError) passwordError.style.display = 'none';
+            if (errorMessage) errorMessage.style.display = 'none';
             
             // Basic validation
-            if (!email || !password) {
-                debugLog('❌ Email or password is empty');
-                const errorMessage = document.getElementById('errorMessage');
-                if (errorMessage) {
-                    errorMessage.textContent = 'Please enter both email and password.';
-                    errorMessage.style.display = 'block';
-                }
-                return;
-            }
+            let hasErrors = false;
             
-            // Email format validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
+            if (!email) {
+                debugLog('❌ Email is empty');
+                if (emailError) {
+                    emailError.textContent = 'Please enter your email address.';
+                    emailError.style.display = 'block';
+                }
+                hasErrors = true;
+            } else if (!validateEmail(email)) {
                 debugLog('❌ Invalid email format');
-                const errorMessage = document.getElementById('errorMessage');
-                if (errorMessage) {
-                    errorMessage.textContent = 'Please enter a valid email address.';
-                    errorMessage.style.display = 'block';
+                if (emailError) {
+                    emailError.textContent = 'Please enter a valid email address.';
+                    emailError.style.display = 'block';
                 }
+                hasErrors = true;
+            }
+            
+            if (!password) {
+                debugLog('❌ Password is empty');
+                if (passwordError) {
+                    passwordError.textContent = 'Please enter your password.';
+                    passwordError.style.display = 'block';
+                }
+                hasErrors = true;
+            }
+            
+            if (hasErrors) {
                 return;
             }
             
-            await processAdminLogin(email, password);
+            await processAdminLogin(email, password, rememberMe);
         });
+        
+        // Add password strength checker
+        const passwordInput = document.getElementById('adminPassword');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+            });
+        }
+        
+        // Add email validation on blur
+        const emailInput = document.getElementById('adminEmail');
+        if (emailInput) {
+            emailInput.addEventListener('blur', function() {
+                const emailError = document.getElementById('email-error');
+                if (emailError) {
+                    emailError.style.display = 'none';
+                    if (this.value && !validateEmail(this.value)) {
+                        emailError.textContent = 'Please enter a valid email address.';
+                        emailError.style.display = 'block';
+                    }
+                }
+            });
+        }
         
         debugLog('✅ Form submission handler attached');
     } else {

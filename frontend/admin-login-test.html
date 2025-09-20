@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login Test - BloodConnect</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #e53e3e;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .feature-list {
+            margin: 20px 0;
+        }
+        
+        .feature-list h2 {
+            color: #2d3748;
+            border-bottom: 2px solid #e53e3e;
+            padding-bottom: 10px;
+        }
+        
+        .feature {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #e53e3e;
+        }
+        
+        .feature h3 {
+            color: #2d3748;
+            margin-top: 0;
+        }
+        
+        .feature p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #e53e3e, #fc8181);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(229, 62, 62, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #718096, #a0aec0);
+        }
+        
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .instructions {
+            background: #ebf8ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #3182ce;
+        }
+        
+        .instructions h3 {
+            color: #2c5282;
+            margin-top: 0;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 10px 0;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Admin Login Page Enhancements</h1>
+        
+        <div class="instructions">
+            <h3>Test Instructions</h3>
+            <ul>
+                <li>Click "View Enhanced Admin Login" to see the improved login page</li>
+                <li>Test the password strength indicator with different passwords</li>
+                <li>Try the "Remember Me" functionality</li>
+                <li>Test form validation with invalid inputs</li>
+                <li>Check the responsive design on mobile devices</li>
+            </ul>
+        </div>
+        
+        <div class="feature-list">
+            <h2>New Features Implemented</h2>
+            
+            <div class="feature">
+                <h3>🔐 Enhanced Security</h3>
+                <p>Password strength indicator that provides real-time feedback on password security. The system now validates passwords for complexity requirements including uppercase, lowercase, numbers, and special characters.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>👁️ Improved Password Visibility</h3>
+                <p>Enhanced password toggle with better accessibility features including ARIA labels that update based on the current state (show/hide password).</p>
+            </div>
+            
+            <div class="feature">
+                <h3>💾 Remember Me Functionality</h3>
+                <p>Added "Remember Me" option that allows admins to stay logged in across browser sessions using localStorage, or use sessionStorage for temporary sessions.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>✅ Advanced Form Validation</h3>
+                <p>Real-time validation for email format and password requirements with clear error messages. Validation occurs both on input blur and form submission.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>🎨 Improved UI/UX</h3>
+                <p>Enhanced visual feedback for form inputs, improved animations, and better responsive design for all device sizes. Added smooth transitions and loading states.</p>
+            </div>
+            
+            <div class="feature">
+                <h3>♿ Accessibility Improvements</h3>
+                <p>Added ARIA attributes for screen readers, proper focus management, and semantic HTML structure to ensure the login page is accessible to all users.</p>
+            </div>
+        </div>
+        
+        <div class="btn-container">
+            <a href="admin-login.html" class="btn">View Enhanced Admin Login</a>
+            <a href="admin-dashboard.html" class="btn btn-secondary">View Admin Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>
