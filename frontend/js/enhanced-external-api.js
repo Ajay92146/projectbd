@@ -117,6 +117,12 @@ class EnhancedExternalAPI {
     async searchExternalDonors(bloodGroup, country = 'India', filters = {}) {
         console.log(`🌐 Searching external APIs for ${bloodGroup} in ${country}...`);
         
+        // Check if running on file:// protocol
+        if (window.location.protocol === 'file:') {
+            console.log('🏠 Running on file:// protocol, using only fallback data');
+            return this.getFallbackSearchResults(bloodGroup, country, filters);
+        }
+        
         const cacheKey = `external_${bloodGroup}_${country}_${JSON.stringify(filters)}`;
         
         // Check cache first
@@ -189,6 +195,42 @@ class EnhancedExternalAPI {
         });
         
         console.log(`✅ External search completed: ${results.totalFound} donors found in ${results.searchTime}ms`);
+        return results;
+    }
+    
+    /**
+     * Get fallback search results for file:// protocol
+     */
+    getFallbackSearchResults(bloodGroup, country, filters) {
+        const startTime = Date.now();
+        const countryData = this.fallbackData[country] || this.fallbackData['India'];
+        
+        // Filter by blood group
+        let donors = countryData.filter(donor => donor.bloodGroup === bloodGroup);
+        
+        // Apply additional filters
+        donors = this.applyAdvancedFilters(donors, filters);
+        
+        const results = {
+            success: true,
+            sources: ['fallback'],
+            donors: donors,
+            totalFound: donors.length,
+            searchTime: Date.now() - startTime,
+            note: 'Using fallback data - file:// protocol detected'
+        };
+        
+        // Save to search history
+        this.addToSearchHistory({
+            bloodGroup,
+            country,
+            filters,
+            resultCount: results.totalFound,
+            timestamp: new Date(),
+            searchTime: results.searchTime
+        });
+        
+        console.log(`✅ Fallback search completed: ${results.totalFound} donors found`);
         return results;
     }
     

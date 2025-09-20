@@ -1378,6 +1378,9 @@
                                 FIND BLOOD DONORS
                             </h2>
                             <p>Advanced search to find available blood donors in your area</p>
+                            <button type="button" onclick="showSearchTips()" class="btn" style="font-size: 0.75rem; padding: 0.25rem 0.75rem; background: var(--gray-400); color: white; margin-top: 0.5rem;">
+                                <i class="fas fa-question-circle"></i> Search Tips
+                            </button>
                         </div>
 
                         <form id="searchForm" class="advanced-search-form">
@@ -1427,6 +1430,14 @@
                                     <select id="searchDistrict" name="district">
                                         <option value="">-----Select District-----</option>
                                         <!-- Options will be populated dynamically based on state selection -->
+                                    </select>
+                                </div>
+
+                                <div class="search-field">
+                                    <label for="searchBlock"><i class="fas fa-th-large"></i> Select Block</label>
+                                    <select id="searchBlock" name="block">
+                                        <option value="">-----Select Block-----</option>
+                                        <!-- Options will be populated dynamically based on district selection -->
                                     </select>
                                 </div>
 
@@ -1529,11 +1540,15 @@
                             <div class="search-actions">
                                 <button type="submit" class="search-btn">
                                     <i class="fas fa-search"></i>
-                                    SEARCH
+                                    SEARCH DONORS
                                 </button>
                                 <button type="reset" class="reset-btn">
                                     <i class="fas fa-redo"></i>
-                                    RESET
+                                    RESET FILTERS
+                                </button>
+                                <button type="button" class="reset-btn" onclick="clearAllFilters()">
+                                    <i class="fas fa-times"></i>
+                                    CLEAR ALL
                                 </button>
                             </div>
                         </form>
@@ -1871,6 +1886,42 @@
         let isSearching = false;
         let lastSearchTime = 0;
         
+        // Show search tips
+        function showSearchTips() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-lightbulb"></i> Search Tips</h3>
+                        <span class="modal-close" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <h4>🔍 How to Use Advanced Search:</h4>
+                        <ul style="text-align: left; margin: 1rem 0; padding-left: 2rem;">
+                            <li><strong>Blood Group:</strong> Required - Select the exact blood type needed</li>
+                            <li><strong>Location:</strong> Use cascading filters (Country → State → District → City) for precise results</li>
+                            <li><strong>Search Radius:</strong> Expand search area if needed (default: 10km)</li>
+                            <li><strong>Urgency Level:</strong> Critical searches will find more donors from multiple sources</li>
+                            <li><strong>Advanced Filters:</strong> Use for gender, age, availability, and verification preferences</li>
+                        </ul>
+                        <h4>💡 Pro Tips:</h4>
+                        <ul style="text-align: left; margin: 1rem 0; padding-left: 2rem;">
+                            <li>Start with basic filters and expand if no results found</li>
+                            <li>Use "Expand Search Area" button for broader results</li>
+                            <li>Check multiple data sources for comprehensive coverage</li>
+                            <li>Save frequently used searches for quick access</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="btn btn-primary">Got it!</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
         // Toggle Advanced Filters
         function toggleAdvancedFilters() {
             const content = document.getElementById('advancedFiltersContent');
@@ -1894,6 +1945,193 @@
             const searchResults = document.getElementById('searchResults');
             const donorsList = document.getElementById('donorsList');
             const resultsCount = document.getElementById('resultsCount');
+            
+            // Cascade dropdown functionality - move inside DOMContentLoaded
+            const countrySelect = document.getElementById('searchCountry');
+            const stateSelect = document.getElementById('searchState');
+            const districtSelect = document.getElementById('searchDistrict');
+            const citySelect = document.getElementById('searchCity');
+
+            // Check if all dropdown elements exist
+            if (!countrySelect || !stateSelect || !districtSelect || !citySelect) {
+                console.error('❌ One or more dropdown elements not found!');
+                return;
+            }
+            
+            console.log('✅ All dropdown elements found, setting up cascading functionality');
+
+            // Sample data for cascading dropdowns (enhanced)
+            const locationData = {
+                'India': {
+                    'Maharashtra': {
+                        'Mumbai': ['Andheri', 'Bandra', 'Borivali', 'Thane', 'Kurla', 'Mulund'],
+                        'Pune': ['Koregaon Park', 'Hinjewadi', 'Kothrud', 'Viman Nagar', 'Wakad', 'Baner'],
+                        'Nagpur': ['Sitabuldi', 'Sadar', 'Dharampeth', 'Hingna'],
+                        'Nashik': ['College Road', 'Gangapur Road', 'Panchavati']
+                    },
+                    'Delhi': {
+                        'New Delhi': ['Connaught Place', 'Karol Bagh', 'Lajpat Nagar', 'Khan Market'],
+                        'South Delhi': ['Greater Kailash', 'Saket', 'Vasant Kunj', 'Hauz Khas'],
+                        'North Delhi': ['Civil Lines', 'Model Town', 'Rohini'],
+                        'East Delhi': ['Laxmi Nagar', 'Preet Vihar', 'Mayur Vihar']
+                    },
+                    'Karnataka': {
+                        'Bangalore': ['Whitefield', 'Koramangala', 'Indiranagar', 'Electronic City', 'Marathahalli', 'BTM Layout'],
+                        'Mysore': ['Saraswathipuram', 'Kuvempunagar', 'Hebbal'],
+                        'Mangalore': ['Kadri', 'Bejai', 'Kankanady']
+                    },
+                    'Tamil Nadu': {
+                        'Chennai': ['T Nagar', 'Anna Nagar', 'Velachery', 'Adyar', 'Porur'],
+                        'Coimbatore': ['RS Puram', 'Peelamedu', 'Saibaba Colony'],
+                        'Madurai': ['Anna Nagar', 'KK Nagar', 'Vilangudi']
+                    },
+                    'Gujarat': {
+                        'Ahmedabad': ['Satellite', 'Vastrapur', 'Navrangpura', 'Maninagar'],
+                        'Surat': ['Athwa', 'Adajan', 'Vesu', 'Rander'],
+                        'Vadodara': ['Alkapuri', 'Fatehgunj', 'Gotri']
+                    },
+                    'Rajasthan': {
+                        'Jaipur': ['Malviya Nagar', 'C Scheme', 'Vaishali Nagar', 'Mansarovar'],
+                        'Jodhpur': ['Sardarpura', 'Ratanada', 'Shastri Nagar'],
+                        'Udaipur': ['Fateh Sagar', 'Surajpole', 'Hiran Magri']
+                    },
+                    'West Bengal': {
+                        'Kolkata': ['Salt Lake', 'New Town', 'Park Street', 'Ballygunge', 'Howrah'],
+                        'Siliguri': ['Matigara', 'Pradhan Nagar', 'Hill Cart Road']
+                    },
+                    'Uttar Pradesh': {
+                        'Lucknow': ['Gomti Nagar', 'Hazratganj', 'Indira Nagar', 'Aliganj'],
+                        'Kanpur': ['Civil Lines', 'Swaroop Nagar', 'Kidwai Nagar'],
+                        'Agra': ['Sadar Bazaar', 'Dayalbagh', 'Sikandra']
+                    }
+                },
+                'USA': {
+                    'California': {
+                        'Los Angeles': ['Downtown', 'Hollywood', 'Beverly Hills', 'Santa Monica'],
+                        'San Francisco': ['Mission District', 'Castro', 'Chinatown', 'SOMA']
+                    },
+                    'New York': {
+                        'New York City': ['Manhattan', 'Brooklyn', 'Queens', 'Bronx']
+                    }
+                },
+                'UK': {
+                    'England': {
+                        'London': ['Westminster', 'Camden', 'Kensington', 'Tower Hamlets'],
+                        'Manchester': ['City Centre', 'Didsbury', 'Chorlton']
+                    }
+                },
+                'Canada': {
+                    'Ontario': {
+                        'Toronto': ['Downtown', 'North York', 'Scarborough', 'Etobicoke'],
+                        'Ottawa': ['ByWard Market', 'Centretown', 'Kanata']
+                    }
+                },
+                'Australia': {
+                    'New South Wales': {
+                        'Sydney': ['CBD', 'Bondi', 'Parramatta', 'Manly'],
+                        'Newcastle': ['The Hill', 'Cooks Hill', 'Hamilton']
+                    }
+                }
+            };
+
+            // Enhanced updateDropdown function with better UX
+            function updateDropdown(selectElement, options) {
+                if (!selectElement) {
+                    console.error('❌ Select element is null');
+                    return;
+                }
+                
+                const currentValue = selectElement.value;
+                selectElement.innerHTML = '<option value="">-----Select-----</option>';
+                
+                if (options.length === 0) {
+                    selectElement.disabled = true;
+                    selectElement.style.opacity = '0.6';
+                    selectElement.style.cursor = 'not-allowed';
+                    return;
+                }
+                
+                selectElement.disabled = false;
+                selectElement.style.opacity = '1';
+                selectElement.style.cursor = 'pointer';
+                
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    selectElement.appendChild(optionElement);
+                });
+                
+                // Restore previous value if it still exists
+                if (currentValue && options.includes(currentValue)) {
+                    selectElement.value = currentValue;
+                }
+                
+                console.log(`✅ Updated ${selectElement.id} with ${options.length} options`);
+            }
+
+            // Update states when country changes
+            countrySelect.addEventListener('change', function() {
+                const country = this.value;
+                console.log('🌍 Country changed to:', country);
+                
+                const states = country ? Object.keys(locationData[country] || {}) : [];
+                console.log('📍 Available states:', states);
+                
+                updateDropdown(stateSelect, states);
+                updateDropdown(districtSelect, []);
+                updateDropdown(citySelect, []);
+            });
+
+            // Update districts when state changes
+            stateSelect.addEventListener('change', function() {
+                const country = countrySelect.value;
+                const state = this.value;
+                console.log('🏛️ State changed to:', state, 'in country:', country);
+                
+                const districts = country && state ? Object.keys(locationData[country][state] || {}) : [];
+                console.log('🏢 Available districts:', districts);
+                
+                updateDropdown(districtSelect, districts);
+                updateDropdown(citySelect, []);
+            });
+
+            // Update cities when district changes
+            districtSelect.addEventListener('change', function() {
+                const country = countrySelect.value;
+                const state = stateSelect.value;
+                const district = this.value;
+                console.log('🏙️ District changed to:', district);
+                
+                const cities = country && state && district ? locationData[country][state][district] || [] : [];
+                console.log('🏘️ Available cities:', cities);
+                
+                updateDropdown(citySelect, cities);
+            });
+
+            // Initialize dropdown states
+            function initializeDropdowns() {
+                console.log('🔧 Initializing cascading dropdowns...');
+                
+                // Disable dependent dropdowns initially
+                updateDropdown(stateSelect, []);
+                updateDropdown(districtSelect, []);
+                updateDropdown(citySelect, []);
+                
+                // Add event listeners for filter count updates
+                const formElements = searchForm.querySelectorAll('select, input');
+                formElements.forEach(element => {
+                    element.addEventListener('change', updateActiveFiltersCount);
+                });
+                
+                // Initial filter count update
+                updateActiveFiltersCount();
+                
+                console.log('✅ Cascading dropdowns initialized successfully');
+            }
+
+            // Call initialization
+            initializeDropdowns();
 
             // Enhanced sample donor data with more diverse locations for fallback
             const sampleDonors = [
@@ -1901,98 +2139,158 @@
                     name: "Rajesh Kumar",
                     bloodType: "O+",
                     location: "Mumbai, Maharashtra",
+                    city: "Mumbai",
+                    state: "Maharashtra",
+                    country: "India",
                     phone: "+91 98765 43210",
                     lastDonation: "2 months ago",
-                    availability: "Available"
+                    availability: "Available",
+                    gender: "male",
+                    age: 28,
+                    verified: true
                 },
                 {
                     name: "Priya Sharma",
                     bloodType: "A+",
                     location: "New Delhi, Delhi",
+                    city: "New Delhi",
+                    state: "Delhi",
+                    country: "India",
                     phone: "+91 87654 32109",
                     lastDonation: "3 months ago",
-                    availability: "Available"
+                    availability: "Available",
+                    gender: "female",
+                    age: 32,
+                    verified: true
                 },
                 {
                     name: "Amit Patel",
                     bloodType: "B+",
                     location: "Ahmedabad, Gujarat",
+                    city: "Ahmedabad",
+                    state: "Gujarat",
+                    country: "India",
                     phone: "+91 76543 21098",
                     lastDonation: "1 month ago",
-                    availability: "Available"
+                    availability: "Available",
+                    gender: "male",
+                    age: 35,
+                    verified: false
                 },
                 {
                     name: "Sneha Reddy",
                     bloodType: "AB+",
                     location: "Bangalore, Karnataka",
+                    city: "Bangalore",
+                    state: "Karnataka",
+                    country: "India",
                     phone: "+91 65432 10987",
                     lastDonation: "4 months ago",
-                    availability: "Available"
+                    availability: "Available",
+                    gender: "female",
+                    age: 26,
+                    verified: true
                 },
                 {
                     name: "Vikram Singh",
                     bloodType: "O-",
                     location: "Jaipur, Rajasthan",
+                    city: "Jaipur",
+                    state: "Rajasthan",
+                    country: "India",
                     phone: "+91 54321 09876",
                     lastDonation: "2 months ago",
-                    availability: "Available"
+                    availability: "Available",
+                    gender: "male",
+                    age: 42,
+                    verified: true
                 },
                 {
                     name: "Kavya Nair",
                     bloodType: "A-",
                     location: "Chennai, Tamil Nadu",
+                    city: "Chennai",
+                    state: "Tamil Nadu",
+                    country: "India",
                     phone: "+91 43210 98765",
                     lastDonation: "1 month ago",
-                    availability: "Available"
+                    availability: "Available",
+                    gender: "female",
+                    age: 29,
+                    verified: true
                 },
                 {
                     name: "Rohit Verma",
                     bloodType: "B-",
                     location: "Pune, Maharashtra",
+                    city: "Pune",
+                    state: "Maharashtra",
+                    country: "India",
                     phone: "+91 32109 87654",
                     lastDonation: "3 months ago",
-                    availability: "Available"
+                    availability: "Not Available",
+                    gender: "male",
+                    age: 38,
+                    verified: false
                 },
                 {
                     name: "Anita Das",
                     bloodType: "AB-",
                     location: "Kolkata, West Bengal",
+                    city: "Kolkata",
+                    state: "West Bengal",
+                    country: "India",
                     phone: "+91 21098 76543",
                     lastDonation: "2 months ago",
-                    availability: "Available"
+                    availability: "Available",
+                    gender: "female",
+                    age: 31,
+                    verified: true
                 },
                 {
                     name: "Suresh Gupta",
                     bloodType: "O+",
                     location: "Lucknow, Uttar Pradesh",
+                    city: "Lucknow",
+                    state: "Uttar Pradesh",
+                    country: "India",
                     phone: "+91 10987 65432",
                     lastDonation: "4 months ago",
-                    availability: "Available"
+                    availability: "Available",
+                    gender: "male",
+                    age: 45,
+                    verified: true
                 },
                 {
                     name: "Meera Joshi",
                     bloodType: "A+",
                     location: "Surat, Gujarat",
+                    city: "Surat",
+                    state: "Gujarat",
+                    country: "India",
                     phone: "+91 09876 54321",
                     lastDonation: "1 month ago",
-                    availability: "Available"
+                    availability: "Available",
+                    gender: "female",
+                    age: 27,
+                    verified: false
                 }
             ];
 
-            // Form validation
+            // Form validation with enhanced messaging
             function validateSearchForm() {
                 const bloodGroup = document.getElementById('searchBloodGroup').value;
                 const country = document.getElementById('searchCountry').value;
                 
                 if (!bloodGroup) {
-                    alert('Please select a blood group to search for donors.');
+                    showNotification('Please select a blood group to search for donors.', 'error');
                     document.getElementById('searchBloodGroup').focus();
                     return false;
                 }
                 
                 // Optional: Warn if no location is selected
                 if (!country) {
-                    const proceed = confirm('No location filter selected. This will search all available donors. Do you want to continue?');
+                    const proceed = confirm('No location filter selected. This will search all available donors worldwide. Do you want to continue?');
                     if (!proceed) {
                         document.getElementById('searchCountry').focus();
                         return false;
@@ -2000,6 +2298,46 @@
                 }
                 
                 return true;
+            }
+            
+            // Show active filters count
+            function updateActiveFiltersCount() {
+                const form = document.getElementById('searchForm');
+                const formData = new FormData(form);
+                let activeFilters = 0;
+                
+                for (let [key, value] of formData.entries()) {
+                    if (value && value.trim() !== '') {
+                        activeFilters++;
+                    }
+                }
+                
+                const toggleButton = document.querySelector('.toggle-filters');
+                if (toggleButton) {
+                    const existingBadge = toggleButton.querySelector('.filter-badge');
+                    if (existingBadge) {
+                        existingBadge.remove();
+                    }
+                    
+                    if (activeFilters > 0) {
+                        const badge = document.createElement('span');
+                        badge.className = 'filter-badge';
+                        badge.style.cssText = `
+                            background: var(--primary-red);
+                            color: white;
+                            border-radius: 50%;
+                            width: 20px;
+                            height: 20px;
+                            font-size: 0.75rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin-left: 0.5rem;
+                        `;
+                        badge.textContent = activeFilters;
+                        toggleButton.appendChild(badge);
+                    }
+                }
             }
 
             // Handle form submission with validation
@@ -2095,7 +2433,17 @@
             const resetBtn = document.querySelector('.reset-btn');
             resetBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                
+                resetSearchForm();
+            });
+            
+            // Clear all filters function
+            function clearAllFilters() {
+                resetSearchForm();
+                showNotification('All search filters have been cleared', 'success');
+            }
+            
+            // Reset search form function
+            function resetSearchForm() {
                 // Reset form
                 searchForm.reset();
                 
@@ -2104,22 +2452,33 @@
                 updateDropdown(districtSelect, []);
                 updateDropdown(citySelect, []);
                 
+                // Reset advanced filters visibility
+                const advancedFiltersContent = document.getElementById('advancedFiltersContent');
+                const toggleButton = document.querySelector('.toggle-filters');
+                if (advancedFiltersContent && toggleButton) {
+                    advancedFiltersContent.style.display = 'none';
+                    toggleButton.classList.remove('active');
+                    toggleButton.querySelector('.toggle-icon').style.transform = 'rotate(0deg)';
+                }
+                
                 // Hide search results
                 searchResults.style.display = 'none';
                 
-                console.log('Search form has been reset');
-            });
+                console.log('Search form has been reset and filters cleared');
+            }
 
             // Search internal database (your existing donors)
             async function searchInternalDatabase(searchCriteria) {
                 return new Promise((resolve) => {
                     setTimeout(() => {
                         // Filter sample donors based on criteria
-                        let filteredDonors = sampleDonors.filter(donor => {
+                        const filteredDonors = sampleDonors.filter(donor => {
+                            // Blood group filter
                             if (searchCriteria.bloodGroup && donor.bloodType !== searchCriteria.bloodGroup) {
                                 return false;
                             }
                             
+                            // Location filters
                             if (searchCriteria.state || searchCriteria.district || searchCriteria.city) {
                                 const donorLocation = donor.location.toLowerCase();
                                 if (searchCriteria.state && !donorLocation.includes(searchCriteria.state.toLowerCase())) {
@@ -2129,6 +2488,24 @@
                                     return false;
                                 }
                                 if (searchCriteria.city && !donorLocation.includes(searchCriteria.city.toLowerCase())) {
+                                    return false;
+                                }
+                            }
+                            
+                            // Country filter
+                            if (searchCriteria.country) {
+                                const donorLocation = donor.location.toLowerCase();
+                                // Check if location contains country-specific terms
+                                const countryTerms = {
+                                    'India': ['india', 'maharashtra', 'delhi', 'karnataka', 'tamil nadu', 'gujarat', 'rajasthan', 'west bengal', 'uttar pradesh'],
+                                    'USA': ['usa', 'california', 'new york', 'texas', 'florida'],
+                                    'UK': ['uk', 'england', 'london', 'manchester'],
+                                    'Canada': ['canada', 'ontario', 'toronto', 'ottawa'],
+                                    'Australia': ['australia', 'sydney', 'melbourne']
+                                };
+                                
+                                const terms = countryTerms[searchCriteria.country] || [searchCriteria.country.toLowerCase()];
+                                if (!terms.some(term => donorLocation.includes(term))) {
                                     return false;
                                 }
                             }
@@ -2152,8 +2529,60 @@
             // Apply advanced filters to donor results
             function applyAdvancedFilters(donors, searchCriteria) {
                 return donors.filter(donor => {
-                    // Additional filtering logic if needed
-                    return true; // For now, external API handles most filtering
+                    // Gender filter
+                    if (searchCriteria.gender && donor.gender && donor.gender.toLowerCase() !== searchCriteria.gender.toLowerCase()) {
+                        return false;
+                    }
+                    
+                    // Age range filter (if donor has age information)
+                    if (searchCriteria.ageRange && donor.age) {
+                        const [minAge, maxAge] = searchCriteria.ageRange.split('-').map(age => parseInt(age));
+                        if (donor.age < minAge || donor.age > maxAge) {
+                            return false;
+                        }
+                    }
+                    
+                    // Availability filter
+                    if (searchCriteria.availability) {
+                        switch (searchCriteria.availability) {
+                            case 'immediate':
+                                if (!donor.availability || !donor.availability.toLowerCase().includes('available')) {
+                                    return false;
+                                }
+                                break;
+                            case 'today':
+                            case 'week':
+                            case 'month':
+                                // For sample data, assume all "Available" donors are available for these timeframes
+                                if (!donor.availability || !donor.availability.toLowerCase().includes('available')) {
+                                    return false;
+                                }
+                                break;
+                        }
+                    }
+                    
+                    // Verification filter
+                    if (searchCriteria.verified !== '' && searchCriteria.verified !== null && searchCriteria.verified !== undefined) {
+                        const isVerified = searchCriteria.verified === 'true';
+                        if (donor.verified !== isVerified) {
+                            return false;
+                        }
+                    }
+                    
+                    // Source filter
+                    if (searchCriteria.source && searchCriteria.source !== 'all' && donor.source && donor.source !== searchCriteria.source) {
+                        return false;
+                    }
+                    
+                    // Radius filter (basic implementation using distance)
+                    if (searchCriteria.radius && searchCriteria.radius !== '0' && donor.distance) {
+                        const radiusKm = parseInt(searchCriteria.radius);
+                        if (donor.distance > radiusKm) {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
                 });
             }
             
@@ -2231,7 +2660,146 @@
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Location</div>
-                                    <div class="info-value">${donor.city}, ${donor.state}</div>
+                                    <div class="info-value">${donor.city || donor.location}, ${donor.state || ''}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Distance</div>
+                                    <div class="info-value">${donor.distance || '~'}km away</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Last Donation</div>
+                                    <div class="info-value">${donor.lastDonation}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Availability</div>
+                                    <div class="info-value">${donor.availability}</div>
+                                </div>
+                            </div>
+                            <div style="margin: 1rem 0;">
+                                <span class="verification-badge ${donor.verified ? 'verified' : 'unverified'}">
+                                    <i class="fas fa-${donor.verified ? 'shield-check' : 'clock'}"></i>
+                                    ${donor.verified ? 'Verified Donor' : 'Pending Verification'}
+                                </span>
+                                ${donor.rating ? `<span style="margin-left: 0.5rem; color: #f59e0b;">★ ${donor.rating}</span>` : ''}
+                            </div>
+                            <div class="donor-actions">
+                                <button class="contact-btn" onclick="contactDonor('${donor.phone}', '${donor.name}')">
+                                    <i class="fas fa-phone"></i> Contact
+                                </button>
+                                <button class="contact-btn" onclick="sendMessage('${donor.name}', '${searchCriteria.urgency}')">
+                                    <i class="fas fa-envelope"></i> Message
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    donorsList.innerHTML = `
+                        <div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--gray-50); border-radius: 0.75rem; border-left: 4px solid var(--primary-red);">
+                            <h4 style="color: var(--primary-red); margin-bottom: 0.5rem;">📊 Search Summary</h4>
+                            <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">Sources searched: ${searchSources.join(', ')} | Search time: ${Date.now() - lastSearchTime}ms</p>
+                        </div>
+                        ${donorCards}
+                    `;
+                }
+
+                console.log(`✅ Enhanced search completed: ${donors.length} donors found from sources: ${searchSources.join(', ')}`);
+                resultsCount.textContent = donors.length;
+                searchResults.style.display = 'block';
+
+                // Smooth scroll to results
+                searchResults.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+            
+            // Helper function to get source label
+            function getSourceLabel(source) {
+                const labels = {
+                    'internal': 'Our DB',
+                    'government': 'Gov DB',
+                    'external': 'External',
+                    'hospitals': 'Hospitals',
+                    'eRaktKosh': 'e-RaktKosh',
+                    'redCross': 'Red Cross',
+                    'bloodConnectGlobal': 'Global',
+                    'nhsBlood': 'NHS',
+                    'canadianBlood': 'Canada',
+                    'lifebloodAU': 'Lifeblood'
+                };
+                return labels[source] || source;
+            }
+            
+            // Show loading state
+            function showLoadingState() {
+                donorsList.innerHTML = `
+                    <div class="loading-state" style="text-align: center; padding: 3rem;">
+                        <div style="display: inline-block; width: 50px; height: 50px; border: 3px solid #e2e8f0; border-radius: 50%; border-top-color: var(--primary-red); animation: spin 1s ease-in-out infinite;"></div>
+                        <h3 style="color: var(--primary-red); margin-top: 1rem;">🔍 Searching donors...</h3>
+                        <p style="color: var(--gray-600);">Checking internal database and external sources</p>
+                    </div>
+                `;
+                searchResults.style.display = 'block';
+                
+                const style = document.createElement('style');
+                style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                document.head.appendChild(style);
+            }
+            
+            // Show error state
+            function showErrorState(message) {
+                donorsList.innerHTML = `
+                    <div class="error-state" style="text-align: center; padding: 3rem; background: #fef5f5; border-radius: 1rem; border: 2px dashed #e53e3e;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e53e3e; margin-bottom: 1rem;"></i>
+                        <h3 style="color: #e53e3e; margin-bottom: 1rem;">Search Error</h3>
+                        <p style="color: #4a5568;">${message}</p>
+                        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #e53e3e; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Try Again</button>
+                    </div>
+                `;
+            }
+            
+            // Enhanced display search results function
+            function displayEnhancedSearchResults(donors, searchCriteria, searchSources) {
+                const searchSummary = [];
+                if (searchCriteria.bloodGroup) searchSummary.push(`Blood Group: ${searchCriteria.bloodGroup}`);
+                if (searchCriteria.country) searchSummary.push(`Country: ${searchCriteria.country}`);
+                if (searchCriteria.state) searchSummary.push(`State: ${searchCriteria.state}`);
+                if (searchCriteria.district) searchSummary.push(`District: ${searchCriteria.district}`);
+                if (searchCriteria.city) searchSummary.push(`City: ${searchCriteria.city}`);
+                
+                if (donors.length === 0) {
+                    donorsList.innerHTML = `
+                        <div class="no-results">
+                            <div class="no-results-content">
+                                <i class="fas fa-search"></i>
+                                <h3>No donors found</h3>
+                                <p>No donors match your search criteria: ${searchSummary.join(', ')}</p>
+                                <p>Try adjusting your filters, expanding the search radius, or check back later for new registrations.</p>
+                                <div style="margin-top: 1.5rem;">
+                                    <button onclick="expandSearchRadius()" class="btn btn-primary" style="margin-right: 1rem;">Expand Search Area</button>
+                                    <button onclick="searchAllSources()" class="btn btn-secondary">Search All Sources</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const donorCards = donors.map(donor => `
+                        <div class="donor-card" style="position: relative;">
+                            <div class="search-source-badge source-${donor.source}">
+                                ${getSourceLabel(donor.source)}
+                            </div>
+                            <div class="donor-info">
+                                <div class="info-item">
+                                    <div class="info-label">Name</div>
+                                    <div class="info-value">${donor.name}</div>
+                                </div>
+                                <div class="info-item blood-type">
+                                    <div class="info-label">Blood Type</div>
+                                    <div class="info-value">${donor.bloodGroup || donor.bloodType}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Location</div>
+                                    <div class="info-value">${donor.city || donor.location}, ${donor.state || ''}</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Distance</div>
@@ -2308,148 +2876,21 @@
                 updateDropdown(districtSelect, []);
                 updateDropdown(citySelect, []);
                 
-                console.log('Cascading dropdowns initialized');
+                // Add event listeners for filter count updates
+                const formElements = searchForm.querySelectorAll('select, input');
+                formElements.forEach(element => {
+                    element.addEventListener('change', updateActiveFiltersCount);
+                });
+                
+                // Initial filter count update
+                updateActiveFiltersCount();
+                
+                console.log('Cascading dropdowns initialized with enhanced filtering');
             }
 
-            // Call initialization
-            initializeDropdowns();
-            
             // Initialize search history UI
             if (window.EnhancedExternalAPI) {
                 window.EnhancedExternalAPI.updateSearchHistoryUI();
-            }
-
-            // Cascade dropdown functionality
-            const countrySelect = document.getElementById('searchCountry');
-            const stateSelect = document.getElementById('searchState');
-            const districtSelect = document.getElementById('searchDistrict');
-            const citySelect = document.getElementById('searchCity');
-
-            // Sample data for cascading dropdowns (enhanced)
-            const locationData = {
-                'India': {
-                    'Maharashtra': {
-                        'Mumbai': ['Andheri', 'Bandra', 'Borivali', 'Thane', 'Kurla', 'Mulund'],
-                        'Pune': ['Koregaon Park', 'Hinjewadi', 'Kothrud', 'Viman Nagar', 'Wakad', 'Baner'],
-                        'Nagpur': ['Sitabuldi', 'Sadar', 'Dharampeth', 'Hingna'],
-                        'Nashik': ['College Road', 'Gangapur Road', 'Panchavati']
-                    },
-                    'Delhi': {
-                        'New Delhi': ['Connaught Place', 'Karol Bagh', 'Lajpat Nagar', 'Khan Market'],
-                        'South Delhi': ['Greater Kailash', 'Saket', 'Vasant Kunj', 'Hauz Khas'],
-                        'North Delhi': ['Civil Lines', 'Model Town', 'Rohini'],
-                        'East Delhi': ['Laxmi Nagar', 'Preet Vihar', 'Mayur Vihar']
-                    },
-                    'Karnataka': {
-                        'Bangalore': ['Whitefield', 'Koramangala', 'Indiranagar', 'Electronic City', 'Marathahalli', 'BTM Layout'],
-                        'Mysore': ['Saraswathipuram', 'Kuvempunagar', 'Hebbal'],
-                        'Mangalore': ['Kadri', 'Bejai', 'Kankanady']
-                    },
-                    'Tamil Nadu': {
-                        'Chennai': ['T Nagar', 'Anna Nagar', 'Velachery', 'Adyar', 'Porur'],
-                        'Coimbatore': ['RS Puram', 'Peelamedu', 'Saibaba Colony'],
-                        'Madurai': ['Anna Nagar', 'KK Nagar', 'Vilangudi']
-                    },
-                    'Gujarat': {
-                        'Ahmedabad': ['Satellite', 'Vastrapur', 'Navrangpura', 'Maninagar'],
-                        'Surat': ['Athwa', 'Adajan', 'Vesu', 'Rander'],
-                        'Vadodara': ['Alkapuri', 'Fatehgunj', 'Gotri']
-                    },
-                    'Rajasthan': {
-                        'Jaipur': ['Malviya Nagar', 'C Scheme', 'Vaishali Nagar', 'Mansarovar'],
-                        'Jodhpur': ['Sardarpura', 'Ratanada', 'Shastri Nagar'],
-                        'Udaipur': ['Fateh Sagar', 'Surajpole', 'Hiran Magri']
-                    },
-                    'West Bengal': {
-                        'Kolkata': ['Salt Lake', 'New Town', 'Park Street', 'Ballygunge', 'Howrah'],
-                        'Siliguri': ['Matigara', 'Pradhan Nagar', 'Hill Cart Road']
-                    },
-                    'Uttar Pradesh': {
-                        'Lucknow': ['Gomti Nagar', 'Hazratganj', 'Indira Nagar', 'Aliganj'],
-                        'Kanpur': ['Civil Lines', 'Swaroop Nagar', 'Kidwai Nagar'],
-                        'Agra': ['Sadar Bazaar', 'Dayalbagh', 'Sikandra']
-                    }
-                },
-                'USA': {
-                    'California': {
-                        'Los Angeles': ['Downtown', 'Hollywood', 'Beverly Hills', 'Santa Monica'],
-                        'San Francisco': ['Mission District', 'Castro', 'Chinatown', 'SOMA']
-                    },
-                    'New York': {
-                        'New York City': ['Manhattan', 'Brooklyn', 'Queens', 'Bronx']
-                    }
-                },
-                'UK': {
-                    'England': {
-                        'London': ['Westminster', 'Camden', 'Kensington', 'Tower Hamlets'],
-                        'Manchester': ['City Centre', 'Didsbury', 'Chorlton']
-                    }
-                },
-                'Canada': {
-                    'Ontario': {
-                        'Toronto': ['Downtown', 'North York', 'Scarborough', 'Etobicoke'],
-                        'Ottawa': ['ByWard Market', 'Centretown', 'Kanata']
-                    }
-                },
-                'Australia': {
-                    'New South Wales': {
-                        'Sydney': ['CBD', 'Bondi', 'Parramatta', 'Manly'],
-                        'Newcastle': ['The Hill', 'Cooks Hill', 'Hamilton']
-                    }
-                }
-            };
-
-            // Update states when country changes
-            countrySelect.addEventListener('change', function() {
-                const country = this.value;
-                updateDropdown(stateSelect, country ? Object.keys(locationData[country] || {}) : []);
-                updateDropdown(districtSelect, []);
-                updateDropdown(citySelect, []);
-            });
-
-            // Update districts when state changes
-            stateSelect.addEventListener('change', function() {
-                const country = countrySelect.value;
-                const state = this.value;
-                const districts = country && state ? Object.keys(locationData[country][state] || {}) : [];
-                updateDropdown(districtSelect, districts);
-                updateDropdown(citySelect, []);
-            });
-
-            // Update cities when district changes
-            districtSelect.addEventListener('change', function() {
-                const country = countrySelect.value;
-                const state = stateSelect.value;
-                const district = this.value;
-                const cities = country && state && district ? locationData[country][state][district] || [] : [];
-                updateDropdown(citySelect, cities);
-            });
-
-            // Enhanced updateDropdown function with better UX
-            function updateDropdown(selectElement, options) {
-                const currentValue = selectElement.value;
-                selectElement.innerHTML = '<option value="">-----Select-----</option>';
-                
-                if (options.length === 0) {
-                    selectElement.disabled = true;
-                    selectElement.style.opacity = '0.6';
-                    return;
-                }
-                
-                selectElement.disabled = false;
-                selectElement.style.opacity = '1';
-                
-                options.forEach(option => {
-                    const optionElement = document.createElement('option');
-                    optionElement.value = option;
-                    optionElement.textContent = option;
-                    selectElement.appendChild(optionElement);
-                });
-                
-                // Restore previous value if it still exists
-                if (currentValue && options.includes(currentValue)) {
-                    selectElement.value = currentValue;
-                }
             }
         });
 

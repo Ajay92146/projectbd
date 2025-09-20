@@ -935,8 +935,7 @@ function setupLoginForm() {
     const loginForm = document.getElementById('loginForm');
     
     if (!loginForm) {
-        console.error('❌ Login form not found! Available forms:', 
-            Array.from(document.querySelectorAll('form')).map(f => f.id || f.className));
+        console.log('ℹ️ No login form found on this page - this is normal for pages without login functionality');
         return;
     }
     

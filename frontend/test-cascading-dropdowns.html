@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cascading Dropdown Test - Blood Donation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+        }
+        .form-group select:disabled {
+            background: #f9f9f9;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .form-group select:focus {
+            outline: none;
+            border-color: #e53e3e;
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+        }
+        .status {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #fef2f2;
+            border: 1px solid #ef4444;
+            color: #dc2626;
+        }
+        .debug {
+            background: #f3f4f6;
+            border: 1px solid #6b7280;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #dc2626;
+        }
+        .selection-display {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Cascading Dropdown Test</h1>
+        <p>Test the country → state → district → city dropdown functionality</p>
+        
+        <div id="status" class="status">
+            <strong>Status:</strong> <span id="statusText">Initializing...</span>
+        </div>
+
+        <form id="testForm">
+            <div class="form-group">
+                <label for="searchCountry">
+                    🌍 Select Country
+                </label>
+                <select id="searchCountry" name="country">
+                    <option value="">-----Select Country-----</option>
+                    <option value="India">🇮🇳 India</option>
+                    <option value="USA">🇺🇸 United States</option>
+                    <option value="UK">🇬🇧 United Kingdom</option>
+                    <option value="Canada">🇨🇦 Canada</option>
+                    <option value="Australia">🇦🇺 Australia</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="searchState">
+                    🏛️ Select State/Province
+                </label>
+                <select id="searchState" name="state" disabled>
+                    <option value="">-----Select State-----</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="searchDistrict">
+                    🏢 Select District
+                </label>
+                <select id="searchDistrict" name="district" disabled>
+                    <option value="">-----Select District-----</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="searchCity">
+                    🏘️ Select City/Area
+                </label>
+                <select id="searchCity" name="city" disabled>
+                    <option value="">-----Select City-----</option>
+                </select>
+            </div>
+        </form>
+
+        <div id="selectionDisplay" class="selection-display">
+            <strong>Current Selection:</strong>
+            <div id="selectedValues">No selections made</div>
+        </div>
+
+        <div>
+            <button class="btn" onclick="resetSelections()">Reset All</button>
+            <button class="btn" onclick="testIndia()">Test India</button>
+            <button class="btn" onclick="testUSA()">Test USA</button>
+        </div>
+
+        <div id="debugLog" class="debug">
+            Debug log will appear here...
+        </div>
+    </div>
+
+    <script>
+        // Location data
+        const locationData = {
+            'India': {
+                'Maharashtra': {
+                    'Mumbai': ['Andheri', 'Bandra', 'Borivali', 'Thane', 'Kurla', 'Mulund'],
+                    'Pune': ['Koregaon Park', 'Hinjewadi', 'Kothrud', 'Viman Nagar', 'Wakad', 'Baner'],
+                    'Nagpur': ['Sitabuldi', 'Sadar', 'Dharampeth', 'Hingna'],
+                    'Nashik': ['College Road', 'Gangapur Road', 'Panchavati']
+                },
+                'Karnataka': {
+                    'Bangalore': ['Whitefield', 'Koramangala', 'Indiranagar', 'Electronic City'],
+                    'Mysore': ['Saraswathipuram', 'Kuvempunagar', 'Hebbal']
+                },
+                'Delhi': {
+                    'New Delhi': ['Connaught Place', 'Karol Bagh', 'Lajpat Nagar'],
+                    'South Delhi': ['Greater Kailash', 'Saket', 'Vasant Kunj']
+                }
+            },
+            'USA': {
+                'California': {
+                    'Los Angeles': ['Downtown', 'Hollywood', 'Beverly Hills', 'Santa Monica'],
+                    'San Francisco': ['Mission District', 'Castro', 'Chinatown', 'SOMA']
+                },
+                'New York': {
+                    'New York City': ['Manhattan', 'Brooklyn', 'Queens', 'Bronx']
+                }
+            },
+            'UK': {
+                'England': {
+                    'London': ['Westminster', 'Camden', 'Kensington', 'Tower Hamlets'],
+                    'Manchester': ['City Centre', 'Didsbury', 'Chorlton']
+                }
+            },
+            'Canada': {
+                'Ontario': {
+                    'Toronto': ['Downtown', 'North York', 'Scarborough', 'Etobicoke'],
+                    'Ottawa': ['ByWard Market', 'Centretown', 'Kanata']
+                }
+            },
+            'Australia': {
+                'New South Wales': {
+                    'Sydney': ['CBD', 'Bondi', 'Parramatta', 'Manly'],
+                    'Newcastle': ['The Hill', 'Cooks Hill', 'Hamilton']
+                }
+            }
+        };
+
+        // Get DOM elements
+        const countrySelect = document.getElementById('searchCountry');
+        const stateSelect = document.getElementById('searchState');
+        const districtSelect = document.getElementById('searchDistrict');
+        const citySelect = document.getElementById('searchCity');
+        const debugLog = document.getElementById('debugLog');
+        const statusText = document.getElementById('statusText');
+        const selectedValues = document.getElementById('selectedValues');
+
+        // Debug logging
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `[${timestamp}] ${message}\n`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(message);
+        }
+
+        // Update dropdown function
+        function updateDropdown(selectElement, options, label = '') {
+            if (!selectElement) {
+                log(`❌ Error: Select element ${label} is null`);
+                return;
+            }
+            
+            const currentValue = selectElement.value;
+            selectElement.innerHTML = '<option value="">-----Select-----</option>';
+            
+            if (options.length === 0) {
+                selectElement.disabled = true;
+                selectElement.style.opacity = '0.6';
+                selectElement.style.cursor = 'not-allowed';
+                log(`🔒 Disabled ${label} (no options available)`);
+                return;
+            }
+            
+            selectElement.disabled = false;
+            selectElement.style.opacity = '1';
+            selectElement.style.cursor = 'pointer';
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                selectElement.appendChild(optionElement);
+            });
+            
+            // Restore previous value if it still exists
+            if (currentValue && options.includes(currentValue)) {
+                selectElement.value = currentValue;
+            }
+            
+            log(`✅ Updated ${label} with ${options.length} options: [${options.join(', ')}]`);
+        }
+
+        // Update selection display
+        function updateSelectionDisplay() {
+            const selections = [];
+            if (countrySelect.value) selections.push(`Country: ${countrySelect.value}`);
+            if (stateSelect.value) selections.push(`State: ${stateSelect.value}`);
+            if (districtSelect.value) selections.push(`District: ${districtSelect.value}`);
+            if (citySelect.value) selections.push(`City: ${citySelect.value}`);
+            
+            selectedValues.textContent = selections.length > 0 ? selections.join(' → ') : 'No selections made';
+        }
+
+        // Event handlers
+        countrySelect.addEventListener('change', function() {
+            const country = this.value;
+            log(`🌍 Country changed to: "${country}"`);
+            
+            const states = country ? Object.keys(locationData[country] || {}) : [];
+            updateDropdown(stateSelect, states, 'State');
+            updateDropdown(districtSelect, [], 'District');
+            updateDropdown(citySelect, [], 'City');
+            updateSelectionDisplay();
+        });
+
+        stateSelect.addEventListener('change', function() {
+            const country = countrySelect.value;
+            const state = this.value;
+            log(`🏛️ State changed to: "${state}" in country: "${country}"`);
+            
+            const districts = country && state ? Object.keys(locationData[country][state] || {}) : [];
+            updateDropdown(districtSelect, districts, 'District');
+            updateDropdown(citySelect, [], 'City');
+            updateSelectionDisplay();
+        });
+
+        districtSelect.addEventListener('change', function() {
+            const country = countrySelect.value;
+            const state = stateSelect.value;
+            const district = this.value;
+            log(`🏢 District changed to: "${district}"`);
+            
+            const cities = country && state && district ? locationData[country][state][district] || [] : [];
+            updateDropdown(citySelect, cities, 'City');
+            updateSelectionDisplay();
+        });
+
+        citySelect.addEventListener('change', function() {
+            log(`🏘️ City changed to: "${this.value}"`);
+            updateSelectionDisplay();
+        });
+
+        // Test functions
+        function resetSelections() {
+            log('🔄 Resetting all selections...');
+            countrySelect.value = '';
+            updateDropdown(stateSelect, [], 'State');
+            updateDropdown(districtSelect, [], 'District');
+            updateDropdown(citySelect, [], 'City');
+            updateSelectionDisplay();
+            log('✅ Reset completed');
+        }
+
+        function testIndia() {
+            log('🧪 Testing India selection...');
+            countrySelect.value = 'India';
+            countrySelect.dispatchEvent(new Event('change'));
+            setTimeout(() => {
+                stateSelect.value = 'Maharashtra';
+                stateSelect.dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    districtSelect.value = 'Mumbai';
+                    districtSelect.dispatchEvent(new Event('change'));
+                }, 100);
+            }, 100);
+        }
+
+        function testUSA() {
+            log('🧪 Testing USA selection...');
+            countrySelect.value = 'USA';
+            countrySelect.dispatchEvent(new Event('change'));
+            setTimeout(() => {
+                stateSelect.value = 'California';
+                stateSelect.dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    districtSelect.value = 'Los Angeles';
+                    districtSelect.dispatchEvent(new Event('change'));
+                }, 100);
+            }, 100);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Cascading dropdown test initialized');
+            statusText.textContent = 'Ready for testing';
+            
+            // Test if all elements are found
+            const elements = [
+                { name: 'Country', element: countrySelect },
+                { name: 'State', element: stateSelect },
+                { name: 'District', element: districtSelect },
+                { name: 'City', element: citySelect }
+            ];
+            
+            let allFound = true;
+            elements.forEach(({ name, element }) => {
+                if (element) {
+                    log(`✅ ${name} dropdown found`);
+                } else {
+                    log(`❌ ${name} dropdown NOT found`);
+                    allFound = false;
+                }
+            });
+            
+            if (allFound) {
+                statusText.textContent = 'All dropdowns ready! Select a country to begin.';
+                statusText.parentElement.className = 'status';
+            } else {
+                statusText.textContent = 'Error: Some dropdown elements missing!';
+                statusText.parentElement.className = 'status error';
+            }
+            
+            updateSelectionDisplay();
+        });
+    </script>
+</body>
+</html>

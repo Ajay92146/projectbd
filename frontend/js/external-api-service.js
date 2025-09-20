@@ -421,6 +421,25 @@ class ExternalAPIService {
     }
     
     /**
+     * Configure data sources (added for compatibility with API config loader)
+     */
+    configureDataSources(sources) {
+        console.log('📊 Configuring external API data sources:', sources);
+        // Update API status based on configured sources
+        if (sources.external !== undefined) {
+            this.apiStatus.googleMaps = sources.external ? 'configured' : 'disabled';
+        }
+        if (sources.government !== undefined) {
+            this.apiStatus.government = sources.government ? 'configured' : 'disabled';
+        }
+        if (sources.hospitals !== undefined) {
+            this.apiStatus.hospital = sources.hospitals ? 'configured' : 'disabled';
+        }
+        
+        console.log('✅ Data sources configured, updated API status:', this.apiStatus);
+    }
+    
+    /**
      * Process queued notifications when APIs become available
      */
     async processQueuedNotifications() {

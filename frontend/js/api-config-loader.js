@@ -18,6 +18,14 @@ class APIConfigLoader {
      */
     async loadConfiguration() {
         try {
+            // Check if we're running on file:// protocol
+            if (window.location.protocol === 'file:') {
+                console.log('🏠 Running on file:// protocol, using fallback configuration');
+                const fallbackConfig = this.getFallbackConfig();
+                this.setupGlobalConfig(fallbackConfig);
+                return fallbackConfig;
+            }
+            
             console.log('📡 Loading API configuration from server...');
             
             const response = await fetch('/api/external/config');
@@ -67,12 +75,18 @@ class APIConfigLoader {
         };
         
         // Set up external API service configuration
-        if (window.ExternalAPIService) {
-            window.ExternalAPIService.configureDataSources({
-                external: config.apis?.googleMaps?.available || false,
-                government: false, // Not implemented yet
-                hospitals: config.apis?.hospital?.available || true
-            });
+        if (window.ExternalAPIService && typeof window.ExternalAPIService.configureDataSources === 'function') {
+            try {
+                window.ExternalAPIService.configureDataSources({
+                    external: config.apis?.googleMaps?.available || false,
+                    government: false, // Not implemented yet
+                    hospitals: config.apis?.hospital?.available || true
+                });
+            } catch (error) {
+                console.warn('⚠️ Failed to configure ExternalAPIService data sources:', error.message);
+            }
+        } else {
+            console.log('ℹ️ ExternalAPIService.configureDataSources not available, skipping configuration');
         }
         
         console.log('🌐 Global API configuration set:', window.API_CONFIG);
@@ -106,6 +120,16 @@ class APIConfigLoader {
      */
     async testAPIConnections() {
         try {
+            // Check if we're running on file:// protocol
+            if (window.location.protocol === 'file:') {
+                console.log('🏠 Running on file:// protocol, skipping API connection tests');
+                return {
+                    success: true,
+                    tests: {},
+                    message: 'Running in file mode, API tests skipped'
+                };
+            }
+            
             console.log('🧪 Testing API connections...');
             
             const response = await fetch('/api/external/test', {
@@ -135,6 +159,16 @@ class APIConfigLoader {
      */
     async getAPIStatus() {
         try {
+            // Check if we're running on file:// protocol
+            if (window.location.protocol === 'file:') {
+                console.log('🏠 Running on file:// protocol, returning fallback status');
+                return {
+                    success: true,
+                    status: 'fallback_mode',
+                    message: 'Running in file mode with fallback configuration'
+                };
+            }
+            
             const response = await fetch('/api/external/status');
             const status = await response.json();
             
@@ -197,9 +231,15 @@ class APIConfigLoader {
             await this.loadConfiguration();
             
             // Wait for external API service to be ready
-            if (window.ExternalAPIService) {
+            if (window.ExternalAPIService && typeof window.ExternalAPIService.checkAPIAvailability === 'function') {
                 console.log('🔗 External API Service detected, running availability check...');
-                await window.ExternalAPIService.checkAPIAvailability();
+                try {
+                    await window.ExternalAPIService.checkAPIAvailability();
+                } catch (error) {
+                    console.warn('⚠️ External API availability check failed:', error.message);
+                }
+            } else {
+                console.log('ℹ️ External API Service not available or method missing, skipping availability check');
             }
             
             // Emit configuration ready event
