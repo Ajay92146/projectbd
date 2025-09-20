@@ -5,6 +5,9 @@
 
 class EnhancedExternalAPI {
     constructor() {
+        this.searchHistory = JSON.parse(localStorage.getItem('bloodDonorSearchHistory')) || [];
+        this.maxHistoryItems = 10;
+        
         this.apiEndpoints = {
             // Indian Government APIs
             eRaktKosh: {
@@ -175,8 +178,122 @@ class EnhancedExternalAPI {
             timestamp: Date.now()
         });
         
+        // Save to search history
+        this.addToSearchHistory({
+            bloodGroup,
+            country,
+            filters,
+            resultCount: results.totalFound,
+            timestamp: new Date(),
+            searchTime: results.searchTime
+        });
+        
         console.log(`✅ External search completed: ${results.totalFound} donors found in ${results.searchTime}ms`);
         return results;
+    }
+    
+    /**
+     * Add search to history
+     */
+    addToSearchHistory(searchData) {
+        // Remove existing similar search
+        this.searchHistory = this.searchHistory.filter(item => 
+            !(item.bloodGroup === searchData.bloodGroup && item.country === searchData.country)
+        );
+        
+        // Add new search to beginning
+        this.searchHistory.unshift({
+            id: Date.now(),
+            bloodGroup: searchData.bloodGroup,
+            country: searchData.country,
+            filters: searchData.filters,
+            resultCount: searchData.resultCount,
+            timestamp: searchData.timestamp,
+            searchTime: searchData.searchTime
+        });
+        
+        // Limit history size
+        if (this.searchHistory.length > this.maxHistoryItems) {
+            this.searchHistory = this.searchHistory.slice(0, this.maxHistoryItems);
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('bloodDonorSearchHistory', JSON.stringify(this.searchHistory));
+        
+        // Update UI if search history component exists
+        this.updateSearchHistoryUI();
+    }
+    
+    /**
+     * Get search history
+     */
+    getSearchHistory() {
+        return this.searchHistory;
+    }
+    
+    /**
+     * Clear search history
+     */
+    clearSearchHistory() {
+        this.searchHistory = [];
+        localStorage.removeItem('bloodDonorSearchHistory');
+        this.updateSearchHistoryUI();
+        console.log('🗑️ Search history cleared');
+    }
+    
+    /**
+     * Update search history UI component
+     */
+    updateSearchHistoryUI() {
+        const historyContainer = document.getElementById('searchHistoryContainer');
+        if (historyContainer) {
+            if (this.searchHistory.length === 0) {
+                historyContainer.innerHTML = '<p style="color: var(--gray-500); font-style: italic;">No recent searches</p>';
+                return;
+            }
+            
+            historyContainer.innerHTML = this.searchHistory.map(item => `
+                <div class="history-item" onclick="window.EnhancedExternalAPI.repeatSearch(${item.id})" 
+                     style="padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 0.5rem; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: var(--primary-red);">${item.bloodGroup}</strong> in 
+                            <span style="color: var(--gray-700);">${item.country}</span>
+                        </div>
+                        <small style="color: var(--gray-500);">${item.resultCount} results</small>
+                    </div>
+                    <small style="color: var(--gray-400);">${new Date(item.timestamp).toLocaleDateString()}</small>
+                </div>
+            `).join('');
+        }
+    }
+    
+    /**
+     * Repeat a previous search
+     */
+    async repeatSearch(searchId) {
+        const searchItem = this.searchHistory.find(item => item.id === searchId);
+        if (searchItem) {
+            console.log('🔄 Repeating search:', searchItem);
+            
+            // Fill form with previous search criteria
+            if (document.getElementById('searchBloodGroup')) {
+                document.getElementById('searchBloodGroup').value = searchItem.bloodGroup;
+            }
+            if (document.getElementById('searchCountry')) {
+                document.getElementById('searchCountry').value = searchItem.country;
+            }
+            
+            // Trigger search
+            const results = await this.searchExternalDonors(searchItem.bloodGroup, searchItem.country, searchItem.filters);
+            
+            // Show notification
+            if (window.showNotification) {
+                window.showNotification(`Repeated search for ${searchItem.bloodGroup} in ${searchItem.country}`, 'success');
+            }
+            
+            return results;
+        }
     }
 
     /**
