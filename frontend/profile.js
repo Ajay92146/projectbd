@@ -200,16 +200,11 @@ async function loadDonations() {
         return;
     }
     
-    // Show loading state
-    donationsContainer.innerHTML = `
-        <div class="loading">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Loading your donations...</p>
-        </div>
-    `;
+    // Use shared utility for loading state
+    SharedUtils.UIUtils.showLoading('donations', 'Loading your donations...');
     
     try {
-        const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token');
+        const token = SharedUtils.AuthUtils.getToken();
         const response = await fetch('/api/profile/donations', {
             method: 'GET',
             headers: {
@@ -223,8 +218,7 @@ async function loadDonations() {
         if (!response.ok) {
             if (response.status === 401) {
                 console.log('❌ Unauthorized, redirecting to login');
-                localStorage.removeItem('token');
-                localStorage.removeItem('bloodconnect_token');
+                SharedUtils.AuthUtils.clearAuthData(false);
                 window.location.href = 'login.html';
                 return;
             }
@@ -249,17 +243,7 @@ async function loadDonations() {
         }
     } catch (error) {
         console.error('❌ Error loading donations:', error);
-        donationsContainer.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--error-color, #dc3545); margin-bottom: 1rem;"></i>
-                <h3>Error Loading Donations</h3>
-                <p>Unable to load your donations. Please try again later.</p>
-                <button class="btn btn-primary" onclick="loadDonations()" style="margin-top: 1rem;">
-                    <i class="fas fa-redo"></i>
-                    Retry
-                </button>
-            </div>
-        `;
+        SharedUtils.UIUtils.showErrorState('donations', 'Error Loading Donations', 'Unable to load your donations. Please try again later.', 'loadDonations()');
     }
 }
 
@@ -272,16 +256,11 @@ async function loadRequests() {
         return;
     }
     
-    // Show loading state
-    requestsContainer.innerHTML = `
-        <div class="loading">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Loading your blood requests...</p>
-        </div>
-    `;
+    // Use shared utility for loading state
+    SharedUtils.UIUtils.showLoading('requests', 'Loading your blood requests...');
     
     try {
-        const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token');
+        const token = SharedUtils.AuthUtils.getToken();
         const response = await fetch('/api/profile/requests', {
             method: 'GET',
             headers: {
@@ -295,8 +274,7 @@ async function loadRequests() {
         if (!response.ok) {
             if (response.status === 401) {
                 console.log('❌ Unauthorized, redirecting to login');
-                localStorage.removeItem('token');
-                localStorage.removeItem('bloodconnect_token');
+                SharedUtils.AuthUtils.clearAuthData(false);
                 window.location.href = 'login.html';
                 return;
             }
@@ -321,17 +299,7 @@ async function loadRequests() {
         }
     } catch (error) {
         console.error('❌ Error loading requests:', error);
-        requestsContainer.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--error-color, #dc3545); margin-bottom: 1rem;"></i>
-                <h3>Error Loading Requests</h3>
-                <p>Unable to load your blood requests. Please try again later.</p>
-                <button class="btn btn-primary" onclick="loadRequests()" style="margin-top: 1rem;">
-                    <i class="fas fa-redo"></i>
-                    Retry
-                </button>
-            </div>
-        `;
+        SharedUtils.UIUtils.showErrorState('requests', 'Error Loading Requests', 'Unable to load your blood requests. Please try again later.', 'loadRequests()');
     }
 }
 
@@ -629,12 +597,8 @@ function toggleProfileDropdown() {
 }
 
 function logout() {
-    // Clear all authentication-related localStorage items
-    localStorage.removeItem('token');
-    localStorage.removeItem('bloodconnect_token');
-    localStorage.removeItem('bloodconnect_user');
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('user');
+    // Use shared utility for clearing auth data
+    SharedUtils.AuthUtils.clearAuthData(false);
     console.log('🔓 All authentication data cleared');
     window.location.href = 'login.html';
 }

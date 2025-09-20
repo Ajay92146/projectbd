@@ -538,52 +538,6 @@ async function loadDonations(searchTerm = '', statusFilter = '', advancedFilters
     }
 }
 
-// Display donations in table with bulk operations
-function displayDonations(donations) {
-    const donationsTableBody = document.getElementById('donationsTableBody');
-    const donationsCount = document.getElementById('donationsCount');
-    
-    if (donationsCount) {
-        donationsCount.textContent = `(${donations.length} donors)`;
-    }
-    
-    if (!donationsTableBody) return;
-    
-    if (donations.length === 0) {
-        donationsTableBody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-hand-holding-heart"></i><br>No donors found in database</td></tr>';
-        return;
-    }
-
-    // Add checkbox column for bulk operations
-    donationsTableBody.innerHTML = `
-        <tr>
-            <th><input type="checkbox" id="selectAllDonations" onclick="toggleSelectAll('donations')"></th>
-            <th>Donor Name</th>
-            <th>Blood Group</th>
-            <th>Donation Date</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Notes</th>
-            <th>Actions</th>
-        </tr>
-    ` + donations.map(donation => `
-        <tr>
-            <td><input type="checkbox" class="donation-checkbox" data-donation-id="${donation._id}"></td>
-            <td><strong>${donation.name || 'Unknown Donor'}</strong></td>
-            <td><span class="status-badge status-active">${donation.bloodGroup || 'N/A'}</span></td>
-            <td>${donation.dateOfDonation ? new Date(donation.dateOfDonation).toLocaleDateString() : 'N/A'}</td>
-            <td>${donation.city ? `${donation.city}, ${donation.state}` : 'N/A'}</td>
-            <td><span class="status-badge status-${donation.isAvailable ? 'active' : 'cancelled'}">${donation.isAvailable ? 'Available' : 'Unavailable'}</span></td>
-            <td>${donation.applicationStatus || 'Approved'}</td>
-            <td>
-                <button class="btn btn-secondary btn-sm" onclick="viewDonationDetails('${donation._id}')">
-                    <i class="fas fa-eye"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
-
 // Enhanced loadRequests with pagination
 async function loadRequests(searchTerm = '', urgencyFilter = '', advancedFilters = {}, page = 1, limit = 20) {
     const requestsTableBody = document.getElementById('requestsTableBody');
@@ -657,6 +611,52 @@ async function loadRequests(searchTerm = '', urgencyFilter = '', advancedFilters
             requestsTableBody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fas fa-exclamation-triangle"></i><br>Failed to load requests. Please try again.</td></tr>';
         }
     }
+}
+
+// Display donations in table with bulk operations
+function displayDonations(donations) {
+    const donationsTableBody = document.getElementById('donationsTableBody');
+    const donationsCount = document.getElementById('donationsCount');
+    
+    if (donationsCount) {
+        donationsCount.textContent = `(${donations.length} donors)`;
+    }
+    
+    if (!donationsTableBody) return;
+    
+    if (donations.length === 0) {
+        donationsTableBody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-hand-holding-heart"></i><br>No donors found in database</td></tr>';
+        return;
+    }
+
+    // Add checkbox column for bulk operations
+    donationsTableBody.innerHTML = `
+        <tr>
+            <th><input type="checkbox" id="selectAllDonations" onclick="toggleSelectAll('donations')"></th>
+            <th>Donor Name</th>
+            <th>Blood Group</th>
+            <th>Donation Date</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Notes</th>
+            <th>Actions</th>
+        </tr>
+    ` + donations.map(donation => `
+        <tr>
+            <td><input type="checkbox" class="donation-checkbox" data-donation-id="${donation._id}"></td>
+            <td><strong>${donation.name || 'Unknown Donor'}</strong></td>
+            <td><span class="status-badge status-active">${donation.bloodGroup || 'N/A'}</span></td>
+            <td>${donation.dateOfDonation ? new Date(donation.dateOfDonation).toLocaleDateString() : 'N/A'}</td>
+            <td>${donation.city ? `${donation.city}, ${donation.state}` : 'N/A'}</td>
+            <td><span class="status-badge status-${donation.isAvailable ? 'active' : 'cancelled'}">${donation.isAvailable ? 'Available' : 'Unavailable'}</span></td>
+            <td>${donation.applicationStatus || 'Approved'}</td>
+            <td>
+                <button class="btn btn-secondary btn-sm" onclick="viewDonationDetails('${donation._id}')">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
 }
 
 // Display requests in table with bulk operations
@@ -963,14 +963,8 @@ async function logoutAdmin() {
         
         debugLog(`Response status: ${response.status}`);
         
-        // Clear admin session from both localStorage and sessionStorage
-        localStorage.removeItem('bloodconnect_admin');
-        localStorage.removeItem('admin_email');
-        localStorage.removeItem('admin_login_time');
-        localStorage.removeItem('admin_last_activity');
-        sessionStorage.removeItem('bloodconnect_admin');
-        sessionStorage.removeItem('admin_email');
-        sessionStorage.removeItem('admin_login_time');
+        // Use shared utility for clearing admin auth data
+        SharedUtils.AuthUtils.clearAuthData(true);
         
         debugLog('✅ Admin session cleared!');
         
@@ -985,14 +979,8 @@ async function logoutAdmin() {
     } catch (error) {
         debugLog(`❌ Logout failed: ${error.message}`);
         
-        // Even if API call fails, clear local session data
-        localStorage.removeItem('bloodconnect_admin');
-        localStorage.removeItem('admin_email');
-        localStorage.removeItem('admin_login_time');
-        localStorage.removeItem('admin_last_activity');
-        sessionStorage.removeItem('bloodconnect_admin');
-        sessionStorage.removeItem('admin_email');
-        sessionStorage.removeItem('admin_login_time');
+        // Even if API call fails, clear local session data using shared utility
+        SharedUtils.AuthUtils.clearAuthData(true);
         
         // Show notification
         showNotification('Logged out successfully', 'success');
@@ -1005,44 +993,8 @@ async function logoutAdmin() {
 // Client-side logout cleanup
 function performClientLogout() {
     try {
-        // Clear all admin-related localStorage items
-        const adminKeys = [
-            'bloodconnect_admin',
-            'admin_email',
-            'admin_login_time',
-            'admin_session',
-            'admin_preferences',
-            'admin_last_activity'
-        ];
-        
-        debugLog('🧹 Clearing admin session data...');
-        adminKeys.forEach(key => {
-            if (localStorage.getItem(key)) {
-                localStorage.removeItem(key);
-                debugLog(`📝 Cleared localStorage key: ${key}`);
-            } else {
-                debugLog(`📝 Key ${key} was already empty`);
-            }
-        });
-        
-        // Clear any sessionStorage as well
-        try {
-            sessionStorage.clear();
-            debugLog('🧹 SessionStorage cleared');
-        } catch (sessionError) {
-            debugLog(`⚠️ SessionStorage clear error: ${sessionError.message}`);
-        }
-        
-        // Verify cleanup
-        const remainingAdminStatus = localStorage.getItem('bloodconnect_admin');
-        if (remainingAdminStatus) {
-            debugLog(`⚠️ Warning: Admin status still exists: ${remainingAdminStatus}`);
-            // Force remove it
-            localStorage.clear();
-            debugLog('🧹 Performed complete localStorage clear');
-        } else {
-            debugLog('✅ Admin session cleanup verified');
-        }
+        // Use shared utility for clearing admin auth data
+        SharedUtils.AuthUtils.clearAuthData(true);
         
         debugLog('✅ Admin logout completed successfully');
         
@@ -1069,16 +1021,17 @@ function performClientLogout() {
         `;
         document.body.appendChild(logoutMessage);
         
-        // Redirect to admin login page after a short delay
+        // Redirect to admin login page after a brief delay
         setTimeout(() => {
-            debugLog('🚀 Redirecting to admin login page...');
+            // Remove the message element
+            if (document.body.contains(logoutMessage)) {
+                document.body.removeChild(logoutMessage);
+            }
             window.location.href = 'admin-login.html';
-        }, 1500);
+        }, 2000);
         
     } catch (error) {
-        debugLog(`❌ Error during logout: ${error.message}`);
-        // Force redirect even if cleanup fails
-        alert('Logout completed. Redirecting to login page.');
+        debugLog(`❌ Client logout error: ${error.message}`);
         window.location.href = 'admin-login.html';
     }
 }
