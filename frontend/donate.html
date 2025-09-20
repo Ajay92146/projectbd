@@ -769,29 +769,32 @@
         /* Two Column Layout - Enhanced for Better Responsiveness */
         .application-content {
             display: grid;
-            grid-template-columns: minmax(320px, 400px) 1fr;
+            grid-template-columns: minmax(320px, 400px) minmax(280px, 350px);
             gap: var(--spacing-8);
             align-items: flex-start;
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 var(--spacing-4);
             min-height: 100vh;
+            justify-content: center;
         }
 
         /* Ensure proper grid behavior on smaller containers */
         @media (max-width: 1400px) {
             .application-content {
-                grid-template-columns: minmax(300px, 350px) 1fr;
+                grid-template-columns: minmax(300px, 350px) minmax(260px, 320px);
                 gap: var(--spacing-6);
+                max-width: 1200px;
             }
         }
 
         /* Better intermediate breakpoint */
         @media (max-width: 1300px) {
             .application-content {
-                grid-template-columns: minmax(280px, 320px) 1fr;
+                grid-template-columns: minmax(280px, 320px) minmax(240px, 280px);
                 gap: var(--spacing-5);
                 padding: 0 var(--spacing-3);
+                max-width: 1000px;
             }
         }
 
@@ -811,6 +814,8 @@
             flex-shrink: 0;
             width: 100%;
             box-sizing: border-box;
+            z-index: 1;
+            justify-self: end;
         }
 
         .instructions-panel h3 {
@@ -920,6 +925,8 @@
             min-width: 0;
             flex-grow: 1;
             box-sizing: border-box;
+            z-index: 2;
+            justify-self: start;
         }
 
         .application-form::before {
@@ -1675,6 +1682,40 @@
         }
 
         /* Enhanced Responsive Design for Better Form Layout */
+        @media (max-width: 1150px) {
+            .application-content {
+                display: flex;
+                flex-direction: column;
+                gap: var(--spacing-6);
+                padding: 0 var(--spacing-3);
+                max-width: 100%;
+            }
+
+            .instructions-panel {
+                position: static;
+                order: 2;
+                margin-top: var(--spacing-6);
+                max-height: none;
+                overflow-y: visible;
+                min-width: auto;
+                width: 100%;
+                padding: var(--spacing-5);
+                justify-self: unset;
+            }
+
+            .application-form {
+                order: 1;
+                margin-bottom: var(--spacing-4);
+                width: 100%;
+                max-width: none;
+                justify-self: unset;
+            }
+            
+            .application-container {
+                padding: 0 var(--spacing-4);
+            }
+        }
+        
         @media (max-width: 1200px) {
             .application-content {
                 display: flex;
