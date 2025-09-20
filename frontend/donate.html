@@ -823,8 +823,7 @@
             width: 100%;
             box-sizing: border-box;
             z-index: 5;
-            grid-column: 2;
-            grid-row: 1;
+            align-self: start;
         }
 
         .instructions-panel h3 {
@@ -934,8 +933,7 @@
             min-width: 0;
             box-sizing: border-box;
             z-index: 1;
-            grid-column: 1;
-            grid-row: 1;
+            align-self: start;
         }
 
         .application-form::before {
@@ -2715,55 +2713,6 @@
                 </div>
 
                 <div class="application-content">
-                    <!-- Instructions Panel -->
-                    <div class="instructions-panel fade-in" data-delay="100">
-                        <h3><i class="fas fa-info-circle"></i> How to Apply</h3>
-
-                        <div class="instruction-step">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <h4>Personal Information</h4>
-                                <p>Fill in your complete name, age, and contact details. Ensure all information is accurate.</p>
-                            </div>
-                        </div>
-
-                        <div class="instruction-step">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <h4>Medical Details</h4>
-                                <p>Select your blood group and provide any relevant medical history or conditions.</p>
-                            </div>
-                        </div>
-
-                        <div class="instruction-step">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <h4>Availability</h4>
-                                <p>Choose your preferred donation date and specify your availability for future donations.</p>
-                            </div>
-                        </div>
-
-                        <div class="instruction-step">
-                            <div class="step-number">4</div>
-                            <div class="step-content">
-                                <h4>Submit Application</h4>
-                                <p>Review all details and submit. You'll receive confirmation and next steps via email.</p>
-                            </div>
-                        </div>
-
-                        <div class="eligibility-info">
-                            <h4><i class="fas fa-check-circle"></i> Eligibility Criteria</h4>
-                            <ul>
-                                <li>Age: 18-65 years</li>
-                                <li>Weight: Minimum 50kg</li>
-                                <li>Good general health</li>
-                                <li>No recent illness</li>
-                                <li>No recent tattoos/piercings</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Application Form -->
                     <!-- Authentication Status Indicator -->
                     <div id="authIndicator" class="auth-indicator not-authenticated" style="display: none; margin-bottom: var(--spacing-6);">
                         <span id="authStatus">Authentication required to apply for donation</span>
@@ -2963,6 +2912,54 @@
                             </button>
                         </div>
                     </form>
+                    
+                    <!-- Instructions Panel -->
+                    <div class="instructions-panel fade-in" data-delay="100">
+                        <h3><i class="fas fa-info-circle"></i> How to Apply</h3>
+
+                        <div class="instruction-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Personal Information</h4>
+                                <p>Fill in your complete name, age, and contact details. Ensure all information is accurate.</p>
+                            </div>
+                        </div>
+
+                        <div class="instruction-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Medical Details</h4>
+                                <p>Select your blood group and provide any relevant medical history or conditions.</p>
+                            </div>
+                        </div>
+
+                        <div class="instruction-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Availability</h4>
+                                <p>Choose your preferred donation date and specify your availability for future donations.</p>
+                            </div>
+                        </div>
+
+                        <div class="instruction-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Submit Application</h4>
+                                <p>Review all details and submit. You'll receive confirmation and next steps via email.</p>
+                            </div>
+                        </div>
+
+                        <div class="eligibility-info">
+                            <h4><i class="fas fa-check-circle"></i> Eligibility Criteria</h4>
+                            <ul>
+                                <li>Age: 18-65 years</li>
+                                <li>Weight: Minimum 50kg</li>
+                                <li>Good general health</li>
+                                <li>No recent illness</li>
+                                <li>No recent tattoos/piercings</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -273,6 +273,7 @@
     height: fit-content;
     max-height: calc(100vh - 100px);
     overflow-y: auto;
+    align-self: start;
 }
 
 .instructions-panel h3 {
