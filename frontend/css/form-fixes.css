@@ -331,11 +331,12 @@
 /* Application container improvements */
 .application-content {
     display: grid;
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 1fr 350px;
     gap: 2rem;
     align-items: flex-start;
     max-width: 1400px;
     margin: 0 auto;
+    position: relative;
 }
 
 /* Authentication indicator styling */
@@ -373,8 +374,10 @@
 /* Mobile responsive improvements */
 @media (max-width: 1200px) {
     .application-content {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 1.5rem;
+        position: static;
     }
 
     .instructions-panel {
@@ -383,9 +386,11 @@
         margin-top: 1.5rem;
         max-height: none;
         overflow-y: visible;
+        width: 100%;
     }
 
     .application-form {
         order: 1;
+        width: 100%;
     }
 }
