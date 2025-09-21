@@ -77,19 +77,13 @@ function getAPIBaseURL() {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     const port = window.location.port;
-    
-    // For production environments (Render deployment)
-    if (process.env.NODE_ENV === 'production') {
-        // In production, API is served from the same domain
-        return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
-    }
-    
-    // For development (localhost)
+
+    // Check if we're in development (localhost)
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return `${protocol}//${hostname}:3002/api`;
+        return 'http://localhost:3002/api';
     }
-    
-    // Default case
+
+    // For production, backend and frontend are served from the same domain
     return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
 }
 
