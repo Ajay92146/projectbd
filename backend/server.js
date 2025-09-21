@@ -1,4 +1,4 @@
- /**
+/**
  * Blood Donation Website - Main Server File
  * This file sets up the Express server and handles all routing
  */
@@ -42,13 +42,14 @@ app.use(helmet({
             defaultSrc: ["'self'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"],
             imgSrc: ["'self'", "data:", "https:"],
             connectSrc: ["'self'"],
         },
     },
 }));
 app.use(morgan('combined')); // Logging
+
 // CORS Configuration - Enhanced for development and production
 const corsOptions = {
     origin: function (origin, callback) {
@@ -108,6 +109,16 @@ app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
+// Fix MIME types for static files - ADD THIS BEFORE STATIC FILE SERVING
+app.use((req, res, next) => {
+    if (req.path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+    } else if (req.path.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css');
+    }
+    next();
+});
+
 // API Routes (MUST come before static files)
 console.log('🔧 Loading API routes...');
 app.use('/api/donors', donorRoutes);
@@ -124,7 +135,15 @@ app.use('/api/emergency', emergencyRoutes);
 console.log('✅ API routes loaded successfully');
 
 // Serve static files from frontend directory (AFTER API routes)
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.static(path.join(__dirname, '../frontend'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        } else if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        }
+    }
+}));
 
 // Serve frontend pages
 app.get('/', (req, res) => {
@@ -232,7 +251,7 @@ app.use('/api/*', (req, res) => {
     });
 });
 
-// 404 handler for all other routes (but not API routes)
+// 404 handler for all other routes (but not API routes or static files)
 app.use('*', (req, res) => {
     // Don't serve HTML for API routes
     if (req.path.startsWith('/api/')) {
@@ -241,6 +260,12 @@ app.use('*', (req, res) => {
             path: req.originalUrl
         });
     }
+    
+    // Don't serve HTML for static files
+    if (req.path.endsWith('.js') || req.path.endsWith('.css') || req.path.endsWith('.png') || req.path.endsWith('.jpg') || req.path.endsWith('.ico')) {
+        return res.status(404).send('File not found');
+    }
+    
     // Serve frontend for non-API routes
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
