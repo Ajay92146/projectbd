@@ -13,17 +13,7 @@ async function processAdminLogout() {
     debugLog('🔐 Starting admin logout process...');
     
     try {
-        // Get API base URL
-        const getAPIBaseURL = window.getAPIBaseURL || (() => {
-            const protocol = window.location.protocol;
-            const hostname = window.location.hostname;
-            
-            if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                return `${protocol}//${hostname}:3002/api`;
-            }
-            return `${protocol}//${hostname}/api`;
-        });
-        
+        // Use the global getAPIBaseURL function from api.js
         const apiUrl = `${getAPIBaseURL()}/admin/logout`;
         debugLog(`API URL: ${apiUrl}`);
         
