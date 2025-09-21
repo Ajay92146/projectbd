@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - BloodConnect</title>
+    
+    <!-- Fix CSP issues by adding proper meta tag -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:;">
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -324,6 +328,15 @@
             transform: translateY(-2px);
         }
 
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+
         .search-filter {
             display: flex;
             gap: 1rem;
@@ -452,205 +465,13 @@
             color: var(--gray-300);
         }
 
-        /* Advanced Search Panel Styles */
-        .advanced-search-panel {
-            background: rgba(247, 250, 252, 0.95);
-            border: 1px solid var(--gray-200);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: none;
-        }
-        
-        .advanced-search-panel.active {
-            display: block;
-        }
-        
-        .advanced-search-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .form-group label {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: var(--gray-700);
-            margin-bottom: 0.25rem;
-        }
-        
-        .form-group input,
-        .form-group select {
-            padding: 0.5rem;
-            border: 1px solid var(--gray-300);
-            border-radius: 0.25rem;
-            font-size: 0.9rem;
-        }
-        
-        .advanced-search-actions {
+        .pagination {
             display: flex;
             gap: 0.5rem;
-            justify-content: flex-end;
-        }
-        
-        .btn-secondary {
-            background: var(--gray-200);
-            color: var(--gray-700);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--gray-300);
-        }
-        
-        .toggle-advanced-search {
-            background: none;
-            border: none;
-            color: var(--primary-red);
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem;
-        }
-        
-        .toggle-advanced-search:hover {
-            text-decoration: underline;
-        }
-        
-        /* Bulk Operations Styles */
-        .bulk-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-        
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-        
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #059669;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
-        .btn-warning {
-            background: #f59e0b;
-            color: white;
-        }
-        
-        .btn-warning:hover {
-            background: #d97706;
-        }
-        
-        .export-btn {
-            margin-left: auto;
-        }
-        
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 10000;
-            align-items: center;
             justify-content: center;
+            margin-top: 1rem;
         }
-        
-        .modal-content {
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            padding: 1rem;
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray-500);
-        }
-        
-        .modal-body {
-            padding: 1rem;
-        }
-        
-        .modal-footer {
-            padding: 1rem;
-            border-top: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-        }
-        
-        /* Detail View Styles */
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .detail-label {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: var(--gray-600);
-            margin-bottom: 0.25rem;
-        }
-        
-        .detail-value {
-            font-size: 1rem;
-            font-weight: 500;
-        }
-        
-        /* Chart Container Styles */
+
         .chart-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
@@ -659,428 +480,14 @@
             box-shadow: var(--shadow-lg);
             border: 1px solid rgba(229, 62, 62, 0.1);
             margin-bottom: 1.5rem;
+            height: 400px;
         }
-        
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--gray-100);
-        }
-        
+
         .chart-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--gray-900);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .chart-title i {
-            color: var(--primary-red);
-        }
-        
-        .chart-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .chart-card {
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--gray-200);
-        }
-        
-        .chart-card-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 600;
+            color: var(--gray-900);
             margin-bottom: 1rem;
-            color: var(--gray-800);
-            text-align: center;
-        }
-        
-        /* Responsive improvements */
-        @media (max-width: 1200px) {
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Mobile Optimization Styles */
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 1rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .search-filter {
-                flex-direction: column;
-            }
-            
-            .search-box {
-                min-width: 100%;
-            }
-            
-            .data-table {
-                font-size: 0.8rem;
-            }
-            
-            .data-table th,
-            .data-table td {
-                padding: 0.5rem;
-            }
-            
-            .bulk-actions {
-                flex-direction: column;
-            }
-            
-            .export-btn {
-                margin-left: 0;
-            }
-            
-            .advanced-search-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header-container {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-            
-            .admin-logo {
-                justify-content: center;
-            }
-            
-            .section-header {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-            
-            .section-title {
-                justify-content: center;
-            }
-            
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 1rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .stat-number {
-                font-size: 2rem;
-            }
-            
-            .stat-label {
-                font-size: 0.8rem;
-            }
-            
-            .btn {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.8rem;
-            }
-            
-            .search-input,
-            .filter-select {
-                font-size: 0.9rem;
-                padding: 0.5rem;
-            }
-            
-            .data-table {
-                display: block;
-                overflow-x: auto;
-            }
-            
-            .detail-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Touch-friendly styles */
-        @media (hover: none) and (pointer: coarse) {
-            .btn,
-            .status-badge,
-            .search-input,
-            .filter-select {
-                min-height: 44px; /* Minimum touch target size */
-                padding: 0.75rem 1rem;
-            }
-            
-            .data-table th,
-            .data-table td {
-                padding: 0.75rem;
-            }
-        }
-        
-        /* Pagination Styles */
-        .pagination-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .pagination-controls {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        
-        .pagination-controls .btn {
-            min-width: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Lazy Loading Styles */
-        .lazy-load-placeholder {
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--gray-500);
-        }
-        
-        /* Print Styles */
-        @media print {
-            .admin-header {
-                position: static;
-                box-shadow: none;
-            }
-            
-            .logout-btn, 
-            .toggle-advanced-search,
-            .bulk-actions,
-            .search-filter,
-            .pagination-container,
-            #lastUpdated,
-            #notificationContainer {
-                display: none !important;
-            }
-            
-            .section-header {
-                border-bottom: 1px solid #000;
-            }
-            
-            .stat-card {
-                box-shadow: none;
-                border: 1px solid #000;
-            }
-            
-            .data-table {
-                border: 1px solid #000;
-            }
-            
-            .data-table th,
-            .data-table td {
-                border: 1px solid #000;
-            }
-            
-            .status-badge {
-                border: 1px solid #000;
-                background: transparent !important;
-                color: #000 !important;
-            }
-            
-            .chart-container {
-                page-break-inside: avoid;
-            }
-            
-            .chart-card {
-                border: 1px solid #000;
-            }
-        }
-        
-        /* Dashboard customization styles */
-        .customize-dashboard {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-        
-        .customize-dashboard:hover {
-            transform: scale(1.1);
-            background: rgba(229, 62, 62, 0.9);
-            color: white;
-        }
-        
-        body.dark-mode .customize-dashboard {
-            background: rgba(45, 55, 72, 0.9);
-            color: #e2e8f0;
-        }
-        
-        body.dark-mode .customize-dashboard:hover {
-            background: rgba(229, 62, 62, 0.9);
-        }
-        
-        /* Customization panel */
-        .customization-panel {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            width: 300px;
-            display: none;
-        }
-        
-        body.dark-mode .customization-panel {
-            background: rgba(45, 55, 72, 0.95);
-            color: #e2e8f0;
-        }
-        
-        .customization-panel.active {
-            display: block;
-        }
-        
-        .customization-panel h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        body.dark-mode .customization-panel h3 {
-            border-bottom: 1px solid #4a5568;
-        }
-        
-        .toggle-switch {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .toggle-switch label {
-            font-weight: 500;
-        }
-        
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-        
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
-        
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .slider {
-            background-color: #e53e3e;
-        }
-        
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-        
-        /* Compact view styles */
-        body.compact-view .stat-card {
-            padding: 1rem;
-        }
-        
-        body.compact-view .stat-number {
-            font-size: 2rem;
-        }
-        
-        body.compact-view .stat-label {
-            font-size: 0.8rem;
-        }
-        
-        body.compact-view .dashboard-section {
-            padding: 1rem;
-        }
-        
-        body.compact-view .section-header {
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-        }
-        
-        body.compact-view .section-title {
-            font-size: 1.25rem;
-        }
-        
-        body.compact-view .data-table th,
-        body.compact-view .data-table td {
-            padding: 0.5rem;
-        }
-        
-        body.compact-view .btn {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-        }
-        
-        body.compact-view .search-input,
-        body.compact-view .filter-select {
-            padding: 0.5rem;
-            font-size: 0.9rem;
-        }
-        
-        body.compact-view .chart-card {
-            padding: 0.75rem;
-        }
-        
-        body.compact-view .chart-card-title {
-            font-size: 1rem;
-            margin-bottom: 0.75rem;
         }
     </style>
 </head>
@@ -1088,31 +495,17 @@
     <!-- Admin Header -->
     <header class="admin-header">
         <div class="header-container">
-            <div style="display: flex; align-items: center;">
-                <a href="index.html" class="admin-logo">
-                    <i class="fas fa-heart"></i>
-                    <span>BloodConnect</span>
-                </a>
-                <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+            <a href="#" class="admin-logo">
+                <i class="fas fa-heart"></i>
+                <span>BloodConnect Admin</span>
+            </a>
+            <div>
+                <button class="dark-mode-toggle" onclick="toggleDarkMode()">
                     <i class="fas fa-moon"></i>
                 </button>
-            </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button class="logout-btn" onclick="printCurrentView()" title="Print Dashboard">
-                    <i class="fas fa-print"></i>
-                    <span class="logout-text">Print</span>
-                </button>
-                <button class="logout-btn" onclick="clearCacheAndRefresh()" title="Clear Cache and Refresh">
-                    <i class="fas fa-sync-alt"></i>
-                    <span class="logout-text">Refresh</span>
-                </button>
-                <button class="logout-btn" onclick="showHelpModal()" title="Show Keyboard Shortcuts">
-                    <i class="fas fa-question-circle"></i>
-                    <span class="logout-text">Help</span>
-                </button>
-                <button class="logout-btn" onclick="logout()" id="logoutButton" title="Logout">
+                <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span class="logout-text">Logout</span>
+                    Logout
                 </button>
             </div>
         </div>
@@ -1120,647 +513,155 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Stats Overview -->
+        <!-- Statistics Grid -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-number" id="totalUsers">0</div>
                 </div>
+                <div class="stat-number" id="totalUsers">-</div>
                 <div class="stat-label">Total Users</div>
             </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-hand-holding-heart"></i>
-                    </div>
-                    <div class="stat-number" id="totalDonations">0</div>
-                </div>
-                <div class="stat-label">Total Donations</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="stat-number" id="totalRequests">0</div>
-                </div>
-                <div class="stat-label">Blood Requests</div>
-            </div>
-
+            
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon">
                         <i class="fas fa-tint"></i>
                     </div>
-                    <div class="stat-number" id="totalBloodUnits">0</div>
                 </div>
-                <div class="stat-label">Blood Units Available</div>
-            </div>
-        </div>
-        
-        <!-- Charts Section -->
-        <div class="chart-container">
-            <div class="chart-header">
-                <h2 class="chart-title">
-                    <i class="fas fa-chart-bar"></i>
-                    Data Visualization
-                </h2>
-                <button class="btn btn-primary" onclick="refreshCharts()">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh Charts
-                </button>
+                <div class="stat-number" id="totalDonations">-</div>
+                <div class="stat-label">Total Donations</div>
             </div>
             
-            <div class="chart-grid">
-                <div class="chart-card">
-                    <div class="chart-card-title">User Registrations by Month</div>
-                    <canvas id="userRegistrationsChart" height="300"></canvas>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-hand-holding-medical"></i>
+                    </div>
                 </div>
-                
-                <div class="chart-card">
-                    <div class="chart-card-title">Blood Donations by Blood Group</div>
-                    <canvas id="donationsByGroupChart" height="300"></canvas>
+                <div class="stat-number" id="totalRequests">-</div>
+                <div class="stat-label">Blood Requests</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-vial"></i>
+                    </div>
                 </div>
-                
-                <div class="chart-card">
-                    <div class="chart-card-title">Blood Requests by Urgency</div>
-                    <canvas id="requestsByUrgencyChart" height="300"></canvas>
-                </div>
-                
-                <div class="chart-card">
-                    <div class="chart-card-title">Donor Availability Status</div>
-                    <canvas id="donorAvailabilityChart" height="300"></canvas>
-                </div>
+                <div class="stat-number" id="totalBloodUnits">-</div>
+                <div class="stat-label">Blood Units</div>
             </div>
         </div>
-        
-        <!-- Users Section -->
+
+        <!-- Charts Section -->
+        <div class="chart-container">
+            <div class="chart-title">User Registrations</div>
+            <canvas id="userRegistrationsChart"></canvas>
+        </div>
+
+        <!-- Users Management Section -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2 class="section-title">
                     <i class="fas fa-users"></i>
-                    User Registrations
-                    <span class="data-count" id="usersCount">(0 users)</span>
+                    Users Management
+                    <span class="data-count" id="usersCount">(0 total)</span>
                 </h2>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-primary" onclick="refreshUsers()">
-                        <i class="fas fa-sync-alt"></i>
-                        Refresh
-                    </button>
-                    <button class="toggle-advanced-search" onclick="toggleAdvancedSearch('users')">
-                        <i class="fas fa-sliders-h"></i>
-                        Advanced Search
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Bulk Actions for Users -->
-            <div class="bulk-actions">
-                <button class="btn btn-success btn-sm" onclick="bulkApprove('users')">
-                    <i class="fas fa-check"></i> Approve Selected
-                </button>
-                <button class="btn btn-warning btn-sm" onclick="bulkReject('users')">
-                    <i class="fas fa-times"></i> Reject Selected
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="bulkDelete('users')">
-                    <i class="fas fa-trash"></i> Delete Selected
-                </button>
-                <button class="btn btn-primary btn-sm export-btn" onclick="exportDataToCSV('users')">
-                    <i class="fas fa-file-export"></i> Export to CSV
+                <button class="btn btn-primary" onclick="loadUsers()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
                 </button>
             </div>
             
-            <!-- Advanced Search Panel for Users -->
-            <div class="advanced-search-panel" id="usersAdvancedSearch">
-                <div class="advanced-search-grid">
-                    <div class="form-group">
-                        <label for="usersBloodGroup">Blood Group</label>
-                        <select id="usersBloodGroup">
-                            <option value="">All Blood Groups</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="usersCity">City</label>
-                        <input type="text" id="usersCity" placeholder="Enter city">
-                    </div>
-                    <div class="form-group">
-                        <label for="usersStatus">Status</label>
-                        <select id="usersStatus">
-                            <option value="">All Statuses</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="usersDateFrom">Joined From</label>
-                        <input type="date" id="usersDateFrom">
-                    </div>
-                    <div class="form-group">
-                        <label for="usersDateTo">Joined To</label>
-                        <input type="date" id="usersDateTo">
-                    </div>
-                </div>
-                <div class="advanced-search-actions">
-                    <button class="btn btn-secondary" onclick="clearAdvancedSearch('users')">Clear</button>
-                    <button class="btn btn-primary" onclick="applyAdvancedSearch('users')">Apply Filters</button>
-                </div>
-            </div>
-
+            <!-- Search and Filter -->
             <div class="search-filter">
                 <div class="search-box">
-                    <input type="text" class="search-input" id="userSearch" placeholder="Search users...">
                     <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search users..." id="userSearch">
                 </div>
-                <select class="filter-select" id="userFilter">
-                    <option value="">All Users</option>
-                    <option value="user">Regular Users</option>
+                <select class="filter-select" id="roleFilter">
+                    <option value="">All Roles</option>
                     <option value="donor">Donors</option>
-                    <option value="admin">Admins</option>
+                    <option value="recipient">Recipients</option>
                 </select>
             </div>
-
-            <div id="usersTableContainer">
-                <table class="data-table" id="usersTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Blood Group</th>
-                            <th>City</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Joined</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-                        <!-- Users will be populated here -->
-                    </tbody>
-                </table>
-            </div>
             
-            <!-- Users Pagination -->
-            <div class="pagination-container" id="usersPagination"></div>
-        </div>
-
-        <!-- Donations Section -->
-        <div class="dashboard-section">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-hand-holding-heart"></i>
-                    Blood Donations
-                    <span class="data-count" id="donationsCount">(0 donations)</span>
-                </h2>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-primary" onclick="refreshDonations()">
-                        <i class="fas fa-sync-alt"></i>
-                        Refresh
-                    </button>
-                    <button class="toggle-advanced-search" onclick="toggleAdvancedSearch('donations')">
-                        <i class="fas fa-sliders-h"></i>
-                        Advanced Search
-                    </button>
-                </div>
-            </div>
+            <!-- Users Table -->
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Blood Group</th>
+                        <th>City</th>
+                        <th>Donations</th>
+                        <th>Requests</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr>
+                        <td colspan="10" class="loading">
+                            <i class="fas fa-spinner"></i>
+                            Loading users...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
             
-            <!-- Bulk Actions for Donations -->
-            <div class="bulk-actions">
-                <button class="btn btn-success btn-sm" onclick="bulkApprove('donations')">
-                    <i class="fas fa-check"></i> Approve Selected
-                </button>
-                <button class="btn btn-warning btn-sm" onclick="bulkReject('donations')">
-                    <i class="fas fa-times"></i> Reject Selected
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="bulkDelete('donations')">
-                    <i class="fas fa-trash"></i> Delete Selected
-                </button>
-                <button class="btn btn-primary btn-sm export-btn" onclick="exportDataToCSV('donations')">
-                    <i class="fas fa-file-export"></i> Export to CSV
-                </button>
-            </div>
-            
-            <!-- Advanced Search Panel for Donations -->
-            <div class="advanced-search-panel" id="donationsAdvancedSearch">
-                <div class="advanced-search-grid">
-                    <div class="form-group">
-                        <label for="donationsBloodGroup">Blood Group</label>
-                        <select id="donationsBloodGroup">
-                            <option value="">All Blood Groups</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="donationsCity">City</label>
-                        <input type="text" id="donationsCity" placeholder="Enter city">
-                    </div>
-                    <div class="form-group">
-                        <label for="donationsDateFrom">Date From</label>
-                        <input type="date" id="donationsDateFrom">
-                    </div>
-                    <div class="form-group">
-                        <label for="donationsDateTo">Date To</label>
-                        <input type="date" id="donationsDateTo">
-                    </div>
-                </div>
-                <div class="advanced-search-actions">
-                    <button class="btn btn-secondary" onclick="clearAdvancedSearch('donations')">Clear</button>
-                    <button class="btn btn-primary" onclick="applyAdvancedSearch('donations')">Apply Filters</button>
-                </div>
-            </div>
-
-            <div class="search-filter">
-                <div class="search-box">
-                    <input type="text" class="search-input" id="donationSearch" placeholder="Search donations...">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
-                <select class="filter-select" id="donationFilter">
-                    <option value="">All Donations</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Deferred">Deferred</option>
-                    <option value="Cancelled">Cancelled</option>
-                </select>
-            </div>
-
-            <div id="donationsTableContainer">
-                <table class="data-table" id="donationsTable">
-                    <thead>
-                        <tr>
-                            <th>Donor Name</th>
-                            <th>Blood Group</th>
-                            <th>Donation Date</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th>Notes</th>
-                        </tr>
-                    </thead>
-                    <tbody id="donationsTableBody">
-                        <!-- Donations will be populated here -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Donations Pagination -->
-            <div class="pagination-container" id="donationsPagination"></div>
-        </div>
-
-        <!-- Requests Section -->
-        <div class="dashboard-section">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-search"></i>
-                    Blood Requests
-                    <span class="data-count" id="requestsCount">(0 requests)</span>
-                </h2>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-primary" onclick="refreshRequests()">
-                        <i class="fas fa-sync-alt"></i>
-                        Refresh
-                    </button>
-                    <button class="toggle-advanced-search" onclick="toggleAdvancedSearch('requests')">
-                        <i class="fas fa-sliders-h"></i>
-                        Advanced Search
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Bulk Actions for Requests -->
-            <div class="bulk-actions">
-                <button class="btn btn-success btn-sm" onclick="bulkApprove('requests')">
-                    <i class="fas fa-check"></i> Approve Selected
-                </button>
-                <button class="btn btn-warning btn-sm" onclick="bulkReject('requests')">
-                    <i class="fas fa-times"></i> Reject Selected
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="bulkDelete('requests')">
-                    <i class="fas fa-trash"></i> Delete Selected
-                </button>
-                <button class="btn btn-primary btn-sm export-btn" onclick="exportDataToCSV('requests')">
-                    <i class="fas fa-file-export"></i> Export to CSV
-                </button>
-            </div>
-            
-            <!-- Advanced Search Panel for Requests -->
-            <div class="advanced-search-panel" id="requestsAdvancedSearch">
-                <div class="advanced-search-grid">
-                    <div class="form-group">
-                        <label for="requestsBloodGroup">Blood Group</label>
-                        <select id="requestsBloodGroup">
-                            <option value="">All Blood Groups</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="requestsHospital">Hospital</label>
-                        <input type="text" id="requestsHospital" placeholder="Enter hospital">
-                    </div>
-                    <div class="form-group">
-                        <label for="requestsCity">City</label>
-                        <input type="text" id="requestsCity" placeholder="Enter city">
-                    </div>
-                    <div class="form-group">
-                        <label for="requestsStatus">Status</label>
-                        <select id="requestsStatus">
-                            <option value="">All Statuses</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="requestsDateFrom">Date From</label>
-                        <input type="date" id="requestsDateFrom">
-                    </div>
-                    <div class="form-group">
-                        <label for="requestsDateTo">Date To</label>
-                        <input type="date" id="requestsDateTo">
-                    </div>
-                </div>
-                <div class="advanced-search-actions">
-                    <button class="btn btn-secondary" onclick="clearAdvancedSearch('requests')">Clear</button>
-                    <button class="btn btn-primary" onclick="applyAdvancedSearch('requests')">Apply Filters</button>
-                </div>
-            </div>
-
-            <div class="search-filter">
-                <div class="search-box">
-                    <input type="text" class="search-input" id="requestSearch" placeholder="Search requests...">
-                    <i class="fas fa-search search-icon"></i>
-                </div>
-                <select class="filter-select" id="requestFilter">
-                    <option value="">All Requests</option>
-                    <option value="Critical">Critical</option>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                </select>
-            </div>
-
-            <div id="requestsTableContainer">
-                <table class="data-table" id="requestsTable">
-                    <thead>
-                        <tr>
-                            <th>Patient Name</th>
-                            <th>Blood Group</th>
-                            <th>Units Needed</th>
-                            <th>Urgency</th>
-                            <th>Hospital</th>
-                            <th>Status</th>
-                            <th>Request Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="requestsTableBody">
-                        <!-- Requests will be populated here -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Requests Pagination -->
-            <div class="pagination-container" id="requestsPagination"></div>
+            <!-- Pagination -->
+            <div class="pagination" id="usersPagination"></div>
         </div>
     </main>
 
-    <!-- Load external JavaScript to avoid CSP issues -->
-    <script src="api.js"></script>
-    <script src="admin-dashboard.js"></script>
-    <script src="auto-refresh.js"></script> 
-    <script src="admin-logout.js"></script>
-    <script>
-        // Toggle advanced search panels
-        function toggleAdvancedSearch(section) {
-            const panel = document.getElementById(`${section}AdvancedSearch`);
-            panel.classList.toggle('active');
-        }
-        
-        // Apply advanced search filters
-        function applyAdvancedSearch(section) {
-            const advancedFilters = {};
-            
-            switch(section) {
-                case 'users':
-                    advancedFilters.bloodGroup = document.getElementById('usersBloodGroup').value;
-                    advancedFilters.city = document.getElementById('usersCity').value;
-                    advancedFilters.status = document.getElementById('usersStatus').value;
-                    advancedFilters.dateFrom = document.getElementById('usersDateFrom').value;
-                    advancedFilters.dateTo = document.getElementById('usersDateTo').value;
-                    
-                    const userSearch = document.getElementById('userSearch');
-                    const userFilter = document.getElementById('userFilter');
-                    const searchTerm = userSearch ? userSearch.value.trim() : '';
-                    const roleFilter = userFilter ? userFilter.value : '';
-                    
-                    loadUsers(searchTerm, roleFilter, advancedFilters);
-                    break;
-                    
-                case 'donations':
-                    advancedFilters.bloodGroup = document.getElementById('donationsBloodGroup').value;
-                    advancedFilters.city = document.getElementById('donationsCity').value;
-                    advancedFilters.dateFrom = document.getElementById('donationsDateFrom').value;
-                    advancedFilters.dateTo = document.getElementById('donationsDateTo').value;
-                    
-                    const donationSearch = document.getElementById('donationSearch');
-                    const donationFilter = document.getElementById('donationFilter');
-                    const donationSearchTerm = donationSearch ? donationSearch.value.trim() : '';
-                    const donationStatusFilter = donationFilter ? donationFilter.value : '';
-                    
-                    loadDonations(donationSearchTerm, donationStatusFilter, advancedFilters);
-                    break;
-                    
-                case 'requests':
-                    advancedFilters.bloodGroup = document.getElementById('requestsBloodGroup').value;
-                    advancedFilters.hospital = document.getElementById('requestsHospital').value;
-                    advancedFilters.city = document.getElementById('requestsCity').value;
-                    advancedFilters.status = document.getElementById('requestsStatus').value;
-                    advancedFilters.dateFrom = document.getElementById('requestsDateFrom').value;
-                    advancedFilters.dateTo = document.getElementById('requestsDateTo').value;
-                    
-                    const requestSearch = document.getElementById('requestSearch');
-                    const requestFilter = document.getElementById('requestFilter');
-                    const requestSearchTerm = requestSearch ? requestSearch.value.trim() : '';
-                    const requestUrgencyFilter = requestFilter ? requestFilter.value : '';
-                    
-                    loadRequests(requestSearchTerm, requestUrgencyFilter, advancedFilters);
-                    break;
-            }
-        }
-        
-        // Clear advanced search filters
-        function clearAdvancedSearch(section) {
-            switch(section) {
-                case 'users':
-                    document.getElementById('usersBloodGroup').value = '';
-                    document.getElementById('usersCity').value = '';
-                    document.getElementById('usersStatus').value = '';
-                    document.getElementById('usersDateFrom').value = '';
-                    document.getElementById('usersDateTo').value = '';
-                    break;
-                    
-                case 'donations':
-                    document.getElementById('donationsBloodGroup').value = '';
-                    document.getElementById('donationsCity').value = '';
-                    document.getElementById('donationsDateFrom').value = '';
-                    document.getElementById('donationsDateTo').value = '';
-                    break;
-                    
-                case 'requests':
-                    document.getElementById('requestsBloodGroup').value = '';
-                    document.getElementById('requestsHospital').value = '';
-                    document.getElementById('requestsCity').value = '';
-                    document.getElementById('requestsStatus').value = '';
-                    document.getElementById('requestsDateFrom').value = '';
-                    document.getElementById('requestsDateTo').value = '';
-                    break;
-            }
-            
-            // Refresh the section with cleared filters
-            switch(section) {
-                case 'users':
-                    refreshUsers();
-                    break;
-                case 'donations':
-                    refreshDonations();
-                    break;
-                case 'requests':
-                    refreshRequests();
-                    break;
-            }
-        }
-        
-        // Refresh all charts
-        function refreshCharts() {
-            loadChartStats();
-        }
-        
-        // Close modal
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        }
-        
-        // Toggle customization panel
-        function toggleCustomizationPanel() {
-            const panel = document.getElementById('customizationPanel');
-            panel.classList.toggle('active');
-        }
-        
-        // Close customization panel when clicking outside
-        document.addEventListener('click', function(event) {
-            const panel = document.getElementById('customizationPanel');
-            const button = document.querySelector('.customize-dashboard');
-            
-            if (panel.classList.contains('active') && 
-                !panel.contains(event.target) && 
-                event.target !== button && 
-                !button.contains(event.target)) {
-                panel.classList.remove('active');
-            }
-        });
-        
-        // Apply customizations
-        function applyCustomizations() {
-            // Get toggle states
-            const showCharts = document.getElementById('showChartsToggle').checked;
-            const showStats = document.getElementById('showStatsToggle').checked;
-            const autoRefresh = document.getElementById('autoRefreshToggle').checked;
-            const compactView = document.getElementById('compactViewToggle').checked;
-            
-            // Apply customizations
-            const chartsSection = document.querySelector('.chart-container');
-            const statsGrid = document.querySelector('.stats-grid');
-            
-            if (chartsSection) {
-                chartsSection.style.display = showCharts ? 'block' : 'none';
-            }
-            
-            if (statsGrid) {
-                statsGrid.style.display = showStats ? 'grid' : 'none';
-            }
-            
-            // Save preferences to localStorage
-            localStorage.setItem('admin_dashboard_prefs', JSON.stringify({
-                showCharts,
-                showStats,
-                autoRefresh,
-                compactView
-            }));
-            
-            // Apply compact view
-            if (compactView) {
-                document.body.classList.add('compact-view');
-            } else {
-                document.body.classList.remove('compact-view');
-            }
-            
-            // Show notification
-            showNotification('Dashboard customizations applied!', 'success');
-        }
-        
-        // Load saved customizations
-        function loadCustomizations() {
-            const savedPrefs = localStorage.getItem('admin_dashboard_prefs');
-            
-            if (savedPrefs) {
-                const prefs = JSON.parse(savedPrefs);
-                
-                // Set toggle states
-                document.getElementById('showChartsToggle').checked = prefs.showCharts !== false;
-                document.getElementById('showStatsToggle').checked = prefs.showStats !== false;
-                document.getElementById('autoRefreshToggle').checked = prefs.autoRefresh !== false;
-                document.getElementById('compactViewToggle').checked = prefs.compactView || false;
-                
-                // Apply customizations
-                applyCustomizations();
-            }
-        }
-        
-        // Run when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCustomizations();
-        });
-    </script>
-    
-    <!-- Chart.js Library -->
+    <!-- Scripts - Load in correct order to fix MIME type issues -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Shared Utilities -->
-    <script src="js/shared-utils.js"></script>
-    
-    <!-- Admin Logout Script -->
-    <script src="js/admin-logout.js"></script>
+    <!-- Inline scripts to avoid MIME type issues -->
+    <script>
+        // Dark mode toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
 
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    <!-- Load external JS files with proper error handling -->
+    <script>
+        // Function to load scripts with proper error handling
+        function loadScript(src, callback) {
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = src;
+            script.onload = callback;
+            script.onerror = function() {
+                console.error('Failed to load script:', src);
+                if (callback) callback();
+            };
+            document.head.appendChild(script);
+        }
+
+        // Load scripts in sequence
+        loadScript('api.js', function() {
+            loadScript('admin-dashboard.js', function() {
+                loadScript('auto-refresh.js', function() {
+                    loadScript('admin-logout.js', function() {
+                        console.log('All scripts loaded successfully');
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
