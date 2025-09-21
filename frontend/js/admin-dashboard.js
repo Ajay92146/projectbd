@@ -18,11 +18,12 @@ function ensureAPIBaseURL() {
     return function() {
         const protocol = window.location.protocol;
         const hostname = window.location.hostname;
+        const port = window.location.port;
         
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             return `${protocol}//${hostname}:3002/api`;
         }
-        return `${protocol}//${hostname}/api`;
+        return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
     };
 }
 
@@ -1255,8 +1256,7 @@ function initializeAdminDashboard() {
     initializeDashboard();
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', initializeAdminDashboard);
+
 
 // Make functions globally available
 window.refreshUsers = refreshUsers;
@@ -2439,63 +2439,6 @@ async function showServerStatus() {
     }, 5000);
 }
 
-// Enhanced initializeAdminDashboard function
-function initializeAdminDashboard() {
-    debugLog('🚀 Admin dashboard page loaded');
-    
-    // Apply dark mode preference
-    applyDarkModePreference();
-    
-    // Add system info button
-    addSystemInfoButton();
-    
-    // Add activity button
-    addActivityButton();
-    
-    // Check authentication first
-    if (!checkAdminAuthentication()) {
-        return; // Will redirect to login
-    }
-    
-    // Initialize session timeout checker
-    initializeSessionTimeout();
-    
-    // Set up keyboard shortcuts
-    setupKeyboardShortcuts();
-    
-    // Add print button
-    addPrintButton();
-    
-    // Add help button
-    addHelpButton();
-    
-    // Check server status
-    showServerStatus();
-    
-    // Log dashboard access
-    logAdminActivity('dashboard_access', 'Admin accessed dashboard');
-    
-    // Set up logout button event listener as backup
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-        debugLog('🔄 Setting up logout button event listener');
-        logoutButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            debugLog('🚪 Logout button clicked via event listener');
-            logout();
-        });
-    } else {
-        debugLog('⚠️ Warning: Logout button not found in DOM');
-    }
-    
-    // Test logout function availability
-    if (typeof logout === 'function') {
-        debugLog('✅ Logout function is available');
-    } else {
-        debugLog('❌ Error: Logout function is not available!');
-    }
-    
-    // Initialize dashboard if authenticated
+// Initialize dashboard if authenticated
     initializeDashboard();
-}
 

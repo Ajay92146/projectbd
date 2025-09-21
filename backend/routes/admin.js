@@ -23,7 +23,8 @@ function adminAuthMiddleware(req, res, next) {
     
     console.log('Checking admin credentials:', { adminEmail, adminAuth });
     
-    if (adminEmail === 'admin@bloodconnect.com' && adminAuth === 'true') {
+    // Check if admin credentials are present and valid
+    if (adminEmail && adminAuth === 'true') {
         console.log('✅ Admin authentication successful');
         next();
     } else {

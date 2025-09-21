@@ -364,65 +364,25 @@ router.get('/requests', [
             isActive: { $ne: false }
         };
 
-        // If no requests found with userId, try with userEmail
-        const userEmailQuery = {
-            userEmail: user.email,
-            isActive: { $ne: false }
-        };
-
-        // If still no requests found, try with phone number
-        const userPhoneQuery = user.phoneNumber ? {
-            contactNumber: user.phoneNumber,
-            isActive: { $ne: false }
-        } : null;
-
         if (status) {
             requestQuery.status = status;
-            userEmailQuery.status = status;
-            if (userPhoneQuery) userPhoneQuery.status = status;
         }
 
         console.log('🔍 Primary request query (userId):', JSON.stringify(requestQuery, null, 2));
 
         // Get requests from Request table with pagination
-        // First try with userId
+        // Only use userId for filtering to ensure privacy
         let requests = await Request.find(requestQuery)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        // If no requests found with userId, try with userEmail
-        if (requests.length === 0 && user.email) {
-            console.log('🔍 No requests found with userId, trying userEmail:', JSON.stringify(userEmailQuery, null, 2));
-            requests = await Request.find(userEmailQuery)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit);
-        }
-
-        // If still no requests found, try with phone number
-        if (requests.length === 0 && userPhoneQuery) {
-            console.log('🔍 No requests found with userEmail, trying phone number:', JSON.stringify(userPhoneQuery, null, 2));
-            requests = await Request.find(userPhoneQuery)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit);
-        }
+        console.log('📊 Found requests:', requests.length);
 
         console.log('📊 Found requests:', requests.length);
 
         // Get total count from Request table
         let totalRequests = await Request.countDocuments(requestQuery);
-        
-        // If no requests found with userId, try with userEmail
-        if (totalRequests === 0 && user.email) {
-            totalRequests = await Request.countDocuments(userEmailQuery);
-        }
-        
-        // If still no requests found, try with phone number
-        if (totalRequests === 0 && userPhoneQuery) {
-            totalRequests = await Request.countDocuments(userPhoneQuery);
-        }
 
         // Prepare the response
         const responseData = {

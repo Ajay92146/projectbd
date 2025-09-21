@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Endpoints Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Admin Endpoints Test</h1>
+    <button onclick="testDashboardStats()">Test Dashboard Stats</button>
+    <button onclick="testChartStats()">Test Chart Stats</button>
+    <button onclick="testUsers()">Test Users</button>
+    <button onclick="testDonations()">Test Donations</button>
+    <button onclick="testRequests()">Test Requests</button>
+    <div id="results"></div>
+
+    <script>
+        function getAPIBaseURL() {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return `${protocol}//${hostname}:3002/api`;
+            }
+            return `${protocol}//${hostname}/api`;
+        }
+
+        function getAdminAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'x-admin-email': 'admin@bloodconnect.com',
+                'x-admin-auth': 'true'
+            };
+        }
+
+        function displayResult(message, isSuccess) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            resultDiv.innerHTML = `<strong>${isSuccess ? 'SUCCESS' : 'ERROR'}:</strong> ${message}`;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        async function testDashboardStats() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/dashboard-stats`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                displayResult(`Dashboard Stats: ${JSON.stringify(data)}`, data.success);
+            } catch (error) {
+                displayResult(`Dashboard Stats Error: ${error.message}`, false);
+            }
+        }
+
+        async function testChartStats() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/chart-stats`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                displayResult(`Chart Stats: ${JSON.stringify(data)}`, data.success);
+            } catch (error) {
+                displayResult(`Chart Stats Error: ${error.message}`, false);
+            }
+        }
+
+        async function testUsers() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/users`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                displayResult(`Users: ${JSON.stringify(data)}`, data.success);
+            } catch (error) {
+                displayResult(`Users Error: ${error.message}`, false);
+            }
+        }
+
+        async function testDonations() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/donations`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                displayResult(`Donations: ${JSON.stringify(data)}`, data.success);
+            } catch (error) {
+                displayResult(`Donations Error: ${error.message}`, false);
+            }
+        }
+
+        async function testRequests() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/requests`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                displayResult(`Requests: ${JSON.stringify(data)}`, data.success);
+            } catch (error) {
+                displayResult(`Requests Error: ${error.message}`, false);
+            }
+        }
+    </script>
+</body>
+</html>

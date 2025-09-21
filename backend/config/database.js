@@ -11,10 +11,14 @@ const mongoose = require('mongoose');
  */
 const connectDB = async () => {
     try {
-        // Use hardcoded MongoDB URI temporarily since .env file is blocked
-        const mongoUri = process.env.MONGODB_URI || 'mongodb+srv://ajc54875:WCX8kDhsJtVxat7e@ajaykadatabase.ru1ft8v.mongodb.net/?retryWrites=true&w=majority&appName=Ajaykadatabase';
+        // Get MongoDB URI from environment variables
+        const mongoUri = process.env.MONGODB_URI;
         
-        // Connect to MongoDB Atlas with minimal options for compatibility
+        if (!mongoUri) {
+            throw new Error('MONGODB_URI environment variable is not defined');
+        }
+        
+        // Connect to MongoDB Atlas
         const conn = await mongoose.connect(mongoUri);
 
         console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host}`);
@@ -43,7 +47,7 @@ const connectDB = async () => {
     } catch (error) {
         console.error('❌ MongoDB Atlas connection failed:', error.message);
         
-        // Exit process with failure if in production
+        // Exit process with failure in production
         if (process.env.NODE_ENV === 'production') {
             process.exit(1);
         }
