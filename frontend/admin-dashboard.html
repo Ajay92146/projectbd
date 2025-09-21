@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - BloodConnect</title>
     
-    <!-- Fix CSP issues by adding proper meta tag -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:;">
+    <!-- Fix CSP to allow Chart.js CDN -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self';">
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -620,11 +620,13 @@
         </div>
     </main>
 
-    <!-- Scripts - Load in correct order to fix MIME type issues -->
+    <!-- Scripts - Load Chart.js first, then our scripts with cache busting -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Inline scripts to avoid MIME type issues -->
+    <!-- Cache busting by adding timestamp -->
     <script>
+        const timestamp = new Date().getTime();
+        
         // Dark mode toggle
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
@@ -635,15 +637,12 @@
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
         }
-    </script>
 
-    <!-- Load external JS files with proper error handling -->
-    <script>
-        // Function to load scripts with proper error handling
+        // Function to load scripts with cache busting
         function loadScript(src, callback) {
             const script = document.createElement('script');
             script.type = 'text/javascript';
-            script.src = src;
+            script.src = src + '?v=' + timestamp;
             script.onload = callback;
             script.onerror = function() {
                 console.error('Failed to load script:', src);
@@ -652,7 +651,7 @@
             document.head.appendChild(script);
         }
 
-        // Load scripts in sequence
+        // Load scripts in sequence with cache busting
         loadScript('api.js', function() {
             loadScript('admin-dashboard.js', function() {
                 loadScript('auto-refresh.js', function() {
