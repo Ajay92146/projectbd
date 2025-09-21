@@ -521,4 +521,474 @@ router.delete('/users/:id', async (req, res) => {
     }
 });
 
+/**
+ * @route   GET /api/admin/chart-stats
+ * @desc    Get chart statistics for admin dashboard
+ * @access  Admin only
+ */
+router.get('/chart-stats', adminAuthMiddleware, async (req, res) => {
+    try {
+        // Get user registrations by month
+        const userRegistrations = await User.aggregate([
+            { $match: { isActive: true } },
+            { $group: {
+                _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+                count: { $sum: 1 }
+            }},
+            { $sort: { '_id': 1 } }
+        ]);
+
+        // Get donations by blood group
+        const donationsByGroup = await Donor.aggregate([
+            { $match: { isActive: true } },
+            { $group: {
+                _id: '$bloodGroup',
+                count: { $sum: 1 }
+            }},
+            { $sort: { '_id': 1 } }
+        ]);
+
+        // Get requests by urgency
+        const requestsByUrgency = await Request.aggregate([
+            { $match: { isActive: true } },
+            { $group: {
+                _id: '$urgency',
+                count: { $sum: 1 }
+            }},
+            { $sort: { '_id': 1 } }
+        ]);
+
+        // Get donor availability status
+        const donorAvailability = await Donor.aggregate([
+            { $group: {
+                _id: '$isAvailable',
+                count: { $sum: 1 }
+            }}
+        ]);
+
+        res.json({
+            success: true,
+            data: {
+                userRegistrations: {
+                    labels: userRegistrations.map(item => item._id),
+                    data: userRegistrations.map(item => item.count)
+                },
+                donationsByGroup: {
+                    labels: donationsByGroup.map(item => item._id),
+                    data: donationsByGroup.map(item => item.count)
+                },
+                requestsByUrgency: {
+                    labels: requestsByUrgency.map(item => item._id),
+                    data: requestsByUrgency.map(item => item.count)
+                },
+                donorAvailability: {
+                    labels: donorAvailability.map(item => item._id ? 'Available' : 'Unavailable'),
+                    data: donorAvailability.map(item => item.count)
+                }
+            }
+        });
+    } catch (error) {
+        logger.error('Error fetching chart stats:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch chart statistics'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/activity-log
+ * @desc    Log admin activity
+ * @access  Admin only
+ */
+router.post('/activity-log', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { action, details } = req.body;
+        
+        // In a real implementation, you would save this to a database
+        // For now, we'll just log it
+        logger.info('ADMIN_ACTIVITY', {
+            action,
+            details,
+            adminEmail: req.headers['x-admin-email'],
+            timestamp: new Date().toISOString()
+        });
+        
+        res.json({
+            success: true,
+            message: 'Activity logged successfully'
+        });
+    } catch (error) {
+        logger.error('Error logging activity:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to log activity'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/admin/activity-logs
+ * @desc    Get recent admin activity logs
+ * @access  Admin only
+ */
+router.get('/activity-logs', adminAuthMiddleware, async (req, res) => {
+    try {
+        // In a real implementation, you would fetch this from a database
+        // For now, we'll return a placeholder response
+        res.json({
+            success: true,
+            data: {
+                logs: []
+            }
+        });
+    } catch (error) {
+        logger.error('Error fetching activity logs:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch activity logs'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/admin/users/:id
+ * @desc    Get user details by ID
+ * @access  Admin only
+ */
+router.get('/users/:id', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const user = await User.findById(id).select('-password');
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            data: user
+        });
+    } catch (error) {
+        logger.error('Error fetching user details:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch user details'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/admin/donations/:id
+ * @desc    Get donation details by ID
+ * @access  Admin only
+ */
+router.get('/donations/:id', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const donation = await Donor.findById(id);
+        
+        if (!donation) {
+            return res.status(404).json({
+                success: false,
+                message: 'Donation not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            data: donation
+        });
+    } catch (error) {
+        logger.error('Error fetching donation details:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch donation details'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/admin/requests/:id
+ * @desc    Get request details by ID
+ * @access  Admin only
+ */
+router.get('/requests/:id', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const request = await Request.findById(id);
+        
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: 'Request not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            data: request
+        });
+    } catch (error) {
+        logger.error('Error fetching request details:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch request details'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/admin/:dataType/export
+ * @desc    Export data to CSV
+ * @access  Admin only
+ */
+router.get('/:dataType/export', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { dataType } = req.params;
+        
+        let data = [];
+        let fileName = '';
+        
+        switch (dataType) {
+            case 'users':
+                data = await User.find({ isActive: true }).select('-password');
+                fileName = 'users_export';
+                break;
+            case 'donations':
+                data = await Donor.find({ isActive: true });
+                fileName = 'donations_export';
+                break;
+            case 'requests':
+                data = await Request.find({ isActive: true });
+                fileName = 'requests_export';
+                break;
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid data type for export'
+                });
+        }
+        
+        res.json({
+            success: true,
+            data: data,
+            fileName: fileName
+        });
+    } catch (error) {
+        logger.error(`Error exporting ${dataType} data:`, error);
+        res.status(500).json({
+            success: false,
+            message: `Failed to export ${dataType} data`
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/:dataType/bulk-approve
+ * @desc    Bulk approve items
+ * @access  Admin only
+ */
+router.post('/:dataType/bulk-approve', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { dataType } = req.params;
+        const { ids } = req.body;
+        
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No items selected for approval'
+            });
+        }
+        
+        let updatedCount = 0;
+        
+        switch (dataType) {
+            case 'users':
+                const userResult = await User.updateMany(
+                    { _id: { $in: ids } },
+                    { isActive: true }
+                );
+                updatedCount = userResult.modifiedCount;
+                break;
+            case 'donations':
+                const donationResult = await Donor.updateMany(
+                    { _id: { $in: ids } },
+                    { isAvailable: true, applicationStatus: 'Approved' }
+                );
+                updatedCount = donationResult.modifiedCount;
+                break;
+            case 'requests':
+                const requestResult = await Request.updateMany(
+                    { _id: { $in: ids } },
+                    { status: 'Approved' }
+                );
+                updatedCount = requestResult.modifiedCount;
+                break;
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid data type for bulk approval'
+                });
+        }
+        
+        res.json({
+            success: true,
+            message: `${updatedCount} ${dataType} approved successfully`,
+            data: {
+                updatedCount
+            }
+        });
+    } catch (error) {
+        logger.error(`Error bulk approving ${dataType}:`, error);
+        res.status(500).json({
+            success: false,
+            message: `Failed to approve ${dataType}`
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/:dataType/bulk-reject
+ * @desc    Bulk reject items
+ * @access  Admin only
+ */
+router.post('/:dataType/bulk-reject', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { dataType } = req.params;
+        const { ids } = req.body;
+        
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No items selected for rejection'
+            });
+        }
+        
+        let updatedCount = 0;
+        
+        switch (dataType) {
+            case 'users':
+                const userResult = await User.updateMany(
+                    { _id: { $in: ids } },
+                    { isActive: false }
+                );
+                updatedCount = userResult.modifiedCount;
+                break;
+            case 'donations':
+                const donationResult = await Donor.updateMany(
+                    { _id: { $in: ids } },
+                    { isAvailable: false, applicationStatus: 'Rejected' }
+                );
+                updatedCount = donationResult.modifiedCount;
+                break;
+            case 'requests':
+                const requestResult = await Request.updateMany(
+                    { _id: { $in: ids } },
+                    { status: 'Rejected' }
+                );
+                updatedCount = requestResult.modifiedCount;
+                break;
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid data type for bulk rejection'
+                });
+        }
+        
+        res.json({
+            success: true,
+            message: `${updatedCount} ${dataType} rejected successfully`,
+            data: {
+                updatedCount
+            }
+        });
+    } catch (error) {
+        logger.error(`Error bulk rejecting ${dataType}:`, error);
+        res.status(500).json({
+            success: false,
+            message: `Failed to reject ${dataType}`
+        });
+    }
+});
+
+/**
+ * @route   DELETE /api/admin/:dataType/bulk-delete
+ * @desc    Bulk delete items (soft delete)
+ * @access  Admin only
+ */
+router.delete('/:dataType/bulk-delete', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { dataType } = req.params;
+        const { ids } = req.body;
+        
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No items selected for deletion'
+            });
+        }
+        
+        let deletedCount = 0;
+        
+        switch (dataType) {
+            case 'users':
+                const userResult = await User.updateMany(
+                    { _id: { $in: ids } },
+                    { isActive: false }
+                );
+                deletedCount = userResult.modifiedCount;
+                break;
+            case 'donations':
+                const donationResult = await Donor.updateMany(
+                    { _id: { $in: ids } },
+                    { isActive: false }
+                );
+                deletedCount = donationResult.modifiedCount;
+                break;
+            case 'requests':
+                const requestResult = await Request.updateMany(
+                    { _id: { $in: ids } },
+                    { isActive: false }
+                );
+                deletedCount = requestResult.modifiedCount;
+                break;
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid data type for bulk deletion'
+                });
+        }
+        
+        res.json({
+            success: true,
+            message: `${deletedCount} ${dataType} deleted successfully`,
+            data: {
+                deletedCount
+            }
+        });
+    } catch (error) {
+        logger.error(`Error bulk deleting ${dataType}:`, error);
+        res.status(500).json({
+            success: false,
+            message: `Failed to delete ${dataType}`
+        });
+    }
+});
+
+/**
+ * @route   GET /api/admin/notifications
+ * @desc    WebSocket endpoint for admin notifications
+ * @access  Admin only
+ */
+// This would typically be handled by a WebSocket server, not an HTTP route
+// We'll add a placeholder comment for now
+// WebSocket implementation would be in a separate service
+
 module.exports = router;
