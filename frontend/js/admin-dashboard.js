@@ -128,6 +128,7 @@ async function loadStats() {
         }
     } catch (error) {
         debugLog(`Error loading stats: ${error.message}`);
+        console.error('Error loading stats:', error);
         
         const totalUsers = document.getElementById('totalUsers');
         const totalDonations = document.getElementById('totalDonations');
@@ -389,6 +390,10 @@ async function loadUsers(searchTerm = '', roleFilter = '', advancedFilters = {},
         });
         debugLog(`Users response status: ${response.status}`);
         
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
         debugLog('Users response data:', data);
         
@@ -413,6 +418,7 @@ async function loadUsers(searchTerm = '', roleFilter = '', advancedFilters = {},
         }
     } catch (error) {
         debugLog(`Error loading users: ${error.message}`);
+        console.error('Error loading users:', error);
         if (usersTableBody) {
             usersTableBody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fas fa-exclamation-triangle"></i><br>Failed to load users. Please try again.</td></tr>';
         }
@@ -505,11 +511,20 @@ async function loadDonations(searchTerm = '', statusFilter = '', advancedFilters
             apiUrl += `&dateTo=${encodeURIComponent(advancedFilters.dateTo)}`;
         }
         
+        debugLog(`Donations API URL: ${apiUrl}`);
+        
         const response = await fetch(apiUrl, {
             method: 'GET',
             headers: getAdminAuthHeaders()
         });
+        debugLog(`Donations response status: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
+        debugLog('Donations response data:', data);
         
         if (data.success) {
             displayDonations(data.data.donations);
@@ -532,6 +547,7 @@ async function loadDonations(searchTerm = '', statusFilter = '', advancedFilters
         }
     } catch (error) {
         debugLog(`Error loading donations: ${error.message}`);
+        console.error('Error loading donations:', error);
         if (donationsTableBody) {
             donationsTableBody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fas fa-exclamation-triangle"></i><br>Failed to load donations. Please try again.</td></tr>';
         }
@@ -580,11 +596,20 @@ async function loadRequests(searchTerm = '', urgencyFilter = '', advancedFilters
             apiUrl += `&dateTo=${encodeURIComponent(advancedFilters.dateTo)}`;
         }
         
+        debugLog(`Requests API URL: ${apiUrl}`);
+        
         const response = await fetch(apiUrl, {
             method: 'GET',
             headers: getAdminAuthHeaders()
         });
+        debugLog(`Requests response status: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
+        debugLog('Requests response data:', data);
         
         if (data.success) {
             displayRequests(data.data.requests);
@@ -607,6 +632,7 @@ async function loadRequests(searchTerm = '', urgencyFilter = '', advancedFilters
         }
     } catch (error) {
         debugLog(`Error loading requests: ${error.message}`);
+        console.error('Error loading requests:', error);
         if (requestsTableBody) {
             requestsTableBody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fas fa-exclamation-triangle"></i><br>Failed to load requests. Please try again.</td></tr>';
         }

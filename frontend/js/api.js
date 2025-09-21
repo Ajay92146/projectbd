@@ -20,7 +20,7 @@ const getAPIBaseURL = () => {
 
     // For production, backend and frontend are served from the same domain
     // Render serves both frontend and backend from the same service
-    const prodApiUrl = `${protocol}//${hostname}/api`;
+    const prodApiUrl = `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
     console.log('🔧 Production API URL:', prodApiUrl);
     return prodApiUrl;
 };

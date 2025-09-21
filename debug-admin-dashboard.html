@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #c53030;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Debug Admin Dashboard</h1>
+        
+        <div class="test-section">
+            <h2>API Configuration Test</h2>
+            <button onclick="testAPIConfig()">Test API Configuration</button>
+            <div id="apiConfigResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Admin Authentication Test</h2>
+            <button onclick="testAdminAuth()">Test Admin Authentication</button>
+            <div id="adminAuthResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Dashboard Stats Test</h2>
+            <button onclick="testDashboardStats()">Test Dashboard Stats</button>
+            <div id="dashboardStatsResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Users List Test</h2>
+            <button onclick="testUsersList()">Test Users List</button>
+            <div id="usersListResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Console Output</h2>
+            <button onclick="clearConsole()">Clear Console</button>
+            <div id="consoleOutput" class="result" style="height: 200px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Console output capture
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            appendToConsole('log', args);
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            appendToConsole('error', args);
+        };
+        
+        function appendToConsole(type, args) {
+            const consoleOutput = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ');
+            const entry = document.createElement('div');
+            entry.innerHTML = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            entry.style.color = type === 'error' ? '#dc2626' : '#16a34a';
+            consoleOutput.appendChild(entry);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        function clearConsole() {
+            document.getElementById('consoleOutput').innerHTML = '';
+        }
+        
+        // API Configuration Test
+        function testAPIConfig() {
+            const resultDiv = document.getElementById('apiConfigResult');
+            try {
+                const protocol = window.location.protocol;
+                const hostname = window.location.hostname;
+                const port = window.location.port;
+                
+                let apiUrl;
+                if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                    apiUrl = `${protocol}//${hostname}:3002/api`;
+                } else {
+                    apiUrl = `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="success">✅ API Configuration Test Passed</div>
+                    <p><strong>Protocol:</strong> ${protocol}</p>
+                    <p><strong>Hostname:</strong> ${hostname}</p>
+                    <p><strong>Port:</strong> ${port || 'None'}</p>
+                    <p><strong>API URL:</strong> ${apiUrl}</p>
+                `;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ API Configuration Test Failed: ${error.message}</div>`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Admin Authentication Test
+        function testAdminAuth() {
+            const resultDiv = document.getElementById('adminAuthResult');
+            try {
+                // Simulate admin auth headers
+                const adminHeaders = {
+                    'Content-Type': 'application/json',
+                    'x-admin-email': 'admin@bloodconnect.com',
+                    'x-admin-auth': 'true'
+                };
+                
+                resultDiv.innerHTML = `
+                    <div class="success">✅ Admin Authentication Headers Created</div>
+                    <p><strong>Headers:</strong></p>
+                    <pre>${JSON.stringify(adminHeaders, null, 2)}</pre>
+                `;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Admin Authentication Test Failed: ${error.message}</div>`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Dashboard Stats Test
+        async function testDashboardStats() {
+            const resultDiv = document.getElementById('dashboardStatsResult');
+            try {
+                resultDiv.innerHTML = '<p>Testing dashboard stats...</p>';
+                resultDiv.className = 'result';
+                
+                // Get API URL
+                const protocol = window.location.protocol;
+                const hostname = window.location.hostname;
+                let apiUrl;
+                if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                    apiUrl = `${protocol}//${hostname}:3002/api`;
+                } else {
+                    apiUrl = `${protocol}//${hostname}/api`;
+                }
+                
+                console.log('API URL:', apiUrl);
+                
+                // Test dashboard stats
+                const response = await fetch(`${apiUrl}/admin/dashboard-stats`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-email': 'admin@bloodconnect.com',
+                        'x-admin-auth': 'true'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Dashboard Stats Test Passed</div>
+                        <p><strong>Total Users:</strong> ${data.data.totalUsers}</p>
+                        <p><strong>Total Donations:</strong> ${data.data.totalDonations}</p>
+                        <p><strong>Total Requests:</strong> ${data.data.totalRequests}</p>
+                        <p><strong>Total Blood Units:</strong> ${data.data.totalBloodUnits}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    resultDiv.className = 'result success';
+                } else {
+                    throw new Error(data.message || 'Failed to load statistics');
+                }
+            } catch (error) {
+                console.error('Dashboard stats error:', error);
+                resultDiv.innerHTML = `<div class="error">❌ Dashboard Stats Test Failed: ${error.message}</div>`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        // Users List Test
+        async function testUsersList() {
+            const resultDiv = document.getElementById('usersListResult');
+            try {
+                resultDiv.innerHTML = '<p>Testing users list...</p>';
+                resultDiv.className = 'result';
+                
+                // Get API URL
+                const protocol = window.location.protocol;
+                const hostname = window.location.hostname;
+                let apiUrl;
+                if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                    apiUrl = `${protocol}//${hostname}:3002/api`;
+                } else {
+                    apiUrl = `${protocol}//${hostname}/api`;
+                }
+                
+                console.log('Users API URL:', apiUrl);
+                
+                // Test users list
+                const response = await fetch(`${apiUrl}/admin/users`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-email': 'admin@bloodconnect.com',
+                        'x-admin-auth': 'true'
+                    }
+                });
+                
+                console.log('Users response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Users response data:', data);
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Users List Test Passed</div>
+                        <p><strong>Total Users:</strong> ${data.data.pagination.totalUsers}</p>
+                        <p><strong>Users Found:</strong> ${data.data.users.length}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    resultDiv.className = 'result success';
+                } else {
+                    throw new Error(data.message || 'Failed to load users');
+                }
+            } catch (error) {
+                console.error('Users list error:', error);
+                resultDiv.innerHTML = `<div class="error">❌ Users List Test Failed: ${error.message}</div>`;
+                resultDiv.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html>
