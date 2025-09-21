@@ -343,12 +343,6 @@ router.get('/requests', [
         const skip = (page - 1) * limit;
         const status = req.query.status;
 
-        // Build query
-        const query = { userId, isActive: true };
-        if (status) {
-            query.status = status;
-        }
-
         // Get user's email to match with requests
         const User = require('../models/User');
         const user = await User.findById(userId);
@@ -361,105 +355,73 @@ router.get('/requests', [
 
         console.log('🔍 Looking for requests for user:', user.email, 'userId:', userId);
 
-        // First, try to find requests in UserRequest table (for authenticated users)
-        const UserRequest = require('../models/UserRequest');
-        const userRequestQuery = { userId, isActive: true };
+        // Build query for Request collection with proper user identification
+        const Request = require('../models/Request');
+        
+        // Primary query: Look for requests with exact userId match (most secure)
+        const requestQuery = {
+            userId: userId,
+            isActive: { $ne: false }
+        };
+
+        // If no requests found with userId, try with userEmail
+        const userEmailQuery = {
+            userEmail: user.email,
+            isActive: { $ne: false }
+        };
+
+        // If still no requests found, try with phone number
+        const userPhoneQuery = user.phoneNumber ? {
+            contactNumber: user.phoneNumber,
+            isActive: { $ne: false }
+        } : null;
+
         if (status) {
-            userRequestQuery.status = status;
+            requestQuery.status = status;
+            userEmailQuery.status = status;
+            if (userPhoneQuery) userPhoneQuery.status = status;
         }
 
-        console.log('👤 Searching UserRequest table by userId:', userId);
+        console.log('🔍 Primary request query (userId):', JSON.stringify(requestQuery, null, 2));
 
-        // Get requests from UserRequest table with pagination
-        const userRequests = await UserRequest.find(userRequestQuery)
+        // Get requests from Request table with pagination
+        // First try with userId
+        let requests = await Request.find(requestQuery)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        console.log('📊 Found UserRequests:', userRequests.length);
-
-        // Get total count from UserRequest table
-        const totalUserRequests = await UserRequest.countDocuments(userRequestQuery);
-
-        // If no requests found in UserRequest table, fallback to searching Request table
-        let requests = userRequests;
-        let totalRequests = totalUserRequests;
-
-        if (userRequests.length === 0) {
-            console.log('🔄 No UserRequests found, falling back to Request table search...');
-
-            // Build query for Request collection by matching contact number or name
-            const Request = require('../models/Request');
-            const requestQuery = {
-                isActive: { $ne: false } // Include documents where isActive is not false
-            };
-
-            // Create multiple search criteria to find user's requests
-            const searchCriteria = [];
-
-            // 1. Try to match by userId (for authenticated users)
-            searchCriteria.push({ userId: userId });
-            console.log('👤 Searching by userId:', userId);
-
-            // 2. Try to match by userEmail (for authenticated users)
-            searchCriteria.push({ userEmail: user.email });
-            console.log('📧 Searching by userEmail:', user.email);
-
-            // 3. Try to match by contact number if user has phone number
-            if (user.phoneNumber) {
-                searchCriteria.push({ contactNumber: user.phoneNumber });
-                console.log('📞 Searching by phone number:', user.phoneNumber);
-            }
-
-            // 4. Try to match by contact person name containing user's name
-            if (user.firstName || user.lastName) {
-                const nameSearches = [];
-                if (user.firstName) {
-                    nameSearches.push({ contactPersonName: new RegExp(user.firstName, 'i') });
-                }
-                if (user.lastName) {
-                    nameSearches.push({ contactPersonName: new RegExp(user.lastName, 'i') });
-                }
-                if (nameSearches.length > 0) {
-                    searchCriteria.push({ $or: nameSearches });
-                }
-                console.log('👤 Also searching by name:', user.firstName, user.lastName);
-            }
-
-            // 5. Try to match by email if available in contactPersonName or additionalNotes
-            if (user.email) {
-                searchCriteria.push({ 
-                    $or: [
-                        { contactPersonName: new RegExp(user.email, 'i') },
-                        { additionalNotes: new RegExp(user.email, 'i') }
-                    ]
-                });
-                console.log('📧 Also searching by email in notes:', user.email);
-            }
-
-            // Combine all search criteria with OR logic
-            if (searchCriteria.length > 0) {
-                requestQuery.$or = searchCriteria;
-            } else {
-                // Fallback: no matching criteria found
-                console.log('⚠️ No search criteria available, will return empty results');
-                requestQuery._id = null; // This will return no results
-            }
-
-            if (status) {
-                requestQuery.status = status;
-            }
-
-            // Get requests from Request table with pagination
-            const fallbackRequests = await Request.find(requestQuery)
+        // If no requests found with userId, try with userEmail
+        if (requests.length === 0 && user.email) {
+            console.log('🔍 No requests found with userId, trying userEmail:', JSON.stringify(userEmailQuery, null, 2));
+            requests = await Request.find(userEmailQuery)
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
+        }
 
-            console.log('📊 Found fallback requests:', fallbackRequests.length);
+        // If still no requests found, try with phone number
+        if (requests.length === 0 && userPhoneQuery) {
+            console.log('🔍 No requests found with userEmail, trying phone number:', JSON.stringify(userPhoneQuery, null, 2));
+            requests = await Request.find(userPhoneQuery)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+        }
 
-            requests = fallbackRequests;
-            totalRequests = await Request.countDocuments(requestQuery);
+        console.log('📊 Found requests:', requests.length);
+
+        // Get total count from Request table
+        let totalRequests = await Request.countDocuments(requestQuery);
+        
+        // If no requests found with userId, try with userEmail
+        if (totalRequests === 0 && user.email) {
+            totalRequests = await Request.countDocuments(userEmailQuery);
+        }
+        
+        // If still no requests found, try with phone number
+        if (totalRequests === 0 && userPhoneQuery) {
+            totalRequests = await Request.countDocuments(userPhoneQuery);
         }
 
         // Prepare the response
@@ -487,12 +449,7 @@ router.get('/requests', [
                 bloodGroup: requests[0].bloodGroup,
                 requiredUnits: requests[0].requiredUnits,
                 status: requests[0].status
-            } : null,
-            actualResponseStructure: {
-                hasDataProperty: !!responseData.data,
-                hasRequestsArray: !!responseData.data.requests,
-                requestsArrayLength: responseData.data.requests.length
-            }
+            } : null
         });
 
         // Add cache-busting headers
