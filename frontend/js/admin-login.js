@@ -72,16 +72,29 @@ function checkPasswordStrength(password) {
     }
 }
 
-// Use global getAPIBaseURL from api.js
+// Get API base URL
+function getAPIBaseURL() {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    
+    // For production environments (Render deployment)
+    if (process.env.NODE_ENV === 'production') {
+        // In production, API is served from the same domain
+        return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
+    }
+    
+    // For development (localhost)
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return `${protocol}//${hostname}:3002/api`;
+    }
+    
+    // Default case
+    return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
+}
 
 // Admin login process
 async function processAdminLogin(email, password, rememberMe) {
-    // Use the unified authentication utility
-    if (window.AdminAuthUtils) {
-        return AdminAuthUtils.processAdminLogin(email, password, rememberMe);
-    }
-    
-    // Fallback to original implementation
     debugLog('🔐 Starting admin login process...');
     debugLog(`📧 Email: ${email}`);
     debugLog(`💾 Remember me: ${rememberMe}`);
@@ -102,18 +115,6 @@ async function processAdminLogin(email, password, rememberMe) {
     try {
         // Call backend API for admin authentication
         debugLog('🔍 Calling backend API for authentication...');
-        
-        // Get API base URL with fallback
-        const getAPIBaseURL = window.getAPIBaseURL || (() => {
-            const protocol = window.location.protocol;
-            const hostname = window.location.hostname;
-            
-            if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                return `${protocol}//${hostname}:3002/api`;
-            }
-            return `${protocol}//${hostname}/api`;
-        });
-        
         const apiUrl = `${getAPIBaseURL()}/admin/login`;
         debugLog(`API URL: ${apiUrl}`);
         
@@ -208,12 +209,6 @@ async function processAdminLogin(email, password, rememberMe) {
 
 // Check if already logged in
 function checkExistingAdminLogin() {
-    // Use the unified authentication utility
-    if (window.AdminAuthUtils) {
-        return AdminAuthUtils.checkExistingAdminLogin();
-    }
-    
-    // Fallback to original implementation
     // Check both localStorage and sessionStorage
     const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
     if (adminStatus === 'true') {

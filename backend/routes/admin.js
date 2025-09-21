@@ -992,6 +992,15 @@ router.delete('/:dataType/bulk-delete', adminAuthMiddleware, async (req, res) =>
  * @desc    WebSocket endpoint for admin notifications
  * @access  Admin only
  */
+// Health check endpoint
+router.get('/health', (req, res) => {
+    res.json({
+        success: true,
+        message: 'Admin API is running',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // This would typically be handled by a WebSocket server, not an HTTP route
 // We'll add a placeholder comment for now
 // WebSocket implementation would be in a separate service

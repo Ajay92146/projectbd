@@ -3,50 +3,34 @@
  * Handles admin dashboard functionality and API calls
  */
 
-// Import admin utilities
-import AdminAuthUtils from './admin-auth-utils.js';
-
 // Debug logging function
 function debugLog(message) {
-    // Use the unified utility function
-    if (window.AdminUtils) {
-        AdminUtils.debugLog(message);
-        return;
-    }
-    
-    // Fallback to original implementation
     console.log(`[AdminDashboard] ${message}`);
 }
 
-// Fallback getAPIBaseURL function in case api.js doesn't load
-function ensureAPIBaseURL() {
-    if (typeof window.getAPIBaseURL === 'function') {
-        return window.getAPIBaseURL;
+// Get API base URL
+function getAPIBaseURL() {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    
+    // For production environments (Render deployment)
+    if (process.env.NODE_ENV === 'production') {
+        // In production, API is served from the same domain
+        return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
     }
     
-    // Fallback implementation
-    return function() {
-        const protocol = window.location.protocol;
-        const hostname = window.location.hostname;
-        const port = window.location.port;
-        
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            return `${protocol}//${hostname}:3002/api`;
-        }
-        return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
-    };
+    // For development (localhost)
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return `${protocol}//${hostname}:3002/api`;
+    }
+    
+    // Default case
+    return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
 }
-
-// Use global getAPIBaseURL from api.js
 
 // Check admin authentication
 function checkAdminAuthentication() {
-    // Use the unified authentication utility
-    if (window.AdminAuthUtils) {
-        return AdminAuthUtils.checkAdminAuthentication();
-    }
-    
-    // Fallback to original implementation
     debugLog('🔍 Checking admin authentication...');
     
     // Get admin status from localStorage
@@ -84,9 +68,6 @@ function checkAdminAuthentication() {
             logout();
             return false;
         }
-        
-        // Update last activity time
-        localStorage.setItem('admin_last_activity', currentTime.toISOString());
     }
     
     debugLog('✅ Admin authenticated successfully!');
@@ -95,12 +76,6 @@ function checkAdminAuthentication() {
 
 // Get auth headers for admin API calls
 function getAdminAuthHeaders() {
-    // Use the unified authentication utility
-    if (window.AdminAuthUtils) {
-        return AdminAuthUtils.getAdminAuthHeaders();
-    }
-    
-    // Fallback to original implementation
     const adminEmail = localStorage.getItem('admin_email');
     return {
         'Content-Type': 'application/json',
@@ -115,7 +90,6 @@ async function loadStats() {
     
     try {
         debugLog('Loading dashboard stats...');
-        const getAPIBaseURL = ensureAPIBaseURL();
         const apiUrl = `${getAPIBaseURL()}/admin/dashboard-stats`;
         debugLog(`API URL: ${apiUrl}`);
         
@@ -152,24 +126,18 @@ async function loadStats() {
             throw new Error(data.message || 'Failed to load statistics');
         }
     } catch (error) {
-        // Use enhanced error handling
-        if (window.AdminUtils && window.AdminUtils.AdminErrorHandler) {
-            AdminUtils.AdminErrorHandler.handleApiError(error, 'Loading dashboard stats');
-        } else {
-            // Fallback to original error handling
-            debugLog(`Error loading stats: ${error.message}`);
-            console.error('Error loading stats:', error);
-            
-            const totalUsers = document.getElementById('totalUsers');
-            const totalDonations = document.getElementById('totalDonations');
-            const totalRequests = document.getElementById('totalRequests');
-            const totalBloodUnits = document.getElementById('totalBloodUnits');
-            
-            if (totalUsers) totalUsers.textContent = 'Error';
-            if (totalDonations) totalDonations.textContent = 'Error';
-            if (totalRequests) totalRequests.textContent = 'Error';
-            if (totalBloodUnits) totalBloodUnits.textContent = 'Error';
-        }
+        debugLog(`Error loading stats: ${error.message}`);
+        console.error('Error loading stats:', error);
+        
+        const totalUsers = document.getElementById('totalUsers');
+        const totalDonations = document.getElementById('totalDonations');
+        const totalRequests = document.getElementById('totalRequests');
+        const totalBloodUnits = document.getElementById('totalBloodUnits');
+        
+        if (totalUsers) totalUsers.textContent = 'Error';
+        if (totalDonations) totalDonations.textContent = 'Error';
+        if (totalRequests) totalRequests.textContent = 'Error';
+        if (totalBloodUnits) totalBloodUnits.textContent = 'Error';
     }
 }
 
@@ -177,7 +145,6 @@ async function loadStats() {
 async function loadChartStats() {
     try {
         debugLog('Loading chart stats...');
-        const getAPIBaseURL = ensureAPIBaseURL();
         const apiUrl = `${getAPIBaseURL()}/admin/chart-stats`;
         debugLog(`Chart API URL: ${apiUrl}`);
         
@@ -201,14 +168,8 @@ async function loadChartStats() {
             throw new Error(data.message || 'Failed to load chart statistics');
         }
     } catch (error) {
-        // Use enhanced error handling
-        if (window.AdminUtils && window.AdminUtils.AdminErrorHandler) {
-            AdminUtils.AdminErrorHandler.handleApiError(error, 'Loading chart stats');
-        } else {
-            // Fallback to original error handling
-            debugLog(`Error loading chart stats: ${error.message}`);
-            showNotification('Failed to load chart data', 'error');
-        }
+        debugLog(`Error loading chart stats: ${error.message}`);
+        showNotification('Failed to load chart data', 'error');
     }
 }
 
@@ -391,7 +352,6 @@ async function loadUsers(searchTerm = '', roleFilter = '', advancedFilters = {},
 
     try {
         debugLog('Loading users...');
-        const getAPIBaseURL = ensureAPIBaseURL();
         let apiUrl = `${getAPIBaseURL()}/admin/users?page=${page}&limit=${limit}`;
         
         // Add search and filter parameters
@@ -454,16 +414,10 @@ async function loadUsers(searchTerm = '', roleFilter = '', advancedFilters = {},
             throw new Error(data.message || 'Failed to load users');
         }
     } catch (error) {
-        // Use enhanced error handling
-        if (window.AdminUtils && window.AdminUtils.AdminErrorHandler) {
-            AdminUtils.AdminErrorHandler.handleApiError(error, 'Loading users');
-        } else {
-            // Fallback to original error handling
-            debugLog(`Error loading users: ${error.message}`);
-            console.error('Error loading users:', error);
-            if (usersTableBody) {
-                usersTableBody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fas fa-exclamation-triangle"></i><br>Failed to load users. Please try again.</td></tr>';
-            }
+        debugLog(`Error loading users: ${error.message}`);
+        console.error('Error loading users:', error);
+        if (usersTableBody) {
+            usersTableBody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fas fa-exclamation-triangle"></i><br>Failed to load users. Please try again.</td></tr>';
         }
     }
 }
@@ -529,7 +483,6 @@ async function loadDonations(searchTerm = '', statusFilter = '', advancedFilters
 
     try {
         debugLog('Loading donations...');
-        const getAPIBaseURL = ensureAPIBaseURL();
         let apiUrl = `${getAPIBaseURL()}/admin/donations?page=${page}&limit=${limit}`;
         
         // Add search and filter parameters
@@ -608,7 +561,6 @@ async function loadRequests(searchTerm = '', urgencyFilter = '', advancedFilters
 
     try {
         debugLog('Loading requests...');
-        const getAPIBaseURL = ensureAPIBaseURL();
         let apiUrl = `${getAPIBaseURL()}/admin/requests?page=${page}&limit=${limit}`;
         
         // Add search and filter parameters
@@ -978,7 +930,6 @@ async function logAdminActivity(action, details) {
     
     // Fallback to original implementation
     try {
-        const getAPIBaseURL = ensureAPIBaseURL();
         const apiUrl = `${getAPIBaseURL()}/admin/activity-log`;
         
         const activityData = {
@@ -1015,7 +966,6 @@ async function logoutFromServer() {
         // Log the logout activity first
         await logAdminActivity('logout', 'Admin logout initiated');
         
-        const getAPIBaseURL = ensureAPIBaseURL();
         const apiUrl = `${getAPIBaseURL()}/admin/logout`;
         const response = await fetch(apiUrl, {
             method: 'POST',
@@ -2554,6 +2504,42 @@ async function showServerStatus() {
     }, 5000);
 }
 
-// Initialize dashboard if authenticated
+// Enhanced initializeAdminDashboard function
+function initializeAdminDashboard() {
+    debugLog('🚀 Admin dashboard page loaded');
+    
+    // Apply dark mode preference
+    applyDarkModePreference();
+    
+    // Check authentication first
+    if (!checkAdminAuthentication()) {
+        return; // Will redirect to login
+    }
+    
+    // Set up logout button event listener
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        debugLog('🔄 Setting up logout button event listener');
+        logoutButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            debugLog('🚪 Logout button clicked via event listener');
+            logout();
+        });
+    } else {
+        debugLog('⚠️ Warning: Logout button not found in DOM');
+    }
+    
+    // Test logout function availability
+    if (typeof logout === 'function') {
+        debugLog('✅ Logout function is available');
+    } else {
+        debugLog('❌ Error: Logout function is not available!');
+    }
+    
+    // Initialize dashboard if authenticated
     initializeDashboard();
+}
+
+// Initialize dashboard when DOM is ready
+document.addEventListener('DOMContentLoaded', initializeAdminDashboard);
 
