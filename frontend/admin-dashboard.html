@@ -462,7 +462,7 @@
         </div>
     </main>
 
-    <!-- All JavaScript embedded inline -->
+    <!-- ALL JAVASCRIPT EMBEDDED HERE -->
     <script>
         // API Configuration
         const getAPIBaseURL = () => {
@@ -627,7 +627,7 @@
                     displayUsers(data.data.users, usersTableBody);
                     
                     if (usersCount) {
-                        usersCount.textContent = `(${data.data.pagination.total} total)`;
+                        usersCount.textContent = `(${data.data.pagination?.total || data.data.users.length} total)`;
                     }
                 } else {
                     throw new Error(data.message || 'Failed to load users');
@@ -667,7 +667,7 @@
             
             tableBody.innerHTML = users.map(user => `
                 <tr>
-                    <td>${user.id}</td>
+                    <td>${user.id || user._id}</td>
                     <td>${user.firstName} ${user.lastName}</td>
                     <td>${user.email}</td>
                     <td>${user.phone || 'N/A'}</td>
@@ -725,7 +725,9 @@
                 notification.style.opacity = '0';
                 notification.style.transform = 'translateX(100%)';
                 setTimeout(() => {
-                    document.body.removeChild(notification);
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
                 }, 300);
             }, 5000);
         }
@@ -735,6 +737,9 @@
             localStorage.removeItem('bloodconnect_admin');
             localStorage.removeItem('admin_email');
             localStorage.removeItem('admin_login_time');
+            sessionStorage.removeItem('bloodconnect_admin');
+            sessionStorage.removeItem('admin_email');
+            sessionStorage.removeItem('admin_login_time');
             window.location.href = 'admin-login.html';
         }
 
