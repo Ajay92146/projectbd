@@ -76,6 +76,12 @@ function checkPasswordStrength(password) {
 
 // Admin login process
 async function processAdminLogin(email, password, rememberMe) {
+    // Use the unified authentication utility
+    if (window.AdminAuthUtils) {
+        return AdminAuthUtils.processAdminLogin(email, password, rememberMe);
+    }
+    
+    // Fallback to original implementation
     debugLog('🔐 Starting admin login process...');
     debugLog(`📧 Email: ${email}`);
     debugLog(`💾 Remember me: ${rememberMe}`);
@@ -202,6 +208,12 @@ async function processAdminLogin(email, password, rememberMe) {
 
 // Check if already logged in
 function checkExistingAdminLogin() {
+    // Use the unified authentication utility
+    if (window.AdminAuthUtils) {
+        return AdminAuthUtils.checkExistingAdminLogin();
+    }
+    
+    // Fallback to original implementation
     // Check both localStorage and sessionStorage
     const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
     if (adminStatus === 'true') {

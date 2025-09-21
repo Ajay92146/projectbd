@@ -11,20 +11,24 @@ const { authMiddleware } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const router = express.Router();
 
-// Admin authentication middleware
+// Enhanced Admin authentication middleware
 function adminAuthMiddleware(req, res, next) {
     // Log all headers for debugging
     console.log('Admin auth headers received:', req.headers);
     
-    // For now, we'll use a simple admin check
-    // In production, this should validate JWT tokens with admin role
+    // For production, this should validate JWT tokens with admin role
+    // For now, we'll use a simple admin check with environment variables
     const adminEmail = req.headers['x-admin-email'] || req.headers['X-Admin-Email'];
     const adminAuth = req.headers['x-admin-auth'] || req.headers['X-Admin-Auth'];
     
-    console.log('Checking admin credentials:', { adminEmail, adminAuth });
+    // Get admin credentials from environment variables or use defaults
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@bloodconnect.com';
+    const ADMIN_AUTH_TOKEN = process.env.ADMIN_AUTH_TOKEN || 'true';
+    
+    console.log('Checking admin credentials:', { adminEmail, adminAuth, ADMIN_EMAIL, ADMIN_AUTH_TOKEN });
     
     // Check if admin credentials are present and valid
-    if (adminEmail && adminAuth === 'true') {
+    if (adminEmail === ADMIN_EMAIL && adminAuth === ADMIN_AUTH_TOKEN) {
         console.log('✅ Admin authentication successful');
         next();
     } else {

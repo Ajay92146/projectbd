@@ -3,8 +3,18 @@
  * Handles admin dashboard functionality and API calls
  */
 
+// Import admin utilities
+import AdminAuthUtils from './admin-auth-utils.js';
+
 // Debug logging function
 function debugLog(message) {
+    // Use the unified utility function
+    if (window.AdminUtils) {
+        AdminUtils.debugLog(message);
+        return;
+    }
+    
+    // Fallback to original implementation
     console.log(`[AdminDashboard] ${message}`);
 }
 
@@ -31,6 +41,12 @@ function ensureAPIBaseURL() {
 
 // Check admin authentication
 function checkAdminAuthentication() {
+    // Use the unified authentication utility
+    if (window.AdminAuthUtils) {
+        return AdminAuthUtils.checkAdminAuthentication();
+    }
+    
+    // Fallback to original implementation
     debugLog('🔍 Checking admin authentication...');
     
     // Get admin status from localStorage
@@ -79,6 +95,12 @@ function checkAdminAuthentication() {
 
 // Get auth headers for admin API calls
 function getAdminAuthHeaders() {
+    // Use the unified authentication utility
+    if (window.AdminAuthUtils) {
+        return AdminAuthUtils.getAdminAuthHeaders();
+    }
+    
+    // Fallback to original implementation
     const adminEmail = localStorage.getItem('admin_email');
     return {
         'Content-Type': 'application/json',
@@ -89,6 +111,8 @@ function getAdminAuthHeaders() {
 
 // Load dashboard statistics
 async function loadStats() {
+    const usersTableBody = document.getElementById('usersTableBody');
+    
     try {
         debugLog('Loading dashboard stats...');
         const getAPIBaseURL = ensureAPIBaseURL();
@@ -128,18 +152,24 @@ async function loadStats() {
             throw new Error(data.message || 'Failed to load statistics');
         }
     } catch (error) {
-        debugLog(`Error loading stats: ${error.message}`);
-        console.error('Error loading stats:', error);
-        
-        const totalUsers = document.getElementById('totalUsers');
-        const totalDonations = document.getElementById('totalDonations');
-        const totalRequests = document.getElementById('totalRequests');
-        const totalBloodUnits = document.getElementById('totalBloodUnits');
-        
-        if (totalUsers) totalUsers.textContent = 'Error';
-        if (totalDonations) totalDonations.textContent = 'Error';
-        if (totalRequests) totalRequests.textContent = 'Error';
-        if (totalBloodUnits) totalBloodUnits.textContent = 'Error';
+        // Use enhanced error handling
+        if (window.AdminUtils && window.AdminUtils.AdminErrorHandler) {
+            AdminUtils.AdminErrorHandler.handleApiError(error, 'Loading dashboard stats');
+        } else {
+            // Fallback to original error handling
+            debugLog(`Error loading stats: ${error.message}`);
+            console.error('Error loading stats:', error);
+            
+            const totalUsers = document.getElementById('totalUsers');
+            const totalDonations = document.getElementById('totalDonations');
+            const totalRequests = document.getElementById('totalRequests');
+            const totalBloodUnits = document.getElementById('totalBloodUnits');
+            
+            if (totalUsers) totalUsers.textContent = 'Error';
+            if (totalDonations) totalDonations.textContent = 'Error';
+            if (totalRequests) totalRequests.textContent = 'Error';
+            if (totalBloodUnits) totalBloodUnits.textContent = 'Error';
+        }
     }
 }
 
@@ -171,8 +201,14 @@ async function loadChartStats() {
             throw new Error(data.message || 'Failed to load chart statistics');
         }
     } catch (error) {
-        debugLog(`Error loading chart stats: ${error.message}`);
-        showNotification('Failed to load chart data', 'error');
+        // Use enhanced error handling
+        if (window.AdminUtils && window.AdminUtils.AdminErrorHandler) {
+            AdminUtils.AdminErrorHandler.handleApiError(error, 'Loading chart stats');
+        } else {
+            // Fallback to original error handling
+            debugLog(`Error loading chart stats: ${error.message}`);
+            showNotification('Failed to load chart data', 'error');
+        }
     }
 }
 
@@ -418,10 +454,16 @@ async function loadUsers(searchTerm = '', roleFilter = '', advancedFilters = {},
             throw new Error(data.message || 'Failed to load users');
         }
     } catch (error) {
-        debugLog(`Error loading users: ${error.message}`);
-        console.error('Error loading users:', error);
-        if (usersTableBody) {
-            usersTableBody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fas fa-exclamation-triangle"></i><br>Failed to load users. Please try again.</td></tr>';
+        // Use enhanced error handling
+        if (window.AdminUtils && window.AdminUtils.AdminErrorHandler) {
+            AdminUtils.AdminErrorHandler.handleApiError(error, 'Loading users');
+        } else {
+            // Fallback to original error handling
+            debugLog(`Error loading users: ${error.message}`);
+            console.error('Error loading users:', error);
+            if (usersTableBody) {
+                usersTableBody.innerHTML = '<tr><td colspan="10" class="empty-state"><i class="fas fa-exclamation-triangle"></i><br>Failed to load users. Please try again.</td></tr>';
+            }
         }
     }
 }
@@ -899,6 +941,13 @@ function refreshRequests() {
 function logout() {
     debugLog('🚪 Logout button clicked');
     
+    // Use the unified authentication utility
+    if (window.AdminAuthUtils) {
+        AdminAuthUtils.logoutAdmin();
+        return;
+    }
+    
+    // Fallback to original implementation
     // Log activity before logout
     logAdminActivity('logout', 'Admin logged out');
     
@@ -922,6 +971,12 @@ function logout() {
 
 // Log admin activity
 async function logAdminActivity(action, details) {
+    // Use the unified authentication utility
+    if (window.AdminAuthUtils) {
+        return AdminAuthUtils.logAdminActivity(action, details);
+    }
+    
+    // Fallback to original implementation
     try {
         const getAPIBaseURL = ensureAPIBaseURL();
         const apiUrl = `${getAPIBaseURL()}/admin/activity-log`;
@@ -950,6 +1005,12 @@ async function logAdminActivity(action, details) {
 
 // Server-side logout call with activity logging
 async function logoutFromServer() {
+    // Use the unified authentication utility
+    if (window.AdminAuthUtils) {
+        return AdminAuthUtils.logoutFromServer();
+    }
+    
+    // Fallback to original implementation
     try {
         // Log the logout activity first
         await logAdminActivity('logout', 'Admin logout initiated');
@@ -974,6 +1035,13 @@ async function logoutFromServer() {
 
 // Admin logout function
 async function logoutAdmin() {
+    // Use the unified authentication utility
+    if (window.AdminAuthUtils) {
+        AdminAuthUtils.logoutAdmin();
+        return;
+    }
+    
+    // Fallback to original implementation
     debugLog('🔐 Starting admin logout process...');
     
     try {
@@ -1019,6 +1087,13 @@ async function logoutAdmin() {
 
 // Client-side logout cleanup
 function performClientLogout() {
+    // Use the unified authentication utility
+    if (window.AdminAuthUtils) {
+        AdminAuthUtils.performClientLogout();
+        return;
+    }
+    
+    // Fallback to original implementation
     try {
         // Use shared utility for clearing admin auth data
         SharedUtils.AuthUtils.clearAuthData(true);
@@ -1266,6 +1341,13 @@ window.logoutAdmin = logoutAdmin;
 
 // Add this new function for updating last updated time
 function updateLastUpdatedTime() {
+    // Use the unified utility function
+    if (window.AdminUtils) {
+        AdminUtils.updateLastUpdatedTime();
+        return;
+    }
+    
+    // Fallback to original implementation
     const now = new Date();
     const timeString = now.toLocaleTimeString();
     const dateString = now.toLocaleDateString();
@@ -1372,6 +1454,13 @@ function initializeWebSocket() {
 
 // Show notification to user
 function showNotification(message, type = 'info') {
+    // Use the unified utility function
+    if (window.AdminUtils) {
+        AdminUtils.showNotification(message, type);
+        return;
+    }
+    
+    // Fallback to original implementation
     // Create notification container if it doesn't exist
     let notificationContainer = document.getElementById('notificationContainer');
     if (!notificationContainer) {
@@ -1566,6 +1655,13 @@ function clearCacheAndRefresh() {
 
 // Toggle select all checkboxes
 function toggleSelectAll(section) {
+    // Use the unified utility function
+    if (window.AdminUtils) {
+        AdminUtils.toggleSelectAll(section);
+        return;
+    }
+    
+    // Fallback to original implementation
     let checkboxes = [];
     let selectAllCheckbox = null;
     
@@ -1883,6 +1979,12 @@ async function exportDataToCSV(dataType) {
 
 // Convert array of objects to CSV format
 function convertToCSV(data) {
+    // Use the unified utility function
+    if (window.AdminUtils) {
+        return AdminUtils.convertToCSV(data);
+    }
+    
+    // Fallback to original implementation
     if (!data || data.length === 0) return '';
     
     // Get headers from first object
@@ -2057,6 +2159,12 @@ async function bulkDelete(dataType) {
 
 // Get selected items based on data type
 function getSelectedItems(dataType) {
+    // Use the unified utility function
+    if (window.AdminUtils) {
+        return AdminUtils.getSelectedItems(dataType);
+    }
+    
+    // Fallback to original implementation
     let checkboxes = [];
     
     switch(dataType) {
@@ -2078,6 +2186,13 @@ function getSelectedItems(dataType) {
 
 // Refresh current section based on data type
 function refreshCurrentSection(dataType) {
+    // Use the unified utility function
+    if (window.AdminUtils) {
+        AdminUtils.refreshCurrentSection(dataType);
+        return;
+    }
+    
+    // Fallback to original implementation
     switch(dataType) {
         case 'users':
             refreshUsers();
