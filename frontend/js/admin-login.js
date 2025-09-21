@@ -72,21 +72,6 @@ function checkPasswordStrength(password) {
     }
 }
 
-// Get API base URL
-function getAPIBaseURL() {
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-
-    // Check if we're in development (localhost)
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:3002/api';
-    }
-
-    // For production, backend and frontend are served from the same domain
-    return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
-}
-
 // Admin login process
 async function processAdminLogin(email, password, rememberMe) {
     debugLog('🔐 Starting admin login process...');
@@ -107,27 +92,21 @@ async function processAdminLogin(email, password, rememberMe) {
     if (loadingSpinner) loadingSpinner.classList.add('active');
 
     try {
-        // Call backend API for admin authentication
+        // Check if BloodConnectAPI is available
+        if (typeof window.BloodConnectAPI === 'undefined' || !window.BloodConnectAPI.adminService) {
+            throw new Error('API service not available. Please refresh the page.');
+        }
+
+        // Use the admin service from api.js
         debugLog('🔍 Calling backend API for authentication...');
-        const apiUrl = `${getAPIBaseURL()}/admin/login`;
-        debugLog(`API URL: ${apiUrl}`);
-        
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
+        const response = await window.BloodConnectAPI.adminService.login({
+            email: email,
+            password: password
         });
         
-        debugLog(`Response status: ${response.status}`);
-        const data = await response.json();
-        debugLog('Response data:', data);
+        debugLog('Response data:', response);
         
-        if (response.ok && data.success) {
+        if (response.success) {
             debugLog('✅ Admin credentials are correct!');
             
             // Store admin session with verification
@@ -178,7 +157,7 @@ async function processAdminLogin(email, password, rememberMe) {
             
         } else {
             debugLog('❌ Invalid admin credentials or API error');
-            throw new Error(data.message || 'Invalid admin credentials. Please try again.');
+            throw new Error(response.message || 'Invalid admin credentials. Please try again.');
         }
         
     } catch (error) {
@@ -325,4 +304,4 @@ document.addEventListener('DOMContentLoaded', initializeAdminLogin);
 
 // Make functions globally available
 window.toggleAdminPassword = toggleAdminPassword;
-window.processAdminLogin = processAdminLogin;
+window.checkPasswordStrength = checkPasswordStrength;

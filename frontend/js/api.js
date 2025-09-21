@@ -154,9 +154,10 @@ class APIClient {
         const currentPath = window.location.pathname;
         const isHomePage = currentPath === '/' || currentPath.includes('/index.html') || currentPath === '';
         const isLoginPage = currentPath.includes('/login');
+        const isAdminLoginPage = currentPath.includes('/admin-login') || currentPath.includes('admin-login.html');
 
-        // Don't redirect if we're already on home page or login page
-        if (!isHomePage && !isLoginPage) {
+        // Don't redirect if we're already on home page, login page, or admin login page
+        if (!isHomePage && !isLoginPage && !isAdminLoginPage) {
             window.location.href = '/login.html';
         }
     }
@@ -419,6 +420,82 @@ class AuthService {
 }
 
 /**
+ * Admin API Service
+ */
+class AdminService {
+    constructor(apiClient) {
+        this.api = apiClient;
+    }
+
+    /**
+     * Admin login
+     * @param {Object} credentials - Admin login credentials
+     * @returns {Promise} - Login response
+     */
+    async login(credentials) {
+        const response = await this.api.post('/admin/login', credentials);
+        
+        // If login successful and token is provided, store it
+        if (response.success && response.data && response.data.token) {
+            this.api.setToken(response.data.token);
+        }
+        
+        return response;
+    }
+
+    /**
+     * Admin logout
+     * @returns {Promise} - Logout response
+     */
+    async logout() {
+        return this.api.post('/admin/logout');
+    }
+
+    /**
+     * Verify admin authentication
+     * @returns {Promise} - Verification response
+     */
+    async verify() {
+        return this.api.get('/admin/verify');
+    }
+
+    /**
+     * Get dashboard statistics
+     * @returns {Promise} - Dashboard stats
+     */
+    async getDashboardStats() {
+        return this.api.get('/admin/dashboard-stats');
+    }
+
+    /**
+     * Get all users
+     * @param {Object} params - Query parameters
+     * @returns {Promise} - Users list
+     */
+    async getUsers(params = {}) {
+        return this.api.get('/admin/users', params);
+    }
+
+    /**
+     * Get all donations
+     * @param {Object} params - Query parameters
+     * @returns {Promise} - Donations list
+     */
+    async getDonations(params = {}) {
+        return this.api.get('/admin/donations', params);
+    }
+
+    /**
+     * Get all requests
+     * @param {Object} params - Query parameters
+     * @returns {Promise} - Requests list
+     */
+    async getRequests(params = {}) {
+        return this.api.get('/admin/requests', params);
+    }
+}
+
+/**
  * Profile Management API Service
  */
 class ProfileService {
@@ -484,106 +561,16 @@ const apiClient = new APIClient();
 const donorService = new DonorService(apiClient);
 const requestService = new RequestService(apiClient);
 const authService = new AuthService(apiClient);
+const adminService = new AdminService(apiClient);
 const profileService = new ProfileService(apiClient);
 
-// Global API object
-window.API = {
-    client: apiClient,
-    donors: donorService,
-    requests: requestService,
-    auth: authService,
-    profile: profileService
+// Make services globally available
+window.BloodConnectAPI = {
+    apiClient,
+    donorService,
+    requestService,
+    authService,
+    adminService,
+    profileService,
+    getAPIBaseURL
 };
-
-// Utility functions for API integration
-
-/**
- * Handle API errors globally
- * @param {Error} error - API error
- * @param {string} context - Error context
- */
-function handleAPIError(error, context = 'API call') {
-    console.error(`${context} failed:`, error);
-    
-    let message = 'An unexpected error occurred. Please try again.';
-    
-    if (error.message.includes('fetch')) {
-        message = 'Network error. Please check your internet connection.';
-    } else if (error.message.includes('401')) {
-        message = 'Authentication required. Please log in.';
-    } else if (error.message.includes('403')) {
-        message = 'Access denied. You do not have permission for this action.';
-    } else if (error.message.includes('404')) {
-        message = 'Resource not found.';
-    } else if (error.message.includes('500')) {
-        message = 'Server error. Please try again later.';
-    }
-    
-    // Show error modal if available
-    if (window.BloodConnect && window.BloodConnect.showModal) {
-        window.BloodConnect.showModal('Error', message, 'error');
-    } else {
-        alert(message);
-    }
-}
-
-/**
- * Show loading state for API calls
- * @param {boolean} loading - Loading state
- * @param {string} message - Loading message
- */
-function showLoadingState(loading, message = 'Loading...') {
-    const loadingElement = document.getElementById('loading');
-    
-    if (loadingElement) {
-        if (loading) {
-            loadingElement.textContent = message;
-            loadingElement.style.display = 'block';
-        } else {
-            loadingElement.style.display = 'none';
-        }
-    }
-}
-
-/**
- * Cache API responses
- */
-class APICache {
-    constructor(ttl = 5 * 60 * 1000) { // 5 minutes default TTL
-        this.cache = new Map();
-        this.ttl = ttl;
-    }
-    
-    set(key, data) {
-        this.cache.set(key, {
-            data,
-            timestamp: Date.now()
-        });
-    }
-    
-    get(key) {
-        const item = this.cache.get(key);
-        
-        if (!item) return null;
-        
-        if (Date.now() - item.timestamp > this.ttl) {
-            this.cache.delete(key);
-            return null;
-        }
-        
-        return item.data;
-    }
-    
-    clear() {
-        this.cache.clear();
-    }
-}
-
-// Initialize API cache
-const apiCache = new APICache();
-
-// Export for use in other files
-window.APICache = APICache;
-window.apiCache = apiCache;
-window.handleAPIError = handleAPIError;
-window.showLoadingState = showLoadingState;
