@@ -418,9 +418,15 @@ class AdminService {
     async login(credentials) {
         const response = await this.api.post('/admin/login', credentials);
         
-        // If login successful and token is provided, store it
-        if (response.success && response.data && response.data.token) {
-            this.api.setToken(response.data.token);
+        // If login successful, store admin token for admin dashboard
+        if (response.success && response.data) {
+            // Store admin token in localStorage for admin dashboard
+            localStorage.setItem('admin_token', 'true');
+            
+            // If API returns a token, also store it in the API client
+            if (response.data.token) {
+                this.api.setToken(response.data.token);
+            }
         }
         
         return response;

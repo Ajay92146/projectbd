@@ -1018,10 +1018,16 @@ function getAdminAuthHeaders() {
         'Content-Type': 'application/json'
     };
     
-    // Add admin token if available
+    // Add admin email and auth token as expected by the backend
+    const adminEmail = localStorage.getItem('admin_email');
+    if (adminEmail) {
+        headers['x-admin-email'] = adminEmail;
+    }
+    
+    // Use admin_token as the auth token
     const adminToken = localStorage.getItem('admin_token');
     if (adminToken) {
-        headers['Authorization'] = `Bearer ${adminToken}`;
+        headers['x-admin-auth'] = adminToken;
     }
     
     return headers;
