@@ -108,7 +108,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -354,6 +354,10 @@
                 <span>BloodConnect Admin</span>
             </a>
             <div>
+                <button class="btn btn-primary" onclick="refreshAllData()" style="margin-right: 10px;">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh All
+                </button>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
@@ -405,6 +409,26 @@
                 <div class="stat-number" id="totalBloodUnits">-</div>
                 <div class="stat-label">Blood Units</div>
             </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-donate"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="totalUserDonations">-</div>
+                <div class="stat-label">User Donations</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-procedures"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="totalUserRequests">-</div>
+                <div class="stat-label">User Requests</div>
+            </div>
         </div>
 
         <!-- Users Management Section -->
@@ -455,6 +479,149 @@
                         <td colspan="10" class="loading">
                             <i class="fas fa-spinner"></i>
                             Loading users...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- User Donations Section -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-donate"></i>
+                    User Donations
+                    <span class="data-count" id="userDonationsCount">(0 total)</span>
+                </h2>
+                <button class="btn btn-primary" onclick="loadUserDonations()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+            
+            <!-- Search and Filter -->
+            <div class="search-filter">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search donations..." id="donationSearch">
+                </div>
+                <select class="filter-select" id="donationStatusFilter">
+                    <option value="">All Status</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Deferred">Deferred</option>
+                </select>
+                <select class="filter-select" id="donationBloodGroupFilter">
+                    <option value="">All Blood Groups</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            
+            <!-- User Donations Table -->
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Donor Name</th>
+                        <th>Blood Group</th>
+                        <th>Units</th>
+                        <th>Donation Date</th>
+                        <th>Center</th>
+                        <th>City</th>
+                        <th>Status</th>
+                        <th>Certificate</th>
+                        <th>Next Eligible</th>
+                    </tr>
+                </thead>
+                <tbody id="userDonationsTableBody">
+                    <tr>
+                        <td colspan="10" class="loading">
+                            <i class="fas fa-spinner"></i>
+                            Loading user donations...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- User Requests Section -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-procedures"></i>
+                    User Requests
+                    <span class="data-count" id="userRequestsCount">(0 total)</span>
+                </h2>
+                <button class="btn btn-primary" onclick="loadUserRequests()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+            
+            <!-- Search and Filter -->
+            <div class="search-filter">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search requests..." id="requestSearch">
+                </div>
+                <select class="filter-select" id="requestStatusFilter">
+                    <option value="">All Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Partially Fulfilled">Partially Fulfilled</option>
+                    <option value="Fulfilled">Fulfilled</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Expired">Expired</option>
+                </select>
+                <select class="filter-select" id="requestUrgencyFilter">
+                    <option value="">All Urgency</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+                <select class="filter-select" id="requestBloodGroupFilter">
+                    <option value="">All Blood Groups</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            
+            <!-- User Requests Table -->
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User Name</th>
+                        <th>Patient Name</th>
+                        <th>Blood Group</th>
+                        <th>Units Required</th>
+                        <th>Units Fulfilled</th>
+                        <th>Urgency</th>
+                        <th>Hospital</th>
+                        <th>Status</th>
+                        <th>Request Date</th>
+                    </tr>
+                </thead>
+                <tbody id="userRequestsTableBody">
+                    <tr>
+                        <td colspan="10" class="loading">
+                            <i class="fas fa-spinner"></i>
+                            Loading user requests...
                         </td>
                     </tr>
                 </tbody>
@@ -563,11 +730,15 @@
                     const totalDonations = document.getElementById('totalDonations');
                     const totalRequests = document.getElementById('totalRequests');
                     const totalBloodUnits = document.getElementById('totalBloodUnits');
+                    const totalUserDonations = document.getElementById('totalUserDonations');
+                    const totalUserRequests = document.getElementById('totalUserRequests');
                     
                     if (totalUsers) totalUsers.textContent = data.data.totalUsers.toLocaleString();
                     if (totalDonations) totalDonations.textContent = data.data.totalDonations.toLocaleString();
                     if (totalRequests) totalRequests.textContent = data.data.totalRequests.toLocaleString();
                     if (totalBloodUnits) totalBloodUnits.textContent = data.data.totalBloodUnits.toLocaleString();
+                    if (totalUserDonations) totalUserDonations.textContent = data.data.totalUserDonations.toLocaleString();
+                    if (totalUserRequests) totalUserRequests.textContent = data.data.totalUserRequests.toLocaleString();
                 } else {
                     throw new Error(data.message || 'Failed to load statistics');
                 }
@@ -579,11 +750,15 @@
                 const totalDonations = document.getElementById('totalDonations');
                 const totalRequests = document.getElementById('totalRequests');
                 const totalBloodUnits = document.getElementById('totalBloodUnits');
+                const totalUserDonations = document.getElementById('totalUserDonations');
+                const totalUserRequests = document.getElementById('totalUserRequests');
                 
                 if (totalUsers) totalUsers.textContent = 'Error';
                 if (totalDonations) totalDonations.textContent = 'Error';
                 if (totalRequests) totalRequests.textContent = 'Error';
                 if (totalBloodUnits) totalBloodUnits.textContent = 'Error';
+                if (totalUserDonations) totalUserDonations.textContent = 'Error';
+                if (totalUserRequests) totalUserRequests.textContent = 'Error';
             }
         }
 
@@ -681,6 +856,203 @@
             `).join('');
         }
 
+        // Load user donations
+        async function loadUserDonations(searchTerm = '', statusFilter = '', bloodGroupFilter = '', page = 1, limit = 20) {
+            const userDonationsTableBody = document.getElementById('userDonationsTableBody');
+            const userDonationsCount = document.getElementById('userDonationsCount');
+            
+            if (userDonationsTableBody) {
+                userDonationsTableBody.innerHTML = '<tr><td colspan="10" class="loading"><i class="fas fa-spinner"></i> Loading user donations...</td></tr>';
+            }
+
+            try {
+                debugLog('Loading user donations...');
+                let apiUrl = `${getAPIBaseURL()}/admin/user-donations?page=${page}&limit=${limit}`;
+                
+                if (searchTerm) {
+                    apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+                }
+                if (statusFilter) {
+                    apiUrl += `&status=${encodeURIComponent(statusFilter)}`;
+                }
+                if (bloodGroupFilter) {
+                    apiUrl += `&bloodGroup=${encodeURIComponent(bloodGroupFilter)}`;
+                }
+                
+                debugLog(`API URL: ${apiUrl}`);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                
+                debugLog(`Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugLog('User donations response data:', data);
+                
+                if (data.success) {
+                    displayUserDonations(data.data.userDonations, userDonationsTableBody);
+                    
+                    if (userDonationsCount) {
+                        userDonationsCount.textContent = `(${data.data.pagination?.total || data.data.userDonations.length} total)`;
+                    }
+                } else {
+                    throw new Error(data.message || 'Failed to load user donations');
+                }
+            } catch (error) {
+                debugLog(`Error loading user donations: ${error.message}`);
+                console.error('Error loading user donations:', error);
+                
+                if (userDonationsTableBody) {
+                    userDonationsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="10" class="empty-state">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error loading user donations: ${error.message}</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        // Display user donations in table
+        function displayUserDonations(userDonations, tableBody) {
+            if (!tableBody) return;
+            
+            if (!userDonations || userDonations.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="empty-state">
+                            <i class="fas fa-donate"></i>
+                            <p>No user donations found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = userDonations.map(donation => `
+                <tr>
+                    <td>${donation._id}</td>
+                    <td>${donation.userId ? `${donation.userId.firstName} ${donation.userId.lastName}` : 'N/A'}</td>
+                    <td>${donation.bloodGroup}</td>
+                    <td>${donation.unitsCollected}</td>
+                    <td>${new Date(donation.donationDate).toLocaleDateString()}</td>
+                    <td>${donation.donationCenter?.name || 'N/A'}</td>
+                    <td>${donation.donationCenter?.city || 'N/A'}</td>
+                    <td><span class="status-badge ${donation.status === 'Completed' ? 'status-active' : 'status-pending'}">${donation.status}</span></td>
+                    <td>${donation.certificateNumber || 'N/A'}</td>
+                    <td>${new Date(donation.nextEligibleDate).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Load user requests
+        async function loadUserRequests(searchTerm = '', statusFilter = '', urgencyFilter = '', bloodGroupFilter = '', page = 1, limit = 20) {
+            const userRequestsTableBody = document.getElementById('userRequestsTableBody');
+            const userRequestsCount = document.getElementById('userRequestsCount');
+            
+            if (userRequestsTableBody) {
+                userRequestsTableBody.innerHTML = '<tr><td colspan="10" class="loading"><i class="fas fa-spinner"></i> Loading user requests...</td></tr>';
+            }
+
+            try {
+                debugLog('Loading user requests...');
+                let apiUrl = `${getAPIBaseURL()}/admin/user-requests?page=${page}&limit=${limit}`;
+                
+                if (searchTerm) {
+                    apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+                }
+                if (statusFilter) {
+                    apiUrl += `&status=${encodeURIComponent(statusFilter)}`;
+                }
+                if (urgencyFilter) {
+                    apiUrl += `&urgency=${encodeURIComponent(urgencyFilter)}`;
+                }
+                if (bloodGroupFilter) {
+                    apiUrl += `&bloodGroup=${encodeURIComponent(bloodGroupFilter)}`;
+                }
+                
+                debugLog(`API URL: ${apiUrl}`);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                
+                debugLog(`Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugLog('User requests response data:', data);
+                
+                if (data.success) {
+                    displayUserRequests(data.data.userRequests, userRequestsTableBody);
+                    
+                    if (userRequestsCount) {
+                        userRequestsCount.textContent = `(${data.data.pagination?.total || data.data.userRequests.length} total)`;
+                    }
+                } else {
+                    throw new Error(data.message || 'Failed to load user requests');
+                }
+            } catch (error) {
+                debugLog(`Error loading user requests: ${error.message}`);
+                console.error('Error loading user requests:', error);
+                
+                if (userRequestsTableBody) {
+                    userRequestsTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="10" class="empty-state">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error loading user requests: ${error.message}</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        // Display user requests in table
+        function displayUserRequests(userRequests, tableBody) {
+            if (!tableBody) return;
+            
+            if (!userRequests || userRequests.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="empty-state">
+                            <i class="fas fa-procedures"></i>
+                            <p>No user requests found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = userRequests.map(request => `
+                <tr>
+                    <td>${request._id}</td>
+                    <td>${request.userId ? `${request.userId.firstName} ${request.userId.lastName}` : 'N/A'}</td>
+                    <td>${request.patientName}</td>
+                    <td>${request.bloodGroup}</td>
+                    <td>${request.requiredUnits}</td>
+                    <td>${request.fulfilledUnits}</td>
+                    <td><span class="status-badge ${request.urgency === 'Critical' || request.urgency === 'High' ? 'status-pending' : 'status-active'}">${request.urgency}</span></td>
+                    <td>${request.hospital?.name || 'N/A'}</td>
+                    <td><span class="status-badge ${request.status === 'Fulfilled' ? 'status-active' : 'status-pending'}">${request.status}</span></td>
+                    <td>${new Date(request.requestDate).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        }
+
         // Show notification
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
@@ -734,13 +1106,35 @@
 
         // Logout function
         function logout() {
+            debugLog('🔐 Starting logout process...');
+            
+            // Clear all admin session data
             localStorage.removeItem('bloodconnect_admin');
             localStorage.removeItem('admin_email');
             localStorage.removeItem('admin_login_time');
             sessionStorage.removeItem('bloodconnect_admin');
             sessionStorage.removeItem('admin_email');
             sessionStorage.removeItem('admin_login_time');
-            window.location.href = 'admin-login.html';
+            
+            debugLog('✅ Session data cleared, redirecting to login...');
+            
+            // Show logout message
+            showNotification('Logged out successfully!', 'success');
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = 'admin-login.html';
+            }, 1000);
+        }
+
+        // Refresh all data function
+        function refreshAllData() {
+            debugLog('🔄 Refreshing all dashboard data...');
+            loadStats();
+            loadUsers();
+            loadUserDonations();
+            loadUserRequests();
+            showNotification('Data refreshed successfully!', 'success');
         }
 
         // Initialize dashboard when DOM is loaded
@@ -751,13 +1145,118 @@
                 return;
             }
             
+            // Load all data
             loadStats();
             loadUsers();
+            loadUserDonations();
+            loadUserRequests();
+            
+            // Set up search event listeners
+            const userSearch = document.getElementById('userSearch');
+            if (userSearch) {
+                userSearch.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value;
+                    const roleFilter = document.getElementById('roleFilter').value;
+                    loadUsers(searchTerm, roleFilter);
+                });
+            }
+            
+            const roleFilter = document.getElementById('roleFilter');
+            if (roleFilter) {
+                roleFilter.addEventListener('change', (e) => {
+                    const roleFilter = e.target.value;
+                    const searchTerm = document.getElementById('userSearch').value;
+                    loadUsers(searchTerm, roleFilter);
+                });
+            }
+            
+            // Set up donation search event listeners
+            const donationSearch = document.getElementById('donationSearch');
+            if (donationSearch) {
+                donationSearch.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value;
+                    const statusFilter = document.getElementById('donationStatusFilter').value;
+                    const bloodGroupFilter = document.getElementById('donationBloodGroupFilter').value;
+                    loadUserDonations(searchTerm, statusFilter, bloodGroupFilter);
+                });
+            }
+            
+            const donationStatusFilter = document.getElementById('donationStatusFilter');
+            if (donationStatusFilter) {
+                donationStatusFilter.addEventListener('change', (e) => {
+                    const statusFilter = e.target.value;
+                    const searchTerm = document.getElementById('donationSearch').value;
+                    const bloodGroupFilter = document.getElementById('donationBloodGroupFilter').value;
+                    loadUserDonations(searchTerm, statusFilter, bloodGroupFilter);
+                });
+            }
+            
+            const donationBloodGroupFilter = document.getElementById('donationBloodGroupFilter');
+            if (donationBloodGroupFilter) {
+                donationBloodGroupFilter.addEventListener('change', (e) => {
+                    const bloodGroupFilter = e.target.value;
+                    const searchTerm = document.getElementById('donationSearch').value;
+                    const statusFilter = document.getElementById('donationStatusFilter').value;
+                    loadUserDonations(searchTerm, statusFilter, bloodGroupFilter);
+                });
+            }
+            
+            // Set up request search event listeners
+            const requestSearch = document.getElementById('requestSearch');
+            if (requestSearch) {
+                requestSearch.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value;
+                    const statusFilter = document.getElementById('requestStatusFilter').value;
+                    const urgencyFilter = document.getElementById('requestUrgencyFilter').value;
+                    const bloodGroupFilter = document.getElementById('requestBloodGroupFilter').value;
+                    loadUserRequests(searchTerm, statusFilter, urgencyFilter, bloodGroupFilter);
+                });
+            }
+            
+            const requestStatusFilter = document.getElementById('requestStatusFilter');
+            if (requestStatusFilter) {
+                requestStatusFilter.addEventListener('change', (e) => {
+                    const statusFilter = e.target.value;
+                    const searchTerm = document.getElementById('requestSearch').value;
+                    const urgencyFilter = document.getElementById('requestUrgencyFilter').value;
+                    const bloodGroupFilter = document.getElementById('requestBloodGroupFilter').value;
+                    loadUserRequests(searchTerm, statusFilter, urgencyFilter, bloodGroupFilter);
+                });
+            }
+            
+            const requestUrgencyFilter = document.getElementById('requestUrgencyFilter');
+            if (requestUrgencyFilter) {
+                requestUrgencyFilter.addEventListener('change', (e) => {
+                    const urgencyFilter = e.target.value;
+                    const searchTerm = document.getElementById('requestSearch').value;
+                    const statusFilter = document.getElementById('requestStatusFilter').value;
+                    const bloodGroupFilter = document.getElementById('requestBloodGroupFilter').value;
+                    loadUserRequests(searchTerm, statusFilter, urgencyFilter, bloodGroupFilter);
+                });
+            }
+            
+            const requestBloodGroupFilter = document.getElementById('requestBloodGroupFilter');
+            if (requestBloodGroupFilter) {
+                requestBloodGroupFilter.addEventListener('change', (e) => {
+                    const bloodGroupFilter = e.target.value;
+                    const searchTerm = document.getElementById('requestSearch').value;
+                    const statusFilter = document.getElementById('requestStatusFilter').value;
+                    const urgencyFilter = document.getElementById('requestUrgencyFilter').value;
+                    loadUserRequests(searchTerm, statusFilter, urgencyFilter, bloodGroupFilter);
+                });
+            }
             
             debugLog('✅ Admin dashboard initialized successfully!');
         });
 
         console.log('✅ Admin dashboard loaded successfully');
+        
+        // Make functions globally available
+        window.loadUsers = loadUsers;
+        window.loadUserDonations = loadUserDonations;
+        window.loadUserRequests = loadUserRequests;
+        window.refreshAllData = refreshAllData;
+        window.logout = logout;
     </script>
 </body>
 </html>

@@ -7,6 +7,8 @@ const express = require('express');
 const User = require('../models/User');
 const Donor = require('../models/Donor');
 const Request = require('../models/Request');
+const UserDonation = require('../models/UserDonation');
+const UserRequest = require('../models/UserRequest');
 const { authMiddleware } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const router = express.Router();
@@ -164,6 +166,12 @@ router.get('/dashboard-stats', adminAuthMiddleware, async (req, res) => {
         // Get total requests count
         const totalRequests = await Request.countDocuments({ isActive: true });
         
+        // Get total user donations count
+        const totalUserDonations = await UserDonation.countDocuments({ isActive: true });
+        
+        // Get total user requests count
+        const totalUserRequests = await UserRequest.countDocuments({ isActive: true });
+        
         // Calculate total blood units available (assuming 1 unit per donor for now)
         const totalBloodUnits = totalDonations;
 
@@ -173,7 +181,9 @@ router.get('/dashboard-stats', adminAuthMiddleware, async (req, res) => {
                 totalUsers,
                 totalDonations,
                 totalRequests,
-                totalBloodUnits
+                totalBloodUnits,
+                totalUserDonations,
+                totalUserRequests
             }
         });
     } catch (error) {
@@ -309,11 +319,82 @@ router.get('/donations', adminAuthMiddleware, async (req, res) => {
 });
 
 /**
- * @route   GET /api/admin/requests
- * @desc    Get all blood requests with pagination and filtering
+ * @route   GET /api/admin/user-donations
+ * @desc    Get all user donations with pagination and filtering
  * @access  Admin only
  */
-router.get('/requests', adminAuthMiddleware, async (req, res) => {
+router.get('/user-donations', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { page = 1, limit = 10, search = '', status = '', bloodGroup = '' } = req.query;
+        
+        // Build search query
+        let query = { isActive: true };
+        
+        if (search) {
+            // First, find users matching the search term
+            const userQuery = {
+                $or: [
+                    { firstName: { $regex: search, $options: 'i' } },
+                    { lastName: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } }
+                ]
+            };
+            const matchingUsers = await User.find(userQuery).select('_id');
+            const userIds = matchingUsers.map(user => user._id);
+            
+            query.$or = [
+                { userId: { $in: userIds } },
+                { 'donationCenter.name': { $regex: search, $options: 'i' } },
+                { 'donationCenter.city': { $regex: search, $options: 'i' } },
+                { certificateNumber: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        if (status) {
+            query.status = status;
+        }
+        
+        if (bloodGroup) {
+            query.bloodGroup = bloodGroup;
+        }
+        
+        // Execute query with pagination and populate user data
+        const userDonations = await UserDonation.find(query)
+            .populate('userId', 'firstName lastName email phoneNumber')
+            .sort({ donationDate: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+        
+        // Get total count
+        const total = await UserDonation.countDocuments(query);
+        
+        res.json({
+            success: true,
+            data: {
+                userDonations,
+                pagination: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(total / limit),
+                    total: total,
+                    limit: parseInt(limit)
+                }
+            }
+        });
+    } catch (error) {
+        logger.error('Error fetching user donations:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch user donations'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/admin/user-requests
+ * @desc    Get all user requests with pagination and filtering
+ * @access  Admin only
+ */
+router.get('/user-requests', adminAuthMiddleware, async (req, res) => {
     try {
         const { page = 1, limit = 10, search = '', status = '', urgency = '', bloodGroup = '' } = req.query;
         
@@ -321,12 +402,24 @@ router.get('/requests', adminAuthMiddleware, async (req, res) => {
         let query = { isActive: true };
         
         if (search) {
+            // First, find users matching the search term
+            const userQuery = {
+                $or: [
+                    { firstName: { $regex: search, $options: 'i' } },
+                    { lastName: { $regex: search, $options: 'i' } },
+                    { email: { $regex: search, $options: 'i' } }
+                ]
+            };
+            const matchingUsers = await User.find(userQuery).select('_id');
+            const userIds = matchingUsers.map(user => user._id);
+            
             query.$or = [
+                { userId: { $in: userIds } },
                 { patientName: { $regex: search, $options: 'i' } },
-                { contactPersonName: { $regex: search, $options: 'i' } },
-                { hospitalName: { $regex: search, $options: 'i' } },
-                { location: { $regex: search, $options: 'i' } },
-                { contactNumber: { $regex: search, $options: 'i' } }
+                { 'hospital.name': { $regex: search, $options: 'i' } },
+                { 'hospital.city': { $regex: search, $options: 'i' } },
+                { 'contactPerson.name': { $regex: search, $options: 'i' } },
+                { 'contactPerson.phoneNumber': { $regex: search, $options: 'i' } }
             ];
         }
         
@@ -342,32 +435,34 @@ router.get('/requests', adminAuthMiddleware, async (req, res) => {
             query.bloodGroup = bloodGroup;
         }
         
-        // Execute query with pagination
-        const requests = await Request.find(query)
+        // Execute query with pagination and populate user data
+        const userRequests = await UserRequest.find(query)
+            .populate('userId', 'firstName lastName email phoneNumber')
+            .populate('donors.donorId', 'firstName lastName phoneNumber')
             .sort({ requestDate: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit);
         
         // Get total count
-        const total = await Request.countDocuments(query);
+        const total = await UserRequest.countDocuments(query);
         
         res.json({
             success: true,
             data: {
-                requests,
+                userRequests,
                 pagination: {
                     currentPage: parseInt(page),
                     totalPages: Math.ceil(total / limit),
-                    totalRequests: total,
-                    requestsPerPage: parseInt(limit)
+                    total: total,
+                    limit: parseInt(limit)
                 }
             }
         });
     } catch (error) {
-        logger.error('Error fetching requests:', error);
+        logger.error('Error fetching user requests:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to fetch requests'
+            message: 'Failed to fetch user requests'
         });
     }
 });
