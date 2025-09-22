@@ -9,7 +9,7 @@ function debugLog(message) {
 }
 
 // Get API base URL function
-function getAPIBaseURL() {
+window.getAPIBaseURL = function() {
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     const port = window.location.port;
@@ -21,7 +21,7 @@ function getAPIBaseURL() {
 }
 
 // Get admin authentication headers
-function getAdminAuthHeaders() {
+window.getAdminAuthHeaders = function() {
     const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
     return {
         'Content-Type': 'application/json',
