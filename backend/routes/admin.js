@@ -1087,6 +1087,46 @@ router.delete('/:dataType/bulk-delete', adminAuthMiddleware, async (req, res) =>
  * @desc    WebSocket endpoint for admin notifications
  * @access  Admin only
  */
+/**
+ * @route   GET /api/admin/dashboard-stats
+ * @desc    Get dashboard statistics for admin dashboard
+ * @access  Admin only
+ */
+router.get('/dashboard-stats', adminAuthMiddleware, async (req, res) => {
+    try {
+        // Get total users count
+        const totalUsers = await User.countDocuments({ isActive: true });
+        
+        // Get total donations count
+        const totalDonations = await Donor.countDocuments({ isActive: true });
+        
+        // Get total requests count
+        const totalRequests = await Request.countDocuments({ isActive: true });
+        
+        // Get total blood units count
+        const totalBloodUnits = await UserDonation.aggregate([
+            { $match: { isActive: true, status: 'Completed' } },
+            { $group: { _id: null, total: { $sum: "$unitsCollected" } } }
+        ]);
+        
+        res.json({
+            success: true,
+            data: {
+                totalUsers,
+                totalDonations,
+                totalRequests,
+                totalBloodUnits: totalBloodUnits.length > 0 ? totalBloodUnits[0].total : 0
+            }
+        });
+    } catch (error) {
+        logger.error('Error fetching dashboard stats:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch dashboard statistics'
+        });
+    }
+});
+
 // Health check endpoint
 router.get('/health', (req, res) => {
     res.json({
