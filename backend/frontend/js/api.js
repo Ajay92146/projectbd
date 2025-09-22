@@ -3,27 +3,10 @@
  * Handles all API calls and data management
  */
 
-// API Configuration - Dynamic URL detection
-const getAPIBaseURL = () => {
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-    
-    console.log('🔧 Determining API URL:', { protocol, hostname, port });
-    
-    // Check if we're in development (localhost)
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        const devApiUrl = 'http://localhost:3002/api';
-        console.log('🔧 Development API URL:', devApiUrl);
-        return devApiUrl;
-    }
+// Note: getAPIBaseURL is now imported from admin-auth-utils.js
 
-    // For production, backend and frontend are served from the same domain
-    // Render serves both frontend and backend from the same service
-    const prodApiUrl = `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
-    console.log('🔧 Production API URL:', prodApiUrl);
-    return prodApiUrl;
-};
+// Initialize the BloodConnectAPI namespace
+window.BloodConnectAPI = window.BloodConnectAPI || {};
 
 const API_CONFIG = {
     baseURL: getAPIBaseURL(),

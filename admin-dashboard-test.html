@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #ddd;
+        }
+        .success {
+            border-left-color: #2ecc71;
+            background-color: #eafaf1;
+        }
+        .error {
+            border-left-color: #e74c3c;
+            background-color: #fdedeb;
+        }
+        pre {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .stat-title {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard Test</h1>
+        
+        <div>
+            <button id="testConnection" class="btn">Test API Connection</button>
+            <button id="goToDashboard" class="btn">Go to Admin Dashboard</button>
+        </div>
+        
+        <div id="result" class="result" style="display: none;"></div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-title">Total Users</div>
+                <div id="statTotalUsers" class="stat-value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Donations</div>
+                <div id="statTotalDonations" class="stat-value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Requests</div>
+                <div id="statTotalRequests" class="stat-value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Blood Units</div>
+                <div id="statTotalBloodUnits" class="stat-value">-</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to get API base URL
+        function getAPIBaseURL() {
+            const hostname = window.location.hostname;
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return 'http://localhost:3002/api';
+            } else {
+                // For production, use the same domain
+                return `${window.location.protocol}//${hostname}/api`;
+            }
+        }
+
+        // Helper function to get admin auth headers
+        function getAdminAuthHeaders() {
+            // For testing purposes, we'll use hardcoded admin credentials
+            return {
+                'Content-Type': 'application/json',
+                'x-admin-email': 'admin@bloodconnect.com',
+                'x-admin-auth': 'true'
+            };
+        }
+
+        // Function to show result
+        function showResult(message, isError = false) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.style.display = 'block';
+            resultDiv.className = isError ? 'result error' : 'result success';
+        }
+
+        // Function to update stats display
+        function updateStats(data) {
+            document.getElementById('statTotalUsers').textContent = data.totalUsers.toLocaleString();
+            document.getElementById('statTotalDonations').textContent = data.totalDonations.toLocaleString();
+            document.getElementById('statTotalRequests').textContent = data.totalRequests.toLocaleString();
+            document.getElementById('statTotalBloodUnits').textContent = data.totalBloodUnits.toLocaleString();
+        }
+
+        // Function to test API connection
+        async function testAPIConnection() {
+            const btn = document.getElementById('testConnection');
+            const originalText = btn.textContent;
+            btn.innerHTML = 'Testing... <span class="loading"></span>';
+            btn.disabled = true;
+            
+            try {
+                const apiUrl = getAPIBaseURL();
+                console.log('API URL:', apiUrl);
+                
+                const response = await fetch(`${apiUrl}/admin/dashboard-stats`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success) {
+                    showResult(`
+                        <h3>✅ API Connection Successful!</h3>
+                        <p>The API is responding correctly with data.</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `);
+                    updateStats(data.data);
+                } else {
+                    throw new Error(data.message || 'API request failed');
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                showResult(`
+                    <h3>❌ API Connection Failed</h3>
+                    <p>Error: ${error.message}</p>
+                    <h4>Possible Solutions:</h4>
+                    <ul>
+                        <li>Check if the server is running</li>
+                        <li>Verify MongoDB connection string in .env.production</li>
+                        <li>Check admin authentication token</li>
+                        <li>Inspect browser console for errors</li>
+                    </ul>
+                `, true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('testConnection').addEventListener('click', testAPIConnection);
+        document.getElementById('goToDashboard').addEventListener('click', () => {
+            window.location.href = '/frontend/admin-dashboard.html';
+        });
+        
+        // Auto-test on page load
+        window.addEventListener('DOMContentLoaded', testAPIConnection);
+    </script>
+</body>
+</html>

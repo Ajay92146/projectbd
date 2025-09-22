@@ -119,6 +119,17 @@ app.use((req, res, next) => {
     next();
 });
 
+// Serve static files from backend/frontend directory
+app.use('/backend/frontend', express.static(path.join(__dirname, 'frontend'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        } else if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        }
+    }
+}));
+
 // API Routes (MUST come before static files)
 console.log('🔧 Loading API routes...');
 app.use('/api/donors', donorRoutes);

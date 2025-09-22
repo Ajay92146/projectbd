@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>MongoDB Connection Test</h1>
+    <p>This tool tests the connection to MongoDB and checks if the admin dashboard API is working correctly.</p>
+    
+    <div>
+        <h2>API Connection Test</h2>
+        <button onclick="testAPIConnection()">Test API Connection</button>
+        <div id="apiResult" class="test-result">Click the button to test API connection</div>
+    </div>
+    
+    <div>
+        <h2>Dashboard Stats Test</h2>
+        <button onclick="testDashboardStats()">Test Dashboard Stats</button>
+        <div id="dashboardResult" class="test-result">Click the button to test dashboard stats</div>
+    </div>
+    
+    <script>
+        // Function to get API base URL
+        function getAPIBaseURL() {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return `${protocol}//${hostname}:3002/api`;
+            }
+            return `${protocol}//${hostname}/api`;
+        }
+        
+        // Function to get admin auth headers
+        function getAdminAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'x-admin-email': 'admin@bloodconnect.com',
+                'x-admin-auth': 'true'
+            };
+        }
+        
+        // Test API connection
+        async function testAPIConnection() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = 'Testing API connection...';
+            resultDiv.className = 'test-result';
+            
+            try {
+                const apiUrl = `${getAPIBaseURL()}/admin/health`;
+                console.log('Testing API URL:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ API Connection Successful</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    resultDiv.className = 'test-result success';
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ API Connection Failed</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    resultDiv.className = 'test-result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ API Connection Error</div>
+                    <p>${error.message}</p>
+                `;
+                resultDiv.className = 'test-result error';
+            }
+        }
+        
+        // Test dashboard stats
+        async function testDashboardStats() {
+            const resultDiv = document.getElementById('dashboardResult');
+            resultDiv.innerHTML = 'Testing dashboard stats...';
+            resultDiv.className = 'test-result';
+            
+            try {
+                const apiUrl = `${getAPIBaseURL()}/admin/dashboard-stats`;
+                console.log('Testing dashboard stats URL:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Dashboard Stats Successful</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    resultDiv.className = 'test-result success';
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Dashboard Stats Failed</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    resultDiv.className = 'test-result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Dashboard Stats Error</div>
+                    <p>${error.message}</p>
+                `;
+                resultDiv.className = 'test-result error';
+            }
+        }
+    </script>
+</body>
+</html>

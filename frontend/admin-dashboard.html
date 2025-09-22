@@ -525,9 +525,11 @@
         
     </main>
 
+    <script src="js/api.js"></script>
+<script src="js/admin-auth-utils.js"></script>
+<script src="js/auth-state.js"></script>
+<script src="js/admin-dashboard.js"></script>
     <script>
-        // All JavaScript moved to external script block to comply with CSP
-        
         // Global variables for data storage
         let usersData = [];
         let donationsData = [];
@@ -580,12 +582,8 @@
         }
 
         function loadStatistics() {
-            // Load dashboard statistics
-            // Replace with your actual API calls
-            document.getElementById('totalUsers').textContent = '0';
-            document.getElementById('totalDonations').textContent = '0';
-            document.getElementById('totalRequests').textContent = '0';
-            document.getElementById('totalBloodUnits').textContent = '0';
+            // Use the loadStats function from the external JS file
+            loadStats();
         }
 
         // Users Management Functions

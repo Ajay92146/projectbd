@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - BloodConnect</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #e53e3e;
+            --primary-red-dark: #c53030;
+            --primary-red-light: #fc8181;
+            --accent-red: #fef5f5;
+            --white: #ffffff;
+            --gray-50: #f7fafc;
+            --gray-100: #edf2f7;
+            --gray-200: #e2e8f0;
+            --gray-600: #4a5568;
+            --gray-700: #2d3748;
+            --gray-800: #1a202c;
+            --gray-900: #171923;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--accent-red) 0%, var(--gray-50) 100%);
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(229, 62, 62, 0.1);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            text-decoration: none;
+        }
+
+        .admin-logo i {
+            font-size: 1.8rem;
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.1); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px -5px rgba(229, 62, 62, 0.4);
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-2px);
+        }
+
+        .admin-main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 1.5rem 2rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(229, 62, 62, 0.1);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-red);
+            font-size: 1.2rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .data-section {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(229, 62, 62, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .refresh-btn {
+            background: var(--gray-100);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            background: var(--gray-200);
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-family: inherit;
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-family: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--gray-50);
+            color: var(--gray-700);
+            font-weight: 600;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            color: var(--gray-800);
+        }
+
+        tr:hover {
+            background: var(--gray-50);
+        }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-pending {
+            background: #feebc8;
+            color: #744210;
+        }
+
+        .status-inactive {
+            background: #fed7d7;
+            color: #822727;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--primary-red);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            color: var(--primary-red-dark);
+            transform: scale(1.1);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-red);
+            color: var(--white);
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .notification {
+            position: fixed;
+            top: 5rem;
+            right: 1.5rem;
+            background: var(--white);
+            border-left: 4px solid var(--primary-red);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1001;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .last-updated {
+            text-align: right;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="header-container">
+            <a href="#" class="admin-logo">
+                <i class="fas fa-heart"></i>
+                <span>BloodConnect Admin</span>
+            </a>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Admin Dashboard</h1>
+            <p class="last-updated">Last updated: <span id="lastUpdated">Just now</span></p>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Total Users</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="totalUsers">0</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Total Donations</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="totalDonations">0</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Total Requests</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="totalRequests">0</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Blood Units Available</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="totalBloodUnits">0</p>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <div class="section-header">
+                <h2 class="section-title">Users</h2>
+                <button id="refreshUsersBtn" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+
+            <div class="search-filter">
+                <input type="text" id="userSearch" class="search-input" placeholder="Search users...">
+                <select id="roleFilter" class="filter-select">
+                    <option value="">All Roles</option>
+                    <option value="donor">Donor</option>
+                    <option value="recipient">Recipient</option>
+                    <option value="both">Both</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Blood Type</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- User data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="usersPagination" class="pagination">
+                <!-- Pagination will be added here -->
+            </div>
+        </div>
+
+        <div class="data-section">
+            <div class="section-header">
+                <h2 class="section-title">Donations</h2>
+                <button id="refreshDonationsBtn" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+
+            <div class="search-filter">
+                <input type="text" id="donationSearch" class="search-input" placeholder="Search donations...">
+                <select id="bloodTypeFilter" class="filter-select">
+                    <option value="">All Blood Types</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Donor</th>
+                            <th>Blood Type</th>
+                            <th>Units</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="donationsTableBody">
+                        <!-- Donation data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="donationsPagination" class="pagination">
+                <!-- Pagination will be added here -->
+            </div>
+        </div>
+
+        <div class="data-section">
+            <div class="section-header">
+                <h2 class="section-title">Requests</h2>
+                <button id="refreshRequestsBtn" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+
+            <div class="search-filter">
+                <input type="text" id="requestSearch" class="search-input" placeholder="Search requests...">
+                <select id="requestStatusFilter" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="fulfilled">Fulfilled</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="expired">Expired</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Requester</th>
+                            <th>Blood Type</th>
+                            <th>Units</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsTableBody">
+                        <!-- Request data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="requestsPagination" class="pagination">
+                <!-- Pagination will be added here -->
+            </div>
+        </div>
+    </main>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="js/admin-auth-utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+    <script>
+        
+        // Define updateNavigation function if it doesn't exist
+        if (typeof window.updateNavigation !== 'function') {
+            window.updateNavigation = function() {
+                console.log('Navigation update placeholder');
+                // This is a placeholder function that will be overridden by auth-state.js if loaded
+            };
+        }
+        
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize event listeners
+            initializeEventListeners();
+            
+            // Initialize dashboard
+            initializeDashboard();
+        });
+
+        function initializeEventListeners() {
+            // Header buttons
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            // Refresh buttons
+            document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
+            document.getElementById('refreshDonationsBtn').addEventListener('click', loadDonations);
+            document.getElementById('refreshRequestsBtn').addEventListener('click', loadRequests);
+            
+            // Search and filter inputs
+            document.getElementById('userSearch').addEventListener('input', filterUsers);
+            document.getElementById('roleFilter').addEventListener('change', filterUsers);
+            
+            document.getElementById('donationSearch').addEventListener('input', filterDonations);
+            document.getElementById('bloodTypeFilter').addEventListener('change', filterDonations);
+            
+            document.getElementById('requestSearch').addEventListener('input', filterRequests);
+            document.getElementById('requestStatusFilter').addEventListener('change', filterRequests);
+        }
+
+        // Dashboard functions
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                console.log('Logging out...');
+                localStorage.removeItem('bloodconnect_admin');
+                localStorage.removeItem('admin_email');
+                localStorage.removeItem('admin_login_time');
+                window.location.href = 'admin-login.html';
+            }
+        }
+
+        function initializeDashboard() {
+            // Check if user is authenticated
+            const adminStatus = localStorage.getItem('bloodconnect_admin');
+            if (adminStatus !== 'true') {
+                alert('You must be logged in as admin to access this page.');
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            
+            // Load dashboard data
+            loadStats();
+            loadUsers();
+            loadDonations();
+            loadRequests();
+            
+            // Update last updated time
+            updateLastUpdatedTime();
+            
+            // Set up auto-refresh
+            setInterval(() => {
+                loadStats();
+                updateLastUpdatedTime();
+            }, 60000); // Refresh every minute
+        }
+
+        function loadStatistics() {
+            // Call the loadStats function from admin-dashboard.js
+            loadStats();
+        }
+
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('lastUpdated').textContent = timeString;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification show ${type}`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Add event listeners to view buttons
+        function addViewEventListeners() {
+            document.querySelectorAll('.view-user-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    viewUser(userId);
+                });
+            });
+            
+            document.querySelectorAll('.view-donation-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const donationId = this.getAttribute('data-id');
+                    viewDonation(donationId);
+                });
+            });
+            
+            document.querySelectorAll('.view-request-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const requestId = this.getAttribute('data-id');
+                    viewRequest(requestId);
+                });
+            });
+        }
+
+        // Filter functions
+        function filterRequests() {
+            const searchTerm = document.getElementById('requestSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('requestStatusFilter').value;
+            
+            const filteredRequests = requestsData.filter(request => {
+                const matchesSearch = 
+                    request.requesterName.toLowerCase().includes(searchTerm) ||
+                    request.bloodType.toLowerCase().includes(searchTerm) ||
+                    request.location.toLowerCase().includes(searchTerm);
+                    
+                const matchesStatus = statusFilter === '' || request.status === statusFilter;
+                
+                return matchesSearch && matchesStatus;
+            });
+            
+            displayRequests(filteredRequests);
+        }
+
+        // View functions
+        function viewRequest(requestId) {
+            const request = requestsData.find(r => r.id === requestId);
+            if (request) {
+                alert(`Request Details:\n\nRequester: ${request.requesterName}\nBlood Type: ${request.bloodType}\nUnits: ${request.units}\nStatus: ${request.status}\nDate: ${request.date}\nLocation: ${request.location}\nReason: ${request.reason}`);
+            }
+        }
+    </script>
+</body>
+</html>
