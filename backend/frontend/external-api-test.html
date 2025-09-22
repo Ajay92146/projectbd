@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>External API Integration Test - BloodConnect</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #fef5f5 0%, #f7fafc 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e53e3e;
+        }
+        .header h1 {
+            color: #e53e3e;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .header p {
+            color: #666;
+            margin: 10px 0;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-section h3 {
+            color: #e53e3e;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #10b981; }
+        .status-warning { background: #f59e0b; }
+        .status-error { background: #ef4444; }
+        .status-unknown { background: #6b7280; }
+        .btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #c53030;
+            transform: translateY(-1px);
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            background: #f8f9fa;
+            border-left: 4px solid #e53e3e;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .api-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+        }
+        .api-status {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        .feature-list li {
+            padding: 5px 0;
+            color: #666;
+        }
+        .feature-list li:before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+        }
+        .demo-section {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 External API Integration Test</h1>
+            <p>Testing all 4 external API integrations with comprehensive fallback support</p>
+            <div id="overallStatus">
+                <span class="status-indicator status-unknown"></span>
+                <span>Initializing...</span>
+            </div>
+        </div>
+
+        <!-- API Status Grid -->
+        <div class="grid" id="apiStatusGrid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Configuration Test -->
+        <div class="test-section">
+            <h3>🔧 Configuration Tests</h3>
+            <button class="btn" onclick="testConfiguration()">Test API Configuration</button>
+            <button class="btn" onclick="testAPIConnections()">Test API Connections</button>
+            <button class="btn" onclick="getAPIStatus()">Get Current Status</button>
+            <div id="configResults" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Enhanced Search Demo -->
+        <div class="demo-section">
+            <h3>🔍 Enhanced Donor Search Demo</h3>
+            <p>Test the multi-source donor search with external API integration</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                <div class="input-group">
+                    <label for="demoBloodGroup">Blood Group:</label>
+                    <select id="demoBloodGroup">
+                        <option value="O+">O+</option>
+                        <option value="A+">A+</option>
+                        <option value="B+">B+</option>
+                        <option value="AB+">AB+</option>
+                        <option value="O-">O-</option>
+                        <option value="A-">A-</option>
+                        <option value="B-">B-</option>
+                        <option value="AB-">AB-</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="demoLocation">Location:</label>
+                    <input type="text" id="demoLocation" value="Mumbai, Maharashtra" placeholder="City, State">
+                </div>
+                <div class="input-group">
+                    <label for="demoUrgency">Urgency:</label>
+                    <select id="demoUrgency">
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="testEnhancedSearch()">🔍 Test Enhanced Search</button>
+            <div id="searchResults" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Notification Demo -->
+        <div class="demo-section">
+            <h3>📱 Notification System Demo</h3>
+            <p>Test SMS and WhatsApp notification systems with fallback support</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="input-group">
+                    <label for="testPhone">Test Phone Number:</label>
+                    <input type="tel" id="testPhone" value="9876543210" placeholder="10-digit number">
+                </div>
+                <div class="input-group">
+                    <label for="notificationMethod">Method:</label>
+                    <select id="notificationMethod">
+                        <option value="sms">SMS (Twilio)</option>
+                        <option value="whatsapp">WhatsApp Business</option>
+                        <option value="auto">Auto (WhatsApp → SMS)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="testNotifications()">📨 Test Notifications</button>
+            <div id="notificationResults" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Hospital Locator Demo -->
+        <div class="demo-section">
+            <h3>🏥 Hospital Locator Demo</h3>
+            <p>Test hospital and blood bank locator with Google Maps integration</p>
+            
+            <button class="btn" onclick="testHospitalLocator()">🗺️ Find Nearby Hospitals</button>
+            <button class="btn" onclick="testWithUserLocation()">📍 Use My Location</button>
+            <div id="hospitalResults" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Real-time Logs -->
+        <div class="test-section">
+            <h3>📊 Real-time Activity Logs</h3>
+            <button class="btn" onclick="clearLogs()">Clear Logs</button>
+            <div id="activityLogs" class="test-result">
+                Waiting for activity...
+            </div>
+        </div>
+    </div>
+
+    <!-- Include all the API scripts -->
+    <script src="js/api-config-loader.js"></script>
+    <script src="js/enhanced-donor-search.js"></script>
+    <script src="js/external-api-service.js"></script>
+
+    <script>
+        // Global variables
+        let logs = [];
+        
+        // Logging function
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            logs.push(logEntry);
+            
+            const logsContainer = document.getElementById('activityLogs');
+            logsContainer.textContent = logs.slice(-20).join('\n'); // Show last 20 logs
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+            
+            console.log(logEntry);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            addLog('🚀 External API Test Page loaded');
+            
+            // Wait for API config to be ready
+            document.addEventListener('apiConfigReady', function(event) {
+                addLog('✅ API Configuration loaded');
+                updateAPIStatusDisplay();
+                updateOverallStatus();
+            });
+            
+            // If config is already ready
+            if (window.APIConfigLoader && window.APIConfigLoader.isConfigLoaded()) {
+                updateAPIStatusDisplay();
+                updateOverallStatus();
+            }
+        });
+
+        // Update API status display
+        function updateAPIStatusDisplay() {
+            const config = window.APIConfigLoader ? window.APIConfigLoader.getConfig() : null;
+            const grid = document.getElementById('apiStatusGrid');
+            
+            if (!config) {
+                grid.innerHTML = '<div class="api-card"><p>Configuration not loaded</p></div>';
+                return;
+            }
+
+            const apis = [
+                {
+                    name: 'Google Maps API',
+                    icon: '🗺️',
+                    status: config.apis?.googleMaps?.available,
+                    features: ['Location Search', 'Nearby Hospitals', 'Geocoding']
+                },
+                {
+                    name: 'Twilio SMS API',
+                    icon: '📱',
+                    status: config.apis?.twilio?.available,
+                    features: ['SMS Notifications', 'Donor Alerts', 'Emergency Messages']
+                },
+                {
+                    name: 'WhatsApp Business API',
+                    icon: '💬',
+                    status: config.apis?.whatsapp?.available,
+                    features: ['Urgent Messaging', 'Rich Media', 'Business Verified']
+                },
+                {
+                    name: 'Hospital Network API',
+                    icon: '🏥',
+                    status: config.apis?.hospital?.available,
+                    features: ['Blood Bank Locator', 'Hospital Directory', 'Mock Data Ready']
+                }
+            ];
+
+            grid.innerHTML = apis.map(api => `
+                <div class="api-card">
+                    <h4>${api.icon} ${api.name}</h4>
+                    <div class="api-status">
+                        <span class="status-indicator status-${api.status ? 'success' : 'warning'}"></span>
+                        ${api.status ? 'Available' : 'Fallback Mode'}
+                    </div>
+                    <ul class="feature-list">
+                        ${api.features.map(feature => `<li>${feature}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        // Update overall status
+        function updateOverallStatus() {
+            const config = window.APIConfigLoader ? window.APIConfigLoader.getConfig() : null;
+            const statusElement = document.getElementById('overallStatus');
+            
+            if (!config) {
+                statusElement.innerHTML = '<span class="status-indicator status-error"></span><span>Configuration Failed</span>';
+                return;
+            }
+
+            const totalAPIs = 4;
+            const availableAPIs = Object.values(config.apis || {}).filter(api => api.available).length;
+            
+            let status, message;
+            if (availableAPIs === totalAPIs) {
+                status = 'success';
+                message = 'All External APIs Available';
+            } else if (availableAPIs > 0) {
+                status = 'warning';
+                message = `${availableAPIs}/${totalAPIs} APIs Available (Fallbacks Active)`;
+            } else {
+                status = 'warning';
+                message = 'All APIs in Fallback Mode (System Functional)';
+            }
+
+            statusElement.innerHTML = `<span class="status-indicator status-${status}"></span><span>${message}</span>`;
+        }
+
+        // Test functions
+        async function testConfiguration() {
+            addLog('🔧 Testing API configuration...');
+            const results = document.getElementById('configResults');
+            results.style.display = 'block';
+            
+            try {
+                const config = await window.BloodConnectConfig.getConfig();
+                results.textContent = JSON.stringify(config, null, 2);
+                addLog('✅ Configuration test completed');
+            } catch (error) {
+                results.textContent = `Error: ${error.message}`;
+                addLog(`❌ Configuration test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPIConnections() {
+            addLog('🔗 Testing API connections...');
+            const results = document.getElementById('configResults');
+            results.style.display = 'block';
+            
+            try {
+                const testResults = await window.BloodConnectConfig.testAPIs();
+                results.textContent = JSON.stringify(testResults, null, 2);
+                addLog('✅ API connection test completed');
+            } catch (error) {
+                results.textContent = `Error: ${error.message}`;
+                addLog(`❌ API connection test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function getAPIStatus() {
+            addLog('📊 Getting API status...');
+            const results = document.getElementById('configResults');
+            results.style.display = 'block';
+            
+            try {
+                const status = await window.BloodConnectConfig.getAPIStatus();
+                results.textContent = JSON.stringify(status, null, 2);
+                addLog('✅ API status retrieved');
+            } catch (error) {
+                results.textContent = `Error: ${error.message}`;
+                addLog(`❌ API status retrieval failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testEnhancedSearch() {
+            addLog('🔍 Testing enhanced donor search...');
+            const results = document.getElementById('searchResults');
+            results.style.display = 'block';
+            results.textContent = 'Searching...';
+            
+            try {
+                const bloodGroup = document.getElementById('demoBloodGroup').value;
+                const location = document.getElementById('demoLocation').value;
+                const urgency = document.getElementById('demoUrgency').value;
+                
+                if (window.EnhancedDonorSearch) {
+                    const searchResults = await window.EnhancedDonorSearch.searchDonors({
+                        bloodGroup,
+                        location,
+                        urgency
+                    });
+                    
+                    results.textContent = JSON.stringify(searchResults, null, 2);
+                    addLog(`✅ Enhanced search completed: ${searchResults.totalDonors} donors found`);
+                } else {
+                    throw new Error('Enhanced Donor Search not available');
+                }
+            } catch (error) {
+                results.textContent = `Error: ${error.message}`;
+                addLog(`❌ Enhanced search failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testNotifications() {
+            addLog('📱 Testing notification system...');
+            const results = document.getElementById('notificationResults');
+            results.style.display = 'block';
+            results.textContent = 'Sending test notification...';
+            
+            try {
+                const phone = document.getElementById('testPhone').value;
+                const method = document.getElementById('notificationMethod').value;
+                const message = `Test notification from BloodConnect API integration - ${new Date().toLocaleTimeString()}`;
+                
+                const result = await window.BloodConnectConfig.sendTestNotification(phone, message, method);
+                results.textContent = JSON.stringify(result, null, 2);
+                
+                if (result.success) {
+                    addLog(`✅ Test notification sent via ${result.method}`);
+                } else {
+                    addLog(`⚠️ Test notification queued: ${result.message}`, 'warning');
+                }
+            } catch (error) {
+                results.textContent = `Error: ${error.message}`;
+                addLog(`❌ Notification test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testHospitalLocator() {
+            addLog('🏥 Testing hospital locator...');
+            const results = document.getElementById('hospitalResults');
+            results.style.display = 'block';
+            results.textContent = 'Searching for hospitals...';
+            
+            try {
+                if (window.ExternalAPIService) {
+                    // Use Mumbai coordinates as default
+                    const hospitals = await window.ExternalAPIService.searchNearbyHospitals(19.0760, 72.8777);
+                    results.textContent = JSON.stringify(hospitals, null, 2);
+                    addLog(`✅ Hospital search completed: ${hospitals.length} hospitals found`);
+                } else {
+                    throw new Error('External API Service not available');
+                }
+            } catch (error) {
+                results.textContent = `Error: ${error.message}`;
+                addLog(`❌ Hospital locator test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWithUserLocation() {
+            addLog('📍 Getting user location...');
+            const results = document.getElementById('hospitalResults');
+            results.style.display = 'block';
+            results.textContent = 'Getting your location...';
+            
+            if (!navigator.geolocation) {
+                results.textContent = 'Geolocation not supported by this browser';
+                addLog('❌ Geolocation not supported', 'error');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    try {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        addLog(`📍 Location obtained: ${lat}, ${lng}`);
+                        
+                        if (window.ExternalAPIService) {
+                            const hospitals = await window.ExternalAPIService.searchNearbyHospitals(lat, lng);
+                            results.textContent = JSON.stringify(hospitals, null, 2);
+                            addLog(`✅ Nearby hospital search completed: ${hospitals.length} hospitals found`);
+                        } else {
+                            throw new Error('External API Service not available');
+                        }
+                    } catch (error) {
+                        results.textContent = `Error: ${error.message}`;
+                        addLog(`❌ Location-based search failed: ${error.message}`, 'error');
+                    }
+                },
+                (error) => {
+                    results.textContent = `Geolocation error: ${error.message}`;
+                    addLog(`❌ Geolocation failed: ${error.message}`, 'error');
+                }
+            );
+        }
+
+        function clearLogs() {
+            logs = [];
+            document.getElementById('activityLogs').textContent = 'Logs cleared...';
+            addLog('🧹 Logs cleared');
+        }
+    </script>
+</body>
+</html>

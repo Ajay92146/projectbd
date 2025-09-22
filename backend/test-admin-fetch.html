@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin API Test</title>
+</head>
+<body>
+    <h1>Admin API Test</h1>
+    <button onclick="testAdminAPI()">Test Admin API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAdminAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                // Get API base URL
+                const protocol = window.location.protocol;
+                const hostname = window.location.hostname;
+                const apiUrl = hostname === 'localhost' || hostname === '127.0.0.1' 
+                    ? `${protocol}//${hostname}:3002/api` 
+                    : `${protocol}//${hostname}/api`;
+                
+                console.log('API URL:', apiUrl);
+                
+                // Test dashboard stats
+                const response = await fetch(`${apiUrl}/admin/dashboard-stats`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-email': 'admin@bloodconnect.com',
+                        'x-admin-auth': 'true'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                resultDiv.innerHTML = `
+                    <h2>Success!</h2>
+                    <p>Total Users: ${data.data.totalUsers}</p>
+                    <p>Total Donations: ${data.data.totalDonations}</p>
+                    <p>Total Requests: ${data.data.totalRequests}</p>
+                    <p>Total Blood Units: ${data.data.totalBloodUnits}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

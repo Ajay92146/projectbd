@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urgent Blood Requests - BloodConnect</title>
+    <meta name="description" content="View and respond to urgent blood requests in your area. Help save lives by donating blood.">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Auth Dropdown CSS -->
+    <link rel="stylesheet" href="css/auth-dropdown.css">
+
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary-red: #e53e3e;
+            --primary-red-dark: #c53030;
+            --primary-red-light: #fc8181;
+            --accent-red: #feb2b2;
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+
+            --success-green: #10b981;
+            --warning-yellow: #f59e0b;
+            --error-red: #ef4444;
+            --info-blue: #3b82f6;
+
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+            --radius-sm: 0.375rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --radius-2xl: 2rem;
+            --radius-3xl: 3rem;
+
+            --spacing-1: 0.25rem;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-5: 1.25rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-10: 2.5rem;
+            --spacing-12: 3rem;
+            --spacing-16: 4rem;
+            --spacing-20: 5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--gray-800);
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--white);
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-4) 0;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: var(--spacing-1);
+            align-items: center;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-2) var(--spacing-4);
+            border-radius: var(--radius-xl);
+            font-weight: 500;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(229, 62, 62, 0.1), transparent);
+            transition: left var(--transition-normal);
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary-red);
+            background: rgba(229, 62, 62, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.login-btn {
+            background: var(--primary-red);
+            color: var(--white);
+        }
+
+        .nav-link.login-btn:hover {
+            background: var(--primary-red-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .hamburger .bar {
+            width: 25px;
+            height: 3px;
+            background: var(--gray-700);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.active .bar:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger.active .bar:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active .bar:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-6);
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            padding: var(--spacing-16) 0 var(--spacing-12);
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .page-subtitle {
+            font-size: 1.25rem;
+            color: var(--gray-600);
+            max-width: 600px;
+            margin: 0 auto var(--spacing-8);
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-12);
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            border: 1px solid var(--gray-200);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-4);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: var(--spacing-2);
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-weight: 600;
+        }
+
+        .stat-card.total { 
+            border-left: 4px solid var(--info-blue);
+        }
+
+        .stat-card.urgent { 
+            border-left: 4px solid var(--warning-yellow);
+        }
+
+        .stat-card.critical { 
+            border-left: 4px solid var(--error-red);
+        }
+
+        .stat-card.emergency { 
+            border-left: 4px solid var(--primary-red);
+        }
+
+        /* Filters Section */
+        .filters-section {
+            background: var(--white);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: var(--spacing-12);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-4);
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .filter-select, .filter-input {
+            padding: var(--spacing-3);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-red);
+        }
+
+        .filter-btn {
+            padding: var(--spacing-3) var(--spacing-6);
+            background: var(--primary-red);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+
+        .filter-btn:hover {
+            background: var(--primary-red-dark);
+        }
+
+        /* Emergency Section */
+        .emergency-section {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-dark));
+            color: var(--white);
+            padding: var(--spacing-8);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--spacing-12);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emergency-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="pulse" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="2" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23pulse)"/></svg>');
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .emergency-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .emergency-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-4);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+        }
+
+        .emergency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-4);
+        }
+
+        /* Request Cards */
+        .requests-section {
+            margin-bottom: var(--spacing-12);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-6);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+        }
+
+        .requests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--spacing-6);
+        }
+
+        .request-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .request-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .request-card.critical {
+            border-color: var(--error-red);
+            animation: cardPulse 2s infinite;
+        }
+
+        .request-card.high {
+            border-color: var(--warning-yellow);
+        }
+
+        .request-card.medium {
+            border-color: var(--info-blue);
+        }
+
+        .request-card.low {
+            border-color: var(--success-green);
+        }
+
+        @keyframes cardPulse {
+            0%, 100% { box-shadow: var(--shadow-lg); }
+            50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), var(--shadow-xl); }
+        }
+
+        .card-header {
+            padding: var(--spacing-6);
+            position: relative;
+        }
+
+        .urgency-badge {
+            position: absolute;
+            top: var(--spacing-4);
+            right: var(--spacing-4);
+            padding: var(--spacing-1) var(--spacing-3);
+            border-radius: var(--radius-xl);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .urgency-badge.critical {
+            background: var(--error-red);
+            color: var(--white);
+        }
+
+        .urgency-badge.high {
+            background: var(--warning-yellow);
+            color: var(--gray-900);
+        }
+
+        .urgency-badge.medium {
+            background: var(--info-blue);
+            color: var(--white);
+        }
+
+        .urgency-badge.low {
+            background: var(--success-green);
+            color: var(--white);
+        }
+
+        .blood-type {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-red);
+            color: var(--white);
+            border-radius: 50%;
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: var(--spacing-4);
+        }
+
+        .patient-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .request-details {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .detail-row i {
+            width: 16px;
+            color: var(--primary-red);
+        }
+
+        .contact-link {
+            color: var(--primary-red);
+            text-decoration: none;
+            font-weight: 600;
+            padding: var(--spacing-1) var(--spacing-2);
+            border-radius: var(--radius);
+            background: rgba(229, 62, 62, 0.1);
+            transition: all var(--transition-normal);
+        }
+
+        .contact-link:hover {
+            background: var(--primary-red);
+            color: var(--white);
+            transform: translateY(-1px);
+        }
+
+        .card-footer {
+            padding: var(--spacing-6);
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: var(--spacing-3);
+        }
+
+        .btn {
+            padding: var(--spacing-3) var(--spacing-4);
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-red);
+            color: var(--white);
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-red-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: var(--spacing-16);
+            color: var(--gray-500);
+        }
+
+        .loading i {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-4);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-16);
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-4);
+            color: var(--gray-400);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-2);
+            color: var(--gray-700);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-2);
+            margin-top: var(--spacing-12);
+        }
+
+        .pagination-btn {
+            padding: var(--spacing-2) var(--spacing-4);
+            border: 2px solid var(--gray-300);
+            background: var(--white);
+            color: var(--gray-700);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary-red);
+            color: var(--white);
+            border-color: var(--primary-red);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-red);
+            color: var(--white);
+            border-color: var(--primary-red);
+        }
+
+        /* Time Remaining */
+        .time-remaining {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            font-weight: 600;
+        }
+
+        .time-remaining.urgent {
+            color: var(--error-red);
+        }
+
+        .time-remaining.warning {
+            color: var(--warning-yellow);
+        }
+
+        .time-remaining.normal {
+            color: var(--success-green);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .emergency-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .requests-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background: var(--white);
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: center;
+                padding: var(--spacing-8) 0;
+                transition: left 0.3s ease;
+                box-shadow: var(--shadow-lg);
+                z-index: 999;
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-item {
+                width: 100%;
+                text-align: center;
+                margin-bottom: var(--spacing-2);
+            }
+
+            .nav-link {
+                width: 80%;
+                margin: 0 auto;
+                padding: var(--spacing-4);
+                justify-content: center;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: var(--gray-800);
+            color: var(--gray-300);
+            padding: var(--spacing-16) 0 var(--spacing-8) 0;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: var(--spacing-12);
+            margin-bottom: var(--spacing-12);
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-6);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .footer-logo i {
+            font-size: 1.8rem;
+        }
+
+        .footer-description {
+            color: var(--gray-400);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-6);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: var(--spacing-3);
+        }
+
+        .footer-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: color var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-red);
+        }
+
+        .contact-info {
+            list-style: none;
+            padding: 0;
+        }
+
+        .contact-info li {
+            margin-bottom: var(--spacing-3);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            color: var(--gray-400);
+        }
+
+        .contact-info i {
+            color: var(--primary-red);
+            width: 16px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--gray-700);
+            padding-top: var(--spacing-8);
+            text-align: center;
+            color: var(--gray-500);
+        }
+
+        /* Mobile Footer */
+        @media (max-width: 768px) {
+            .footer {
+                padding: var(--spacing-12) 0 var(--spacing-6) 0;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-8);
+            }
+            
+            .footer-section {
+                text-align: center;
+            }
+            
+            .footer-logo {
+                justify-content: center;
+            }
+            
+            .contact-info {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        /* Tablet Footer */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: var(--spacing-10);
+            }
+            
+            .footer-section:first-child {
+                grid-column: 1 / -1;
+                text-align: center;
+                margin-bottom: var(--spacing-6);
+            }
+        }
+        
+        /* Small Mobile Footer */
+        @media (max-width: 480px) {
+            .footer {
+                padding: var(--spacing-8) 0 var(--spacing-4) 0;
+            }
+            
+            .footer-content {
+                gap: var(--spacing-6);
+            }
+            
+            .footer-section h3 {
+                font-size: 1.1rem;
+                margin-bottom: var(--spacing-4);
+            }
+            
+            .footer-logo {
+                font-size: 1.3rem;
+                margin-bottom: var(--spacing-3);
+            }
+            
+            .footer-description {
+                font-size: 0.9rem;
+                margin-bottom: var(--spacing-4);
+            }
+            
+            .footer-links a {
+                font-size: 0.9rem;
+                padding: var(--spacing-1) 0;
+            }
+            
+            .contact-info li {
+                font-size: 0.9rem;
+                margin-bottom: var(--spacing-2);
+            }
+            
+            .footer-bottom {
+                padding-top: var(--spacing-4);
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-container">
+                <a href="index.html" class="nav-logo">
+                    <i class="fas fa-heart"></i>
+                    <span>BloodConnect</span>
+                </a>
+                
+                <ul class="nav-menu" id="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="donate.html" class="nav-link">
+                            <span>Donate</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="urgent-requests.html" class="nav-link active">
+                            <span>Urgent Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="request.html" class="nav-link">
+                            <span>Request Blood</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="about.html" class="nav-link">
+                            <span>About</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="contact.html" class="nav-link">
+                            <span>Contact</span>
+                        </a>
+                    </li>
+                    <!-- Auth Navigation -->
+                    <li class="nav-item" id="registerNav">
+                        <a href="index.html#registration-section" class="nav-link">
+                            <span>Register</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="loginNav">
+                        <a href="login.html" class="nav-link login-btn">
+                            <span>Login</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-login.html" class="nav-link" style="background: linear-gradient(135deg, var(--gray-700), var(--gray-800)); color: var(--white);">
+                            <span>Admin</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="hamburger" id="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1 class="page-title">🩸 Urgent Blood Requests</h1>
+            <p class="page-subtitle">
+                Help save lives by responding to urgent blood requests in your area. Every donation makes a difference.
+            </p>
+            
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card total">
+                    <div class="stat-icon">
+                        <i class="fas fa-list" style="color: var(--info-blue);"></i>
+                    </div>
+                    <div class="stat-number" id="totalRequestsCount">-</div>
+                    <div class="stat-label">Total Requests</div>
+                </div>
+                
+                <div class="stat-card urgent">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--warning-yellow);"></i>
+                    </div>
+                    <div class="stat-number" id="urgentRequestsCount">-</div>
+                    <div class="stat-label">Urgent Requests</div>
+                </div>
+                
+                <div class="stat-card critical">
+                    <div class="stat-icon">
+                        <i class="fas fa-heartbeat" style="color: var(--error-red);"></i>
+                    </div>
+                    <div class="stat-number" id="criticalRequestsCount">-</div>
+                    <div class="stat-label">Critical Requests</div>
+                </div>
+                
+                <div class="stat-card emergency">
+                    <div class="stat-icon">
+                        <i class="fas fa-ambulance" style="color: var(--primary-red);"></i>
+                    </div>
+                    <div class="stat-number" id="emergencyRequestsCount">-</div>
+                    <div class="stat-label">Emergency</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Blood Group</label>
+                    <select id="bloodGroupFilter" class="filter-select">
+                        <option value="">All Blood Groups</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Location</label>
+                    <input type="text" id="locationFilter" class="filter-input" placeholder="Enter city or state">
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Urgency</label>
+                    <select id="urgencyFilter" class="filter-select">
+                        <option value="">All Urgency Levels</option>
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Sort By</label>
+                    <select id="sortFilter" class="filter-select">
+                        <option value="urgency">Urgency</option>
+                        <option value="requiredBy">Required Date</option>
+                        <option value="requestDate">Request Date</option>
+                        <option value="location">Location</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <button id="applyFiltersBtn" class="filter-btn">
+                        <i class="fas fa-search"></i>
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Section -->
+        <div class="emergency-section" id="emergencySection" style="display: none;">
+            <div class="emergency-content">
+                <h2 class="emergency-title">
+                    <i class="fas fa-siren" style="animation: pulse 1s infinite;"></i>
+                    🚨 EMERGENCY BLOOD REQUESTS
+                </h2>
+                <div class="emergency-grid" id="emergencyGrid">
+                    <!-- Emergency requests will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Requests Section -->
+        <div class="requests-section">
+            <h2 class="section-title">
+                <i class="fas fa-list"></i>
+                Blood Requests
+                <span id="resultsCount" style="font-size: 1rem; color: var(--gray-500); font-weight: 400;"></span>
+            </h2>
+            
+            <!-- Loading State -->
+            <div id="loadingState" class="loading">
+                <i class="fas fa-spinner"></i>
+                <h3>Loading urgent blood requests...</h3>
+                <p>Please wait while we fetch the latest requests</p>
+            </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h3>No Requests Found</h3>
+                <p>There are no blood requests matching your criteria at the moment.</p>
+                <button class="btn btn-primary" onclick="window.location.href='request.html'" style="margin-top: var(--spacing-4);">
+                    <i class="fas fa-plus"></i>
+                    Submit a Request
+                </button>
+            </div>
+            
+            <!-- Requests Grid -->
+            <div id="requestsGrid" class="requests-grid">
+                <!-- Request cards will be populated here -->
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="paginationContainer" style="display: none;">
+            <!-- Pagination will be populated here -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- BloodConnect Section -->
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-heart"></i>
+                        <span>BloodConnect</span>
+                    </div>
+                    <p class="footer-description">
+                        Connecting lives through blood donation. Join our community and help save lives every day.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a href="donate.html"><i class="fas fa-hand-holding-heart"></i> Donate Blood</a></li>
+                        <li><a href="request.html"><i class="fas fa-search"></i> Request Blood</a></li>
+                        <li><a href="about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
+                        <li><a href="contact.html"><i class="fas fa-phone"></i> Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Help Center</a></li>
+                        <li><a href="#"><i class="fas fa-file-alt"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+                        <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-phone"></i> 9136706650</li>
+                        <li><i class="fas fa-envelope"></i> blooddonation1627@gmail.com</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Emergency Support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 BloodConnect. All rights reserved. | Saving lives through blood donation</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Include JavaScript Files -->
+    <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/urgent-requests.js"></script>
+    
+    <script>
+        // Hamburger menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburger = document.getElementById('hamburger');
+            const navMenu = document.getElementById('nav-menu');
+            
+            if (hamburger && navMenu) {
+                hamburger.addEventListener('click', function() {
+                    hamburger.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+                
+                // Close menu when clicking on a link
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        hamburger.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!hamburger.contains(event.target) && !navMenu.contains(event.target)) {
+                        hamburger.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

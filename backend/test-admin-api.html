@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin API Test</title>
+</head>
+<body>
+    <h1>Admin API Test</h1>
+    <button onclick="testDashboardStats()">Test Dashboard Stats</button>
+    <button onclick="testChartStats()">Test Chart Stats</button>
+    <button onclick="testUsers()">Test Users</button>
+    <button onclick="testDonations()">Test Donations</button>
+    <button onclick="testRequests()">Test Requests</button>
+    <div id="results"></div>
+
+    <script>
+        function getAPIBaseURL() {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return `${protocol}//${hostname}:3002/api`;
+            }
+            return `${protocol}//${hostname}/api`;
+        }
+
+        function getAdminAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'x-admin-email': 'admin@bloodconnect.com',
+                'x-admin-auth': 'true'
+            };
+        }
+
+        async function testDashboardStats() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/dashboard-stats`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testChartStats() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/chart-stats`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testUsers() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/users`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testDonations() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/donations`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testRequests() {
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/requests`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

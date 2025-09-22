@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: blood-donation-website
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3002
+      # Set this to your actual Render domain after deployment
+      - key: FRONTEND_URL
+        value: https://blood-donation-website.onrender.com
+      # These will be set in Render dashboard (recommended for security)
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+

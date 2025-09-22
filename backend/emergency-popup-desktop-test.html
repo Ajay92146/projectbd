@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Popup Desktop Responsiveness Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #e53e3e;
+        }
+        
+        .test-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        
+        .test-button:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+        }
+        
+        .screen-size-display {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #2d3748;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            z-index: 9999;
+        }
+        
+        .breakpoint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .breakpoint-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .breakpoint-card.active {
+            border-color: #e53e3e;
+            background: #fef2f2;
+        }
+        
+        .test-results {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="screen-size-display" id="screenInfo">
+        Screen: <span id="screenWidth"></span> x <span id="screenHeight"></span>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🖥️ Emergency Popup Desktop Responsiveness Test</h1>
+            <p>Test emergency popup behavior across different desktop screen sizes</p>
+        </div>
+        
+        <div class="test-section">
+            <h3>📏 Current Breakpoint Analysis</h3>
+            <div class="breakpoint-grid">
+                <div class="breakpoint-card" id="bp-xl">
+                    <h4>Extra Large (≥1200px)</h4>
+                    <p>Max Width: 500px</p>
+                    <p>Padding: 25px</p>
+                    <p>Font Size: 1.5rem</p>
+                </div>
+                <div class="breakpoint-card" id="bp-lg">
+                    <h4>Large (992px - 1199px)</h4>
+                    <p>Max Width: 450px</p>
+                    <p>Padding: 22px</p>
+                    <p>Font Size: 1.4rem</p>
+                </div>
+                <div class="breakpoint-card" id="bp-md">
+                    <h4>Medium (769px - 991px)</h4>
+                    <p>Max Width: 420px</p>
+                    <p>Padding: 20px</p>
+                    <p>Font Size: 0.88rem</p>
+                </div>
+                <div class="breakpoint-card" id="bp-sm">
+                    <h4>Small (≤768px)</h4>
+                    <p>Max Width: 320px</p>
+                    <p>Buttons: Stacked</p>
+                    <p>Mobile Optimized</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 Test Actions</h3>
+            <button class="test-button" onclick="testDesktopPopup()">
+                🖥️ Test Desktop Popup
+            </button>
+            <button class="test-button" onclick="testCriticalEmergency()">
+                🆘 Test Critical Emergency
+            </button>
+            <button class="test-button" onclick="testUrgentEmergency()">
+                ⚠️ Test Urgent Emergency
+            </button>
+            <button class="test-button" onclick="testResponsiveBreakpoints()">
+                📱 Test All Breakpoints
+            </button>
+            <button class="test-button" onclick="measurePopupSize()">
+                📏 Measure Popup Size
+            </button>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 Manual Testing Instructions</h3>
+            <ol>
+                <li><strong>Resize Browser Window:</strong> Drag browser edges to test different widths</li>
+                <li><strong>Monitor Breakpoints:</strong> Watch the active breakpoint card highlight</li>
+                <li><strong>Test Popup Display:</strong> Click test buttons to see popup at different sizes</li>
+                <li><strong>Check Readability:</strong> Ensure text is readable at all screen sizes</li>
+                <li><strong>Verify Button Layout:</strong> Buttons should adapt appropriately</li>
+            </ol>
+        </div>
+        
+        <div class="test-results" id="testResults">
+            <div style="color: #059669; font-weight: bold;">✅ Test Console Ready</div>
+            <div>Resize browser window and click test buttons to see responsive behavior...</div>
+        </div>
+    </div>
+
+    <!-- Load Emergency Popup System -->
+    <script src="js/emergency-popup.js"></script>
+    
+    <script>
+        // Screen size monitoring
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            document.getElementById('screenWidth').textContent = width;
+            document.getElementById('screenHeight').textContent = height;
+            
+            // Update active breakpoint
+            document.querySelectorAll('.breakpoint-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            if (width >= 1200) {
+                document.getElementById('bp-xl').classList.add('active');
+            } else if (width >= 992) {
+                document.getElementById('bp-lg').classList.add('active');
+            } else if (width >= 769) {
+                document.getElementById('bp-md').classList.add('active');
+            } else {
+                document.getElementById('bp-sm').classList.add('active');
+            }
+        }
+        
+        // Log to test results
+        function logToTestResults(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#3182ce',
+                success: '#059669', 
+                warning: '#d69e2e',
+                error: '#e53e3e'
+            };
+            
+            const logEntry = document.createElement('div');
+            logEntry.style.color = colors[type];
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            results.appendChild(logEntry);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        // Initialize emergency popup system
+        let emergencyPopup;
+        
+        function initializeEmergencySystem() {
+            if (typeof EmergencyPopupSystem !== 'undefined') {
+                emergencyPopup = new EmergencyPopupSystem();
+                emergencyPopup.init();
+                window.emergencyPopup = emergencyPopup;
+                logToTestResults('✅ Emergency popup system initialized', 'success');
+            } else {
+                logToTestResults('❌ Emergency popup system not found', 'error');
+            }
+        }
+        
+        // Test functions
+        function testDesktopPopup() {
+            const width = window.innerWidth;
+            logToTestResults(`🖥️ Testing desktop popup at ${width}px width`, 'info');
+            
+            if (window.emergencyPopup) {
+                const testRequest = {
+                    _id: 'test-desktop-' + Date.now(),
+                    patientName: 'John Desktop',
+                    bloodGroup: 'O+',
+                    requiredUnits: 3,
+                    urgency: 'Urgent',
+                    hospitalName: 'Desktop General Hospital',
+                    location: 'Downtown Medical Center',
+                    hospitalPhone: '+1-555-0123',
+                    hoursLeft: 8,
+                    additionalNotes: 'Testing desktop responsive design'
+                };
+                
+                window.emergencyPopup.displayEmergencyPopup(testRequest);
+                logToTestResults('✅ Desktop popup displayed', 'success');
+            } else {
+                logToTestResults('❌ Emergency popup system not available', 'error');
+            }
+        }
+        
+        function testCriticalEmergency() {
+            logToTestResults('🆘 Testing critical emergency display', 'warning');
+            
+            if (window.emergencyPopup) {
+                const criticalRequest = {
+                    _id: 'critical-' + Date.now(),
+                    patientName: 'Emergency Patient',
+                    bloodGroup: 'AB-',
+                    requiredUnits: 5,
+                    urgency: 'Critical',
+                    hospitalName: 'Emergency Medical Center',
+                    location: 'ICU Ward 5',
+                    hospitalPhone: '911',
+                    hoursLeft: 2,
+                    additionalNotes: 'IMMEDIATE TRANSFUSION REQUIRED'
+                };
+                
+                window.emergencyPopup.displayEmergencyPopup(criticalRequest);
+                logToTestResults('✅ Critical emergency displayed', 'success');
+            } else {
+                logToTestResults('❌ Emergency popup system not available', 'error');
+            }
+        }
+        
+        function testUrgentEmergency() {
+            logToTestResults('⚠️ Testing urgent emergency display', 'info');
+            
+            if (window.emergencyPopup) {
+                const urgentRequest = {
+                    _id: 'urgent-' + Date.now(),
+                    patientName: 'Sarah Wilson',
+                    bloodGroup: 'A+',
+                    requiredUnits: 2,
+                    urgency: 'Urgent',
+                    hospitalName: 'City Hospital',
+                    location: 'Emergency Department',
+                    hospitalPhone: '+1-555-9999',
+                    hoursLeft: 12,
+                    additionalNotes: 'Surgery scheduled for tomorrow morning'
+                };
+                
+                window.emergencyPopup.displayEmergencyPopup(urgentRequest);
+                logToTestResults('✅ Urgent emergency displayed', 'success');
+            } else {
+                logToTestResults('❌ Emergency popup system not available', 'error');
+            }
+        }
+        
+        function testResponsiveBreakpoints() {
+            logToTestResults('📱 Testing responsive breakpoints...', 'info');
+            
+            const breakpoints = [
+                { width: 1400, name: 'Extra Large Desktop' },
+                { width: 1100, name: 'Large Desktop' },
+                { width: 900, name: 'Medium Desktop' },
+                { width: 600, name: 'Tablet' },
+                { width: 400, name: 'Mobile' }
+            ];
+            
+            let index = 0;
+            function testNextBreakpoint() {
+                if (index < breakpoints.length) {
+                    const bp = breakpoints[index];
+                    logToTestResults(`Testing ${bp.name} (${bp.width}px)`, 'info');
+                    
+                    // Note: We can't actually resize the window from script for security reasons
+                    // This is just for demonstration
+                    logToTestResults(`📏 Manually resize to ${bp.width}px to test this breakpoint`, 'warning');
+                    
+                    index++;
+                    setTimeout(testNextBreakpoint, 2000);
+                } else {
+                    logToTestResults('✅ Breakpoint testing instructions complete', 'success');
+                }
+            }
+            
+            testNextBreakpoint();
+        }
+        
+        function measurePopupSize() {
+            logToTestResults('📏 Measuring popup dimensions...', 'info');
+            
+            if (window.emergencyPopup && window.emergencyPopup.isPopupVisible) {
+                const popup = document.querySelector('.emergency-popup');
+                if (popup) {
+                    const rect = popup.getBoundingClientRect();
+                    const computedStyle = window.getComputedStyle(popup);
+                    
+                    logToTestResults(`Popup Width: ${rect.width}px`, 'info');
+                    logToTestResults(`Popup Height: ${rect.height}px`, 'info');
+                    logToTestResults(`Max Width: ${computedStyle.maxWidth}`, 'info');
+                    logToTestResults(`Padding: ${computedStyle.padding}`, 'info');
+                    logToTestResults(`Font Size: ${computedStyle.fontSize}`, 'info');
+                } else {
+                    logToTestResults('❌ No popup visible to measure', 'error');
+                }
+            } else {
+                logToTestResults('❌ No popup visible. Click a test button first.', 'error');
+            }
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            updateScreenInfo();
+            initializeEmergencySystem();
+            logToTestResults('🚀 Desktop responsiveness test initialized', 'success');
+        });
+        
+        // Update screen info on resize
+        window.addEventListener('resize', updateScreenInfo);
+        
+        // Initial update
+        updateScreenInfo();
+    </script>
+</body>
+</html>

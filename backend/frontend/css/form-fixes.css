@@ -1,0 +1,397 @@
+/* 
+ * Blood Donation Form Alignment Fixes
+ * This file contains CSS fixes for form alignment issues
+ */
+
+/* Enhanced Form Group Styling */
+.form-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 75px;
+    margin-bottom: 1rem;
+}
+
+/* Ensure consistent label styling */
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.875rem;
+    line-height: 1.2;
+    flex-shrink: 0;
+}
+
+/* Form input styling for better alignment */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    color: #1a202c;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    box-sizing: border-box;
+    flex: 1;
+    min-height: 48px; /* Ensure minimum touch target */
+}
+
+/* Focus states for better UX */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #e53e3e;
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Hover states */
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+    border-color: #fc8181;
+    box-shadow: 0 4px 12px rgba(229, 62, 62, 0.1);
+}
+
+/* Form row improvements */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+    align-items: flex-start;
+}
+
+/* Full width form groups */
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Form section group styling */
+.form-section-group {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    background: #f7fafc;
+    border-radius: 1rem;
+    border-left: 4px solid #e53e3e;
+}
+
+.form-section-group h4 {
+    color: #1a202c;
+    margin-bottom: 1.5rem;
+    font-size: 1.125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+}
+
+.form-section-group h4 i {
+    color: #e53e3e;
+}
+
+/* Error message styling */
+.error-message {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    min-height: 1.25rem;
+}
+
+.error-message.show {
+    opacity: 1;
+}
+
+/* Form actions alignment */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Button styling */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 1.125rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 180px;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #e53e3e, #fc8181);
+    color: #ffffff;
+    box-shadow: 0 10px 25px rgba(229, 62, 62, 0.4);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #c53030, #e53e3e);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 0 20px rgba(229, 62, 62, 0.5);
+}
+
+.btn-secondary {
+    background: #edf2f7;
+    color: #4a5568;
+    border: 2px solid #cbd5e0;
+}
+
+.btn-secondary:hover {
+    background: #e2e8f0;
+    border-color: #a0aec0;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Consent checkboxes styling */
+.consent-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #4a5568;
+    line-height: 1.5;
+}
+
+.checkbox-label input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 0.25rem;
+    background: #ffffff;
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    margin-top: 2px; /* Align with text */
+}
+
+.checkbox-label:hover .checkmark {
+    border-color: #e53e3e;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+    background: #e53e3e;
+    border-color: #e53e3e;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .form-group {
+        min-height: 65px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    .form-section-group {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-group {
+        min-height: 60px;
+    }
+    
+    .form-section-group {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-row {
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Instructions panel improvements */
+.instructions-panel {
+    background: #ffffff;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    position: sticky;
+    top: calc(80px + 1rem);
+    height: fit-content;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    align-self: start;
+}
+
+.instructions-panel h3 {
+    color: #1a202c;
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.instructions-panel h3 i {
+    color: #e53e3e;
+}
+
+.instruction-step {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.instruction-step:last-of-type {
+    border-bottom: none;
+    margin-bottom: 2rem;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #e53e3e, #fc8181);
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.step-content h4 {
+    color: #1a202c;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.step-content p {
+    color: #4a5568;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Application container improvements */
+.application-content {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+    align-items: flex-start;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Authentication indicator styling */
+.auth-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #edf2f7;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.auth-indicator.authenticated {
+    background: rgba(34, 197, 94, 0.1);
+    color: rgb(21, 128, 61);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.auth-indicator.not-authenticated {
+    background: rgba(239, 68, 68, 0.1);
+    color: rgb(185, 28, 28);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    font-weight: 600;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 1200px) {
+    .application-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        position: static;
+    }
+
+    .instructions-panel {
+        position: static;
+        order: 2;
+        margin-top: 1.5rem;
+        max-height: none;
+        overflow-y: visible;
+        width: 100%;
+    }
+
+    .application-form {
+        order: 1;
+        width: 100%;
+    }
+}

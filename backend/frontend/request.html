@@ -1,0 +1,3412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Blood - Find Blood Donors | BloodConnect</title>
+    <meta name="description" content="Search for blood donors and submit blood requests. Find the blood type you need in your area quickly and easily.">
+    <meta name="keywords" content="blood request, find blood donors, blood search, emergency blood, blood availability">
+    
+    <!-- Favicon -->
+    <!-- <link rel="icon" type="image/x-icon" href="/assets/icons/favicon.ico"> -->
+    
+    <!-- Embedded CSS -->
+    <style>
+        /* Essential CSS Variables and Styles */
+        :root {
+            --primary-red: #e53e3e;
+            --primary-red-dark: #c53030;
+            --primary-red-light: #fc8181;
+            --secondary-red: #fed7d7;
+            --accent-red: #fef5f5;
+            --white: #ffffff;
+            --off-white: #fafafa;
+            --gray-50: #f7fafc;
+            --gray-100: #edf2f7;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e0;
+            --gray-400: #a0aec0;
+            --gray-500: #718096;
+            --gray-600: #4a5568;
+            --gray-700: #2d3748;
+            --gray-800: #1a202c;
+            --gray-900: #171923;
+            --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-size-sm: clamp(0.8rem, 0.9vw, 0.875rem);
+            --font-size-base: clamp(0.9rem, 1vw, 1rem);
+            --font-size-lg: clamp(1rem, 1.2vw, 1.125rem);
+            --font-size-xl: clamp(1.1rem, 1.4vw, 1.25rem);
+            --font-size-2xl: clamp(1.3rem, 1.8vw, 1.5rem);
+            --font-size-3xl: clamp(1.6rem, 2.4vw, 1.875rem);
+            --font-size-4xl: clamp(2rem, 3vw, 2.25rem);
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-5: 1.25rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-10: 2.5rem;
+            --spacing-12: 3rem;
+            --spacing-16: 4rem;
+            --spacing-20: 5rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --radius-2xl: 1rem;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --shadow-red: 0 10px 25px -5px rgba(229, 62, 62, 0.4);
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --z-fixed: 1030;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-primary);
+            font-size: var(--font-size-base);
+            line-height: 1.7;
+            color: var(--gray-800);
+            background: linear-gradient(135deg, var(--off-white) 0%, var(--gray-50) 100%);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3 { font-weight: var(--font-weight-semibold); line-height: 1.2; margin-bottom: var(--spacing-4); color: var(--gray-900); }
+        h1 { font-size: var(--font-size-4xl); }
+        h2 { font-size: var(--font-size-3xl); }
+        h3 { font-size: var(--font-size-2xl); }
+        p { margin-bottom: var(--spacing-4); color: var(--gray-600); }
+        a { color: var(--primary-red); text-decoration: none; transition: color var(--transition-fast); }
+        a:hover { color: var(--primary-red-dark); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--spacing-4); }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: var(--z-fixed);
+            transition: all var(--transition-normal);
+            border-bottom: 1px solid rgba(229, 62, 62, 0.1);
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-4) 0;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            text-decoration: none;
+        }
+
+        .nav-logo i {
+            font-size: 1.8rem;
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.1); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
+        }
+
+        .nav-menu { display: flex; list-style: none; gap: var(--spacing-1); align-items: center; }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-2) var(--spacing-4);
+            border-radius: var(--radius-full);
+            font-weight: 500;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(229, 62, 62, 0.1), transparent);
+            transition: left var(--transition-normal);
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(135deg, var(--accent-red), rgba(229, 62, 62, 0.1));
+            color: var(--primary-red);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(229, 62, 62, 0.2);
+        }
+        .nav-link.login-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            box-shadow: var(--shadow-red);
+        }
+
+        .nav-link.login-btn:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-3px);
+            box-shadow: var(--glow-red);
+        }
+
+        /* User Dropdown Styles */
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            padding: var(--spacing-3) var(--spacing-4);
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background: var(--gray-50);
+            color: var(--primary-red);
+        }
+
+        .dropdown-item.logout-item {
+            color: var(--gray-600);
+        }
+
+        .dropdown-item.logout-item:hover {
+            background: var(--gray-100);
+            color: var(--gray-800);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--gray-200);
+            margin: var(--spacing-2) 0;
+        }
+
+        /* Mobile Navigation */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .bar {
+            width: 25px;
+            height: 3px;
+            background: var(--primary-red);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-normal);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-4) var(--spacing-8);
+            border: none;
+            border-radius: var(--radius-xl);
+            font-weight: var(--font-weight-semibold);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            text-transform: uppercase;
+            font-size: var(--font-size-sm);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            box-shadow: var(--shadow-red);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        /* Page Header Section */
+        .page-header {
+            background: linear-gradient(135deg, var(--accent-red) 0%, var(--gray-50) 100%);
+            padding: calc(80px + var(--spacing-8)) 0 var(--spacing-8) 0;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-red);
+            margin-bottom: var(--spacing-4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-3);
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Advanced Search Section */
+        .advanced-search-section {
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red-dark) 100%);
+            padding: var(--spacing-16) 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .advanced-search-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .search-hero {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: var(--spacing-12);
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .search-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-10);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .search-header {
+            text-align: center;
+            margin-bottom: var(--spacing-8);
+        }
+
+        .search-header h2 {
+            color: var(--primary-red);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .search-header h2 i {
+            margin-right: var(--spacing-2);
+            color: var(--primary-red-light);
+        }
+
+        .search-header p {
+            color: var(--gray-600);
+            font-size: var(--font-size-sm);
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-8);
+        }
+
+        .search-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-field label {
+            font-weight: var(--font-weight-semibold);
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-2);
+            font-size: var(--font-size-sm);
+        }
+
+        .search-field select {
+            padding: var(--spacing-3) var(--spacing-4);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            background: var(--white);
+            font-size: var(--font-size-sm);
+            color: var(--gray-700);
+            transition: all var(--transition-normal);
+            cursor: pointer;
+        }
+
+        .search-field select:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+        }
+
+        .search-field select:hover {
+            border-color: var(--primary-red-light);
+        }
+
+        .search-actions {
+            display: flex;
+            gap: var(--spacing-4);
+            justify-content: center;
+        }
+
+        .search-btn, .reset-btn {
+            padding: var(--spacing-3) var(--spacing-8);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .search-btn:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .reset-btn {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-200);
+        }
+
+        .reset-btn:hover {
+            background: var(--gray-200);
+            transform: translateY(-2px);
+        }
+
+        /* Search Visual */
+        .search-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .search-illustration {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .blood-drop {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary-red-light), var(--primary-red));
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 30px rgba(229, 62, 62, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .magnifying-glass {
+            transform: rotate(45deg);
+            color: var(--white);
+            font-size: var(--font-size-3xl);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: particle-float 4s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) {
+            top: 20%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .particle:nth-child(2) {
+            top: 60%;
+            right: 20%;
+            animation-delay: 1.5s;
+        }
+
+        .particle:nth-child(3) {
+            bottom: 20%;
+            left: 30%;
+            animation-delay: 3s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, -50%) rotate(-45deg) translateY(0px); }
+            50% { transform: translate(-50%, -50%) rotate(-45deg) translateY(-10px); }
+        }
+
+        @keyframes particle-float {
+            0%, 100% { transform: translateY(0px) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+        }
+
+        /* Form Styles */
+        .form-section {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--off-white) 100%);
+            padding: calc(80px + var(--spacing-20)) 0 var(--spacing-20) 0;
+            min-height: 100vh;
+        }
+        .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: var(--spacing-16);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .login-required-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: var(--radius-2xl);
+        }
+
+        .overlay-content {
+            text-align: center;
+            padding: var(--spacing-12);
+            max-width: 400px;
+        }
+
+        .overlay-icon {
+            font-size: var(--font-size-4xl);
+            color: var(--primary-red);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .overlay-content h3 {
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-4);
+            font-size: var(--font-size-2xl);
+        }
+
+        .overlay-content p {
+            color: var(--gray-600);
+            margin-bottom: var(--spacing-8);
+            line-height: 1.6;
+        }
+
+        .overlay-actions {
+            display: flex;
+            gap: var(--spacing-4);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .overlay-actions .btn {
+            min-width: 120px;
+        }
+
+        /* Form container positioning for overlay */
+        .form-container {
+            position: relative;
+        }
+
+        /* Disable form when overlay is shown */
+        .form-container.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        /* Form authentication indicator */
+        .auth-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-3) var(--spacing-4);
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-6);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+        
+        .auth-indicator.authenticated {
+            background: rgba(34, 197, 94, 0.1);
+            color: rgb(21, 128, 61);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .auth-indicator.not-authenticated {
+            background: rgba(239, 68, 68, 0.1);
+            color: rgb(185, 28, 28);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: var(--spacing-8);
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-6); }
+        .form-group { margin-bottom: var(--spacing-6); }
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-2);
+            font-weight: var(--font-weight-medium);
+            color: var(--gray-700);
+        }
+        
+        /* Advanced Search Enhancements */
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-5);
+            margin-bottom: var(--spacing-6);
+        }
+        
+        .search-field label {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-2);
+            font-weight: var(--font-weight-semibold);
+            color: var(--gray-700);
+            font-size: var(--font-size-sm);
+        }
+        
+        .search-field label i {
+            color: var(--primary-red);
+            width: 16px;
+            text-align: center;
+        }
+        
+        /* Advanced Filters Toggle */
+        .advanced-filters {
+            margin: var(--spacing-6) 0;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            background: var(--gray-50);
+        }
+        
+        .toggle-filters {
+            width: 100%;
+            padding: var(--spacing-4) var(--spacing-6);
+            background: linear-gradient(135deg, var(--gray-100), var(--white));
+            border: none;
+            font-weight: var(--font-weight-semibold);
+            color: var(--gray-700);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition-normal);
+        }
+        
+        .toggle-filters:hover {
+            background: linear-gradient(135deg, var(--primary-red-light), var(--primary-red));
+            color: var(--white);
+        }
+        
+        .toggle-icon {
+            transition: transform var(--transition-normal);
+        }
+        
+        .toggle-filters.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+        
+        .advanced-filters-content {
+            padding: var(--spacing-6);
+            background: var(--white);
+            border-top: 1px solid var(--gray-200);
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+                padding: 0 var(--spacing-6);
+            }
+            to {
+                opacity: 1;
+                max-height: 800px;
+                padding: var(--spacing-6);
+            }
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: var(--spacing-4);
+        }
+        
+        /* Enhanced Search Results */
+        .search-source-badge {
+            position: absolute;
+            top: var(--spacing-2);
+            right: var(--spacing-2);
+            padding: var(--spacing-1) var(--spacing-2);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+        }
+        
+        .source-internal {
+            background: rgba(34, 197, 94, 0.1);
+            color: rgb(21, 128, 61);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .source-government {
+            background: rgba(59, 130, 246, 0.1);
+            color: rgb(30, 64, 175);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .source-external {
+            background: rgba(245, 158, 11, 0.1);
+            color: rgb(146, 64, 14);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .source-hospitals {
+            background: rgba(139, 69, 19, 0.1);
+            color: rgb(92, 400, 138);
+            border: 1px solid rgba(139, 69, 19, 0.2);
+        }
+        
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-1);
+            padding: var(--spacing-1) var(--spacing-2);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            border-radius: var(--radius-full);
+            margin-top: var(--spacing-2);
+        }
+        
+        .verified {
+            background: rgba(34, 197, 94, 0.1);
+            color: rgb(21, 128, 61);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .unverified {
+            background: rgba(156, 163, 175, 0.1);
+            color: rgb(75, 85, 99);
+            border: 1px solid rgba(156, 163, 175, 0.2);
+        }
+        
+        /* Search History Styles */
+        .history-item:hover {
+            background: var(--white) !important;
+            border-color: var(--primary-red) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.15);
+        }
+        
+        .search-history-section {
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: var(--spacing-4) var(--spacing-5);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            background: rgba(255, 255, 255, 0.8);
+            transition: all var(--transition-normal);
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(229, 62, 62, 0.1), var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .form-actions { text-align: center; margin-top: var(--spacing-8); }
+
+        /* Enhanced Search Results */
+        .search-results {
+            margin-top: var(--spacing-12);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-8);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-6);
+            padding-bottom: var(--spacing-4);
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .results-header h3 {
+            color: var(--primary-red);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+
+        .results-count {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            padding: var(--spacing-2) var(--spacing-4);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .donors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-6);
+        }
+
+        .donor-card {
+            background: var(--white);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            border: 2px solid transparent;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .donor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+        }
+
+        .donor-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-2xl);
+            border-color: var(--primary-red-light);
+        }
+
+        .donor-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .info-item {
+            text-align: center;
+            padding: var(--spacing-3);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+        }
+
+        .info-label {
+            font-size: var(--font-size-xs);
+            color: var(--gray-500);
+            text-transform: uppercase;
+            font-weight: var(--font-weight-medium);
+            margin-bottom: var(--spacing-1);
+        }
+
+        .info-value {
+            font-weight: var(--font-weight-bold);
+            color: var(--gray-900);
+            font-size: var(--font-size-base);
+        }
+
+        .blood-type {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white) !important;
+            border-radius: var(--radius-lg) !important;
+        }
+
+        .donor-actions {
+            display: flex;
+            gap: var(--spacing-2);
+            justify-content: center;
+        }
+
+        .contact-btn {
+            flex: 1;
+            padding: var(--spacing-2) var(--spacing-4);
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+
+        .contact-btn:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-2px);
+        }
+
+        /* No Results State */
+        .no-results {
+            text-align: center;
+            padding: var(--spacing-16) var(--spacing-8);
+            background: var(--gray-50);
+            border-radius: var(--radius-xl);
+            border: 2px dashed var(--gray-300);
+        }
+
+        .no-results-content i {
+            font-size: var(--font-size-4xl);
+            color: var(--gray-400);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .no-results-content h3 {
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .no-results-content p {
+            color: var(--gray-500);
+            margin: 0;
+        }
+
+        /* Responsive Design for Search */
+        @media (max-width: 768px) {
+            .search-hero {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-8);
+            }
+
+            .search-visual {
+                order: -1;
+            }
+
+            .search-illustration {
+                width: 150px;
+                height: 150px;
+            }
+
+            .blood-drop {
+                width: 80px;
+                height: 80px;
+            }
+
+            .magnifying-glass {
+                font-size: var(--font-size-xl);
+            }
+
+            .donors-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-header {
+                flex-direction: column;
+                gap: var(--spacing-2);
+                text-align: center;
+            }
+
+            .search-actions {
+                flex-direction: column;
+            }
+
+            .search-btn, .reset-btn {
+                width: 100%;
+            }
+        }
+
+        /* Animations */
+        .fade-in { opacity: 0; transform: translateY(40px); animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Quick Links Section */
+        .quick-links {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+            padding: var(--spacing-16) 0;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-6);
+            margin-top: var(--spacing-8);
+        }
+
+        .link-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-4);
+            padding: var(--spacing-8);
+            background: var(--white);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-sm);
+            text-decoration: none;
+            color: var(--gray-700);
+            transition: all var(--transition-normal);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(229, 62, 62, 0.1), transparent);
+            transition: left var(--transition-slow);
+        }
+
+        .link-card:hover::before {
+            left: 100%;
+        }
+
+        .link-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-2xl);
+            border-color: var(--primary-red);
+            color: var(--primary-red);
+        }
+
+        .link-card i {
+            font-size: var(--font-size-3xl);
+            color: var(--primary-red);
+            transition: all var(--transition-normal);
+        }
+
+        .link-card:hover i {
+            transform: scale(1.2);
+            color: var(--primary-red-dark);
+        }
+
+        .link-card span {
+            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-lg);
+            text-align: center;
+            transition: color var(--transition-normal);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            /* Mobile Navigation */
+            .nav-menu {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                flex-direction: column;
+                background: rgba(255, 255, 255, 0.98);
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+                backdrop-filter: blur(20px);
+                padding: var(--spacing-8) 0;
+                gap: var(--spacing-4);
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hamburger.active .bar:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+
+            .hamburger.active .bar:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger.active .bar:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+
+            /* Form Styles */
+            .form-grid { grid-template-columns: 1fr; }
+            .form-container { margin: var(--spacing-4); padding: var(--spacing-8); }
+            .donor-info { grid-template-columns: 1fr; }
+
+            .links-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: var(--spacing-4);
+            }
+
+            .link-card {
+                padding: var(--spacing-6);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .links-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--gray-900);
+            color: var(--white);
+            padding: var(--spacing-16) 0 var(--spacing-8) 0;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-8);
+            margin-bottom: var(--spacing-8);
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--primary-red);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: var(--spacing-2);
+        }
+
+        .footer-section ul li a {
+            color: var(--gray-300);
+            transition: color var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--white);
+        }
+
+        .contact-info p {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-2);
+            color: var(--gray-300);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: var(--spacing-8);
+            border-top: 1px solid var(--gray-700);
+            color: var(--gray-400);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 0;
+            border-radius: var(--radius-2xl);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-2xl);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+            text-align: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-3);
+            font-size: var(--font-size-xl);
+        }
+
+        .modal-body {
+            padding: var(--spacing-8);
+            text-align: center;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            padding: var(--spacing-6);
+            text-align: center;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Auth Dropdown CSS -->
+    <link rel="stylesheet" href="css/auth-dropdown.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-heart"></i>
+                <span>BloodConnect</span>
+            </div>
+            
+            <ul class="nav-menu" id="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="donate.html" class="nav-link">
+                        <span>Want to Donate Blood</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="urgent-requests.html" class="nav-link">
+                        <span>Urgent Requests</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="request.html" class="nav-link active">
+                        <span>Request Blood</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="about.html" class="nav-link">
+                        <span>About</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="contact.html" class="nav-link">
+                        <span>Contact</span>
+                    </a>
+                </li>
+                <!-- Auth Navigation (will be updated by JavaScript) -->
+                <li class="nav-item" id="registerNav">
+                    <a href="index.html#registration-section" class="nav-link">
+                        <span>Register</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="loginNav">
+                    <a href="login.html" class="nav-link login-btn">
+                        <span>Login</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="admin-login.html" class="nav-link" style="background: linear-gradient(135deg, var(--gray-700), var(--gray-800)); color: var(--white);">
+                        <span>Admin</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <div class="header-content fade-in">
+                <h1>
+                    <i class="fas fa-search"></i>
+                    Request Blood
+                </h1>
+                <p>Find blood donors in your area or submit a blood request for immediate assistance</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advanced Search Section -->
+    <section class="advanced-search-section">
+        <div class="container">
+            <div class="search-hero fade-in">
+                <div class="search-content">
+                    <div class="search-card">
+                        <div class="search-header">
+                            <h2>
+                                <i class="fas fa-search-plus"></i>
+                                FIND BLOOD DONORS
+                            </h2>
+                            <p>Advanced search to find available blood donors in your area</p>
+                            <button type="button" class="show-search-tips-btn" class="btn" style="font-size: 0.75rem; padding: 0.25rem 0.75rem; background: var(--gray-400); color: white; margin-top: 0.5rem;">
+                                <i class="fas fa-question-circle"></i> Search Tips
+                            </button>
+                        </div>
+
+                        <form id="searchForm" class="advanced-search-form">
+                            <div class="search-grid">
+                                <div class="search-field">
+                                    <label for="searchBloodGroup"><i class="fas fa-tint"></i> Blood Group</label>
+                                    <select id="searchBloodGroup" name="bloodGroup" required>
+                                        <option value="">-----Select Blood Group-----</option>
+                                        <option value="A+">A+ (A Positive)</option>
+                                        <option value="A-">A- (A Negative)</option>
+                                        <option value="B+">B+ (B Positive)</option>
+                                        <option value="B-">B- (B Negative)</option>
+                                        <option value="AB+">AB+ (AB Positive)</option>
+                                        <option value="AB-">AB- (AB Negative)</option>
+                                        <option value="O+">O+ (O Positive)</option>
+                                        <option value="O-">O- (O Negative)</option>
+                                    </select>
+                                </div>
+
+                                <div class="search-field">
+                                    <label for="searchCountry"><i class="fas fa-globe"></i> Select Country</label>
+                                    <select id="searchCountry" name="country">
+                                        <option value="">-----Select Country-----</option>
+                                        <option value="India">🇮🇳 India</option>
+                                        <option value="USA">🇺🇸 United States</option>
+                                        <option value="UK">🇬🇧 United Kingdom</option>
+                                        <option value="Canada">🇨🇦 Canada</option>
+                                        <option value="Australia">🇦🇺 Australia</option>
+                                        <option value="Germany">🇩🇪 Germany</option>
+                                        <option value="France">🇫🇷 France</option>
+                                        <option value="Japan">🇯🇵 Japan</option>
+                                        <option value="Singapore">🇸🇬 Singapore</option>
+                                        <option value="UAE">🇦🇪 UAE</option>
+                                    </select>
+                                </div>
+
+                                <div class="search-field">
+                                    <label for="searchState"><i class="fas fa-map-marker-alt"></i> Select State</label>
+                                    <select id="searchState" name="state">
+                                        <option value="">-----Select State-----</option>
+                                        <!-- Options will be populated dynamically based on country selection -->
+                                    </select>
+                                </div>
+
+                                <div class="search-field">
+                                    <label for="searchDistrict"><i class="fas fa-map"></i> Select District</label>
+                                    <select id="searchDistrict" name="district">
+                                        <option value="">-----Select District-----</option>
+                                        <!-- Options will be populated dynamically based on state selection -->
+                                    </select>
+                                </div>
+
+                                <div class="search-field">
+                                    <label for="searchBlock"><i class="fas fa-th-large"></i> Select Block</label>
+                                    <select id="searchBlock" name="block">
+                                        <option value="">-----Select Block-----</option>
+                                        <!-- Options will be populated dynamically based on district selection -->
+                                    </select>
+                                </div>
+
+                                <div class="search-field">
+                                    <label for="searchCity"><i class="fas fa-city"></i> Select City</label>
+                                    <select id="searchCity" name="city">
+                                        <option value="">-----Select City-----</option>
+                                        <!-- Options will be populated dynamically based on district selection -->
+                                    </select>
+                                </div>
+                                
+                                <div class="search-field">
+                                    <label for="searchRadius"><i class="fas fa-crosshairs"></i> Search Radius</label>
+                                    <select id="searchRadius" name="radius">
+                                        <option value="5">Within 5 km</option>
+                                        <option value="10" selected>Within 10 km</option>
+                                        <option value="25">Within 25 km</option>
+                                        <option value="50">Within 50 km</option>
+                                        <option value="100">Within 100 km</option>
+                                        <option value="0">No radius limit</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Advanced Filters Section -->
+                            <div class="advanced-filters">
+                                <button type="button" class="toggle-filters">
+                                    <i class="fas fa-sliders-h"></i> Advanced Filters
+                                    <i class="fas fa-chevron-down toggle-icon"></i>
+                                </button>
+                                
+                                <div id="advancedFiltersContent" class="advanced-filters-content" style="display: none;">
+                                    <div class="filters-grid">
+                                        <div class="search-field">
+                                            <label for="searchGender"><i class="fas fa-venus-mars"></i> Gender</label>
+                                            <select id="searchGender" name="gender">
+                                                <option value="">Any Gender</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="search-field">
+                                            <label for="searchAgeRange"><i class="fas fa-birthday-cake"></i> Age Range</label>
+                                            <select id="searchAgeRange" name="ageRange">
+                                                <option value="">Any Age</option>
+                                                <option value="18-25">18-25 years</option>
+                                                <option value="26-35">26-35 years</option>
+                                                <option value="36-45">36-45 years</option>
+                                                <option value="46-55">46-55 years</option>
+                                                <option value="56-65">56-65 years</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="search-field">
+                                            <label for="searchAvailability"><i class="fas fa-clock"></i> Availability</label>
+                                            <select id="searchAvailability" name="availability">
+                                                <option value="">Any Time</option>
+                                                <option value="immediate">Available Now</option>
+                                                <option value="today">Available Today</option>
+                                                <option value="week">Available This Week</option>
+                                                <option value="month">Available This Month</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="search-field">
+                                            <label for="searchUrgency"><i class="fas fa-exclamation-triangle"></i> Urgency Level</label>
+                                            <select id="searchUrgency" name="urgency">
+                                                <option value="medium">Medium (Default)</option>
+                                                <option value="low">Low Priority</option>
+                                                <option value="high">High Priority</option>
+                                                <option value="critical">🚨 Critical/Emergency</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="search-field">
+                                            <label for="searchVerified"><i class="fas fa-shield-check"></i> Verification</label>
+                                            <select id="searchVerified" name="verified">
+                                                <option value="">All Donors</option>
+                                                <option value="true">Verified Only</option>
+                                                <option value="false">Unverified Only</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="search-field">
+                                            <label for="searchSource"><i class="fas fa-database"></i> Data Source</label>
+                                            <select id="searchSource" name="source">
+                                                <option value="all">All Sources</option>
+                                                <option value="internal">Our Database</option>
+                                                <option value="government">Government DB</option>
+                                                <option value="external">External APIs</option>
+                                                <option value="hospitals">Hospital Networks</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="search-actions">
+                                <button type="submit" class="search-btn">
+                                    <i class="fas fa-search"></i>
+                                    SEARCH DONORS
+                                </button>
+                                <button type="reset" class="reset-btn">
+                                    <i class="fas fa-redo"></i>
+                                    RESET FILTERS
+                                </button>
+                                <button type="button" class="clear-all-btn reset-btn">
+                                    <i class="fas fa-times"></i>
+                                    CLEAR ALL
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Search History Component -->
+                        <div class="search-history-section" style="margin-top: 2rem; padding: 1.5rem; background: var(--gray-50); border-radius: 1rem; border-left: 4px solid var(--primary-red);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h4 style="color: var(--primary-red); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-history"></i> Recent Searches
+                                </h4>
+                                <button class="clear-search-history-btn btn" style="background: var(--gray-400); color: white; font-size: 0.75rem; padding: 0.25rem 0.75rem;">
+                                    <i class="fas fa-trash"></i> Clear
+                                </button>
+                            </div>
+                            <div id="searchHistoryContainer" style="max-height: 200px; overflow-y: auto;">
+                                <p style="color: var(--gray-500); font-style: italic;">No recent searches</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="search-visual">
+                    <div class="search-illustration">
+                        <div class="blood-drop">
+                            <div class="magnifying-glass">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <div class="search-particles">
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                            <div class="particle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div id="searchResults" class="search-results" style="display: none;">
+                <div class="results-header">
+                    <h3><i class="fas fa-users"></i> Available Donors</h3>
+                    <div class="results-count">
+                        <span id="resultsCount">0</span> donors found
+                    </div>
+                </div>
+                <div id="donorsList" class="donors-grid">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blood Request Form Section -->
+    <section class="form-section">
+        <div class="container">
+            <!-- Login Required Overlay -->
+            <div id="loginRequiredOverlay" class="login-required-overlay" style="display: none;">
+                <div class="overlay-content">
+                    <div class="overlay-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Login Required</h3>
+                    <p>You need to be logged in to submit a blood request. This helps us verify your identity and contact you regarding the request.</p>
+                    <div class="overlay-actions">
+                        <a href="login.html" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login Now
+                        </a>
+                        <a href="index.html#registration-section" class="btn btn-secondary">
+                            <i class="fas fa-user-plus"></i>
+                            Register
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <div class="form-header fade-in">
+                    <!-- Authentication Status Indicator -->
+                    <div id="authIndicator" class="auth-indicator not-authenticated" style="display: none;">
+                        <i class="fas fa-lock"></i>
+                        <span id="authStatus">Authentication required to submit forms</span>
+                    </div>
+                    
+                    <h2>Submit Blood Request</h2>
+                    <p>Fill out this form to submit an urgent blood request</p>
+                </div>
+                
+                <form id="requestForm" class="request-form fade-in" data-delay="200">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="patientName">
+                                Patient Name *
+                            </label>
+                            <input type="text" id="patientName" name="patientName" required 
+                                   placeholder="Enter patient's full name" maxlength="100">
+                            <span class="error-message" id="patientName-error"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="requestBloodGroup">
+                                <i class="fas fa-tint"></i>
+                                Blood Group *
+                            </label>
+                            <select id="requestBloodGroup" name="bloodGroup" required>
+                                <option value="">Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                            <span class="error-message" id="requestBloodGroup-error"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="requiredUnits">
+                                <i class="fas fa-vial"></i>
+                                Required Units *
+                            </label>
+                            <input type="number" id="requiredUnits" name="requiredUnits" required 
+                                   placeholder="Number of units needed" min="1" max="10">
+                            <span class="error-message" id="requiredUnits-error"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="urgency">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Urgency Level *
+                            </label>
+                            <select id="urgency" name="urgency" required>
+                                <option value="">Select Urgency</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                            <span class="error-message" id="urgency-error"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="hospitalName">
+                                <i class="fas fa-hospital"></i>
+                                Hospital Name *
+                            </label>
+                            <input type="text" id="hospitalName" name="hospitalName" required 
+                                   placeholder="Enter hospital name" maxlength="200">
+                            <span class="error-message" id="hospitalName-error"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="requestLocation">
+                                Location *
+                            </label>
+                            <input type="text" id="requestLocation" name="location" required 
+                                   placeholder="Hospital location (City, State)" maxlength="200">
+                            <span class="error-message" id="requestLocation-error"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactNumber">
+                                Contact Number *
+                            </label>
+                            <input type="tel" id="contactNumber" name="contactNumber" required 
+                                   placeholder="Enter 10-digit mobile number" pattern="[6-9][0-9]{9}" maxlength="10">
+                            <span class="error-message" id="contactNumber-error"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="requiredBy">
+                                Required By *
+                            </label>
+                            <input type="datetime-local" id="requiredBy" name="requiredBy" required>
+                            <span class="error-message" id="requiredBy-error"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactPersonName">
+                                Contact Person Name
+                            </label>
+                            <input type="text" id="contactPersonName" name="contactPersonName" 
+                                   placeholder="Name of person to contact" maxlength="100">
+                            <span class="error-message" id="contactPersonName-error"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="relationship">
+                                Relationship to Patient
+                            </label>
+                            <select id="relationship" name="relationship">
+                                <option value="">Select Relationship</option>
+                                <option value="Self">Self</option>
+                                <option value="Family">Family</option>
+                                <option value="Friend">Friend</option>
+                                <option value="Doctor">Doctor</option>
+                                <option value="Hospital Staff">Hospital Staff</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span class="error-message" id="relationship-error"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="additionalNotes">
+                                <i class="fas fa-sticky-note"></i>
+                                Additional Notes
+                            </label>
+                            <textarea id="additionalNotes" name="additionalNotes" rows="4" 
+                                      placeholder="Any additional information or special requirements" maxlength="500"></textarea>
+                            <span class="error-message" id="additionalNotes-error"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="requestTerms" name="terms" required>
+                                <label for="requestTerms">
+                                    I confirm that all information provided is accurate and I agree to the 
+                                    <a href="#" class="link">Terms and Conditions</a> *
+                                </label>
+                            </div>
+                            <span class="error-message" id="requestTerms-error"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="requestSubmitBtn">
+                            Submit Request
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            Reset Form
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+        <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- BloodConnect Section -->
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-heart"></i>
+                        <span>BloodConnect</span>
+                    </div>
+                    <p class="footer-description">
+                        Connecting lives through blood donation. Join our community and help save lives every day.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a href="donate.html"><i class="fas fa-hand-holding-heart"></i> Donate Blood</a></li>
+                        <li><a href="request.html"><i class="fas fa-search"></i> Request Blood</a></li>
+                        <li><a href="about.html"><i class="fas fa-info-circle"></i> About Us</a></li>
+                        <li><a href="contact.html"><i class="fas fa-phone"></i> Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="footer-section">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Help Center</a></li>
+                        <li><a href="#"><i class="fas fa-file-alt"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+                        <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-phone"></i> 9307066500</li>
+                        <li><i class="fas fa-envelope"></i> blooddonation1627@gmail.com</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Emergency Support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 BloodConnect. All rights reserved. | Saving lives through blood donation</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fas fa-check-circle"></i> Success!</h2>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message">Operation completed successfully.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary modal-close-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/api.js"></script>  <!-- Load API first for getAPIBaseURL -->
+    <script src="js/main.js"></script>
+    <script src="js/forms.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/auth-state.js"></script>
+
+    <!-- Load Enhanced External API Service -->
+    <script src="js/enhanced-external-api.js"></script>
+    
+    <!-- Advanced Search JavaScript -->
+    <script>
+        // Global variables
+        let isSearching = false;
+        let lastSearchTime = 0;
+        
+        // Show search tips
+        function showSearchTips() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-lightbulb"></i> Search Tips</h3>
+                        <span class="modal-close close-modal-btn">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <h4>🔍 How to Use Advanced Search:</h4>
+                        <ul style="text-align: left; margin: 1rem 0; padding-left: 2rem;">
+                            <li><strong>Blood Group:</strong> Required - Select the exact blood type needed</li>
+                            <li><strong>Location:</strong> Use cascading filters (Country → State → District → City) for precise results</li>
+                            <li><strong>Search Radius:</strong> Expand search area if needed (default: 10km)</li>
+                            <li><strong>Urgency Level:</strong> Critical searches will find more donors from multiple sources</li>
+                            <li><strong>Advanced Filters:</strong> Use for gender, age, availability, and verification preferences</li>
+                        </ul>
+                        <h4>💡 Pro Tips:</h4>
+                        <ul style="text-align: left; margin: 1rem 0; padding-left: 2rem;">
+                            <li>Start with basic filters and expand if no results found</li>
+                            <li>Use "Expand Search Area" button for broader results</li>
+                            <li>Check multiple data sources for comprehensive coverage</li>
+                            <li>Save frequently used searches for quick access</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="close-modal-btn btn btn-primary">Got it!</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        // Toggle Advanced Filters
+        function toggleAdvancedFilters() {
+            const content = document.getElementById('advancedFiltersContent');
+            const button = document.querySelector('.toggle-filters');
+            const icon = button.querySelector('.toggle-icon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                button.classList.add('active');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.display = 'none';
+                button.classList.remove('active');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        // Advanced Search Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('searchForm');
+            const searchResults = document.getElementById('searchResults');
+            const donorsList = document.getElementById('donorsList');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            // Cascade dropdown functionality - move inside DOMContentLoaded
+            const countrySelect = document.getElementById('searchCountry');
+            const stateSelect = document.getElementById('searchState');
+            const districtSelect = document.getElementById('searchDistrict');
+            const citySelect = document.getElementById('searchCity');
+
+            // Check if all dropdown elements exist
+            if (!countrySelect || !stateSelect || !districtSelect || !citySelect) {
+                console.error('❌ One or more dropdown elements not found!');
+                return;
+            }
+            
+            console.log('✅ All dropdown elements found, setting up cascading functionality');
+
+            // Sample data for cascading dropdowns (enhanced)
+            const locationData = {
+                'India': {
+                    'Maharashtra': {
+                        'Mumbai': ['Andheri', 'Bandra', 'Borivali', 'Thane', 'Kurla', 'Mulund'],
+                        'Pune': ['Koregaon Park', 'Hinjewadi', 'Kothrud', 'Viman Nagar', 'Wakad', 'Baner'],
+                        'Nagpur': ['Sitabuldi', 'Sadar', 'Dharampeth', 'Hingna'],
+                        'Nashik': ['College Road', 'Gangapur Road', 'Panchavati']
+                    },
+                    'Delhi': {
+                        'New Delhi': ['Connaught Place', 'Karol Bagh', 'Lajpat Nagar', 'Khan Market'],
+                        'South Delhi': ['Greater Kailash', 'Saket', 'Vasant Kunj', 'Hauz Khas'],
+                        'North Delhi': ['Civil Lines', 'Model Town', 'Rohini'],
+                        'East Delhi': ['Laxmi Nagar', 'Preet Vihar', 'Mayur Vihar']
+                    },
+                    'Karnataka': {
+                        'Bangalore': ['Whitefield', 'Koramangala', 'Indiranagar', 'Electronic City', 'Marathahalli', 'BTM Layout'],
+                        'Mysore': ['Saraswathipuram', 'Kuvempunagar', 'Hebbal'],
+                        'Mangalore': ['Kadri', 'Bejai', 'Kankanady']
+                    },
+                    'Tamil Nadu': {
+                        'Chennai': ['T Nagar', 'Anna Nagar', 'Velachery', 'Adyar', 'Porur'],
+                        'Coimbatore': ['RS Puram', 'Peelamedu', 'Saibaba Colony'],
+                        'Madurai': ['Anna Nagar', 'KK Nagar', 'Vilangudi']
+                    },
+                    'Gujarat': {
+                        'Ahmedabad': ['Satellite', 'Vastrapur', 'Navrangpura', 'Maninagar'],
+                        'Surat': ['Athwa', 'Adajan', 'Vesu', 'Rander'],
+                        'Vadodara': ['Alkapuri', 'Fatehgunj', 'Gotri']
+                    },
+                    'Rajasthan': {
+                        'Jaipur': ['Malviya Nagar', 'C Scheme', 'Vaishali Nagar', 'Mansarovar'],
+                        'Jodhpur': ['Sardarpura', 'Ratanada', 'Shastri Nagar'],
+                        'Udaipur': ['Fateh Sagar', 'Surajpole', 'Hiran Magri']
+                    },
+                    'West Bengal': {
+                        'Kolkata': ['Salt Lake', 'New Town', 'Park Street', 'Ballygunge', 'Howrah'],
+                        'Siliguri': ['Matigara', 'Pradhan Nagar', 'Hill Cart Road']
+                    },
+                    'Uttar Pradesh': {
+                        'Lucknow': ['Gomti Nagar', 'Hazratganj', 'Indira Nagar', 'Aliganj'],
+                        'Kanpur': ['Civil Lines', 'Swaroop Nagar', 'Kidwai Nagar'],
+                        'Agra': ['Sadar Bazaar', 'Dayalbagh', 'Sikandra']
+                    }
+                },
+                'USA': {
+                    'California': {
+                        'Los Angeles': ['Downtown', 'Hollywood', 'Beverly Hills', 'Santa Monica'],
+                        'San Francisco': ['Mission District', 'Castro', 'Chinatown', 'SOMA']
+                    },
+                    'New York': {
+                        'New York City': ['Manhattan', 'Brooklyn', 'Queens', 'Bronx']
+                    }
+                },
+                'UK': {
+                    'England': {
+                        'London': ['Westminster', 'Camden', 'Kensington', 'Tower Hamlets'],
+                        'Manchester': ['City Centre', 'Didsbury', 'Chorlton']
+                    }
+                },
+                'Canada': {
+                    'Ontario': {
+                        'Toronto': ['Downtown', 'North York', 'Scarborough', 'Etobicoke'],
+                        'Ottawa': ['ByWard Market', 'Centretown', 'Kanata']
+                    }
+                },
+                'Australia': {
+                    'New South Wales': {
+                        'Sydney': ['CBD', 'Bondi', 'Parramatta', 'Manly'],
+                        'Newcastle': ['The Hill', 'Cooks Hill', 'Hamilton']
+                    }
+                }
+            };
+
+            // Enhanced updateDropdown function with better UX
+            function updateDropdown(selectElement, options) {
+                if (!selectElement) {
+                    console.error('❌ Select element is null');
+                    return;
+                }
+                
+                const currentValue = selectElement.value;
+                selectElement.innerHTML = '<option value="">-----Select-----</option>';
+                
+                if (options.length === 0) {
+                    selectElement.disabled = true;
+                    selectElement.style.opacity = '0.6';
+                    selectElement.style.cursor = 'not-allowed';
+                    return;
+                }
+                
+                selectElement.disabled = false;
+                selectElement.style.opacity = '1';
+                selectElement.style.cursor = 'pointer';
+                
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    selectElement.appendChild(optionElement);
+                });
+                
+                // Restore previous value if it still exists
+                if (currentValue && options.includes(currentValue)) {
+                    selectElement.value = currentValue;
+                }
+                
+                console.log(`✅ Updated ${selectElement.id} with ${options.length} options`);
+            }
+
+            // Update states when country changes
+            countrySelect.addEventListener('change', function() {
+                const country = this.value;
+                console.log('🌍 Country changed to:', country);
+                
+                const states = country ? Object.keys(locationData[country] || {}) : [];
+                console.log('📍 Available states:', states);
+                
+                updateDropdown(stateSelect, states);
+                updateDropdown(districtSelect, []);
+                updateDropdown(citySelect, []);
+            });
+
+            // Update districts when state changes
+            stateSelect.addEventListener('change', function() {
+                const country = countrySelect.value;
+                const state = this.value;
+                console.log('🏛️ State changed to:', state, 'in country:', country);
+                
+                const districts = country && state ? Object.keys(locationData[country][state] || {}) : [];
+                console.log('🏢 Available districts:', districts);
+                
+                updateDropdown(districtSelect, districts);
+                updateDropdown(citySelect, []);
+            });
+
+            // Update cities when district changes
+            districtSelect.addEventListener('change', function() {
+                const country = countrySelect.value;
+                const state = stateSelect.value;
+                const district = this.value;
+                console.log('🏙️ District changed to:', district);
+                
+                const cities = country && state && district ? locationData[country][state][district] || [] : [];
+                console.log('🏘️ Available cities:', cities);
+                
+                updateDropdown(citySelect, cities);
+            });
+
+            // Initialize dropdown states
+            function initializeDropdowns() {
+                console.log('🔧 Initializing cascading dropdowns...');
+                
+                // Disable dependent dropdowns initially
+                updateDropdown(stateSelect, []);
+                updateDropdown(districtSelect, []);
+                updateDropdown(citySelect, []);
+                
+                // Add event listeners for filter count updates
+                const formElements = searchForm.querySelectorAll('select, input');
+                formElements.forEach(element => {
+                    element.addEventListener('change', updateActiveFiltersCount);
+                });
+                
+                // Initial filter count update
+                updateActiveFiltersCount();
+                
+                console.log('✅ Cascading dropdowns initialized successfully');
+            }
+
+            // Call initialization
+            initializeDropdowns();
+
+            // Enhanced sample donor data with more diverse locations for fallback
+            const sampleDonors = [
+                {
+                    name: "Rajesh Kumar",
+                    bloodType: "O+",
+                    location: "Mumbai, Maharashtra",
+                    city: "Mumbai",
+                    state: "Maharashtra",
+                    country: "India",
+                    phone: "+91 98765 43210",
+                    lastDonation: "2 months ago",
+                    availability: "Available",
+                    gender: "male",
+                    age: 28,
+                    verified: true
+                },
+                {
+                    name: "Priya Sharma",
+                    bloodType: "A+",
+                    location: "New Delhi, Delhi",
+                    city: "New Delhi",
+                    state: "Delhi",
+                    country: "India",
+                    phone: "+91 87654 32109",
+                    lastDonation: "3 months ago",
+                    availability: "Available",
+                    gender: "female",
+                    age: 32,
+                    verified: true
+                },
+                {
+                    name: "Amit Patel",
+                    bloodType: "B+",
+                    location: "Ahmedabad, Gujarat",
+                    city: "Ahmedabad",
+                    state: "Gujarat",
+                    country: "India",
+                    phone: "+91 76543 21098",
+                    lastDonation: "1 month ago",
+                    availability: "Available",
+                    gender: "male",
+                    age: 35,
+                    verified: false
+                },
+                {
+                    name: "Sneha Reddy",
+                    bloodType: "AB+",
+                    location: "Bangalore, Karnataka",
+                    city: "Bangalore",
+                    state: "Karnataka",
+                    country: "India",
+                    phone: "+91 65432 10987",
+                    lastDonation: "4 months ago",
+                    availability: "Available",
+                    gender: "female",
+                    age: 26,
+                    verified: true
+                },
+                {
+                    name: "Vikram Singh",
+                    bloodType: "O-",
+                    location: "Jaipur, Rajasthan",
+                    city: "Jaipur",
+                    state: "Rajasthan",
+                    country: "India",
+                    phone: "+91 54321 09876",
+                    lastDonation: "2 months ago",
+                    availability: "Available",
+                    gender: "male",
+                    age: 42,
+                    verified: true
+                },
+                {
+                    name: "Kavya Nair",
+                    bloodType: "A-",
+                    location: "Chennai, Tamil Nadu",
+                    city: "Chennai",
+                    state: "Tamil Nadu",
+                    country: "India",
+                    phone: "+91 43210 98765",
+                    lastDonation: "1 month ago",
+                    availability: "Available",
+                    gender: "female",
+                    age: 29,
+                    verified: true
+                },
+                {
+                    name: "Rohit Verma",
+                    bloodType: "B-",
+                    location: "Pune, Maharashtra",
+                    city: "Pune",
+                    state: "Maharashtra",
+                    country: "India",
+                    phone: "+91 32109 87654",
+                    lastDonation: "3 months ago",
+                    availability: "Not Available",
+                    gender: "male",
+                    age: 38,
+                    verified: false
+                },
+                {
+                    name: "Anita Das",
+                    bloodType: "AB-",
+                    location: "Kolkata, West Bengal",
+                    city: "Kolkata",
+                    state: "West Bengal",
+                    country: "India",
+                    phone: "+91 21098 76543",
+                    lastDonation: "2 months ago",
+                    availability: "Available",
+                    gender: "female",
+                    age: 31,
+                    verified: true
+                },
+                {
+                    name: "Suresh Gupta",
+                    bloodType: "O+",
+                    location: "Lucknow, Uttar Pradesh",
+                    city: "Lucknow",
+                    state: "Uttar Pradesh",
+                    country: "India",
+                    phone: "+91 10987 65432",
+                    lastDonation: "4 months ago",
+                    availability: "Available",
+                    gender: "male",
+                    age: 45,
+                    verified: true
+                },
+                {
+                    name: "Meera Joshi",
+                    bloodType: "A+",
+                    location: "Surat, Gujarat",
+                    city: "Surat",
+                    state: "Gujarat",
+                    country: "India",
+                    phone: "+91 09876 54321",
+                    lastDonation: "1 month ago",
+                    availability: "Available",
+                    gender: "female",
+                    age: 27,
+                    verified: false
+                }
+            ];
+
+            // Form validation with enhanced messaging
+            function validateSearchForm() {
+                const bloodGroup = document.getElementById('searchBloodGroup').value;
+                const country = document.getElementById('searchCountry').value;
+                
+                if (!bloodGroup) {
+                    showNotification('Please select a blood group to search for donors.', 'error');
+                    document.getElementById('searchBloodGroup').focus();
+                    return false;
+                }
+                
+                // Optional: Warn if no location is selected
+                if (!country) {
+                    const proceed = confirm('No location filter selected. This will search all available donors worldwide. Do you want to continue?');
+                    if (!proceed) {
+                        document.getElementById('searchCountry').focus();
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+            
+            // Show active filters count
+            function updateActiveFiltersCount() {
+                const form = document.getElementById('searchForm');
+                const formData = new FormData(form);
+                let activeFilters = 0;
+                
+                for (let [key, value] of formData.entries()) {
+                    if (value && value.trim() !== '') {
+                        activeFilters++;
+                    }
+                }
+                
+                const toggleButton = document.querySelector('.toggle-filters');
+                if (toggleButton) {
+                    const existingBadge = toggleButton.querySelector('.filter-badge');
+                    if (existingBadge) {
+                        existingBadge.remove();
+                    }
+                    
+                    if (activeFilters > 0) {
+                        const badge = document.createElement('span');
+                        badge.className = 'filter-badge';
+                        badge.style.cssText = `
+                            background: var(--primary-red);
+                            color: white;
+                            border-radius: 50%;
+                            width: 20px;
+                            height: 20px;
+                            font-size: 0.75rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin-left: 0.5rem;
+                        `;
+                        badge.textContent = activeFilters;
+                        toggleButton.appendChild(badge);
+                    }
+                }
+            }
+
+            // Handle form submission with validation
+            searchForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Prevent multiple concurrent searches
+                if (isSearching) {
+                    console.log('⏳ Search already in progress...');
+                    return;
+                }
+                
+                // Validate form before proceeding
+                if (!validateSearchForm()) {
+                    return;
+                }
+
+                isSearching = true;
+                lastSearchTime = Date.now();
+                
+                const formData = new FormData(searchForm);
+                const searchCriteria = {
+                    bloodGroup: formData.get('bloodGroup'),
+                    country: formData.get('country'),
+                    state: formData.get('state'),
+                    district: formData.get('district'),
+                    city: formData.get('city'),
+                    radius: formData.get('radius'),
+                    urgency: formData.get('urgency') || 'medium',
+                    gender: formData.get('gender'),
+                    ageRange: formData.get('ageRange'),
+                    availability: formData.get('availability'),
+                    verified: formData.get('verified'),
+                    source: formData.get('source')
+                };
+
+                console.log('🔍 Enhanced search criteria:', searchCriteria);
+
+                try {
+                    // Show loading state
+                    showLoadingState();
+                    
+                    // Step 1: Search internal database first
+                    let allDonors = [];
+                    let searchSources = [];
+                    
+                    console.log('🏠 Searching internal database...');
+                    const internalResults = await searchInternalDatabase(searchCriteria);
+                    if (internalResults && internalResults.donors) {
+                        allDonors.push(...internalResults.donors);
+                        searchSources.push('internal');
+                    }
+                    
+                    // Step 2: If not enough results, search external APIs
+                    const minResults = searchCriteria.urgency === 'critical' ? 10 : 5;
+                    if (allDonors.length < minResults && window.EnhancedExternalAPI) {
+                        console.log('🌐 Searching external APIs for additional donors...');
+                        
+                        const externalResults = await window.EnhancedExternalAPI.searchExternalDonors(
+                            searchCriteria.bloodGroup,
+                            searchCriteria.country || 'India',
+                            {
+                                ageRange: searchCriteria.ageRange,
+                                gender: searchCriteria.gender,
+                                verified: searchCriteria.verified,
+                                availability: searchCriteria.availability,
+                                source: searchCriteria.source
+                            }
+                        );
+                        
+                        if (externalResults && externalResults.success) {
+                            allDonors.push(...externalResults.donors);
+                            searchSources.push(...externalResults.sources);
+                        }
+                    }
+                    
+                    // Step 3: Apply additional filters and sorting
+                    const filteredDonors = applyAdvancedFilters(allDonors, searchCriteria);
+                    
+                    // Step 4: Display results with comprehensive information
+                    displayEnhancedSearchResults(filteredDonors, searchCriteria, searchSources);
+                    
+                } catch (error) {
+                    console.error('❌ Search error:', error);
+                    showErrorState(error.message);
+                } finally {
+                    isSearching = false;
+                    hideLoadingState();
+                }
+            });
+
+            // Enhanced reset functionality
+            const resetBtn = document.querySelector('.reset-btn');
+            resetBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                resetSearchForm();
+            });
+            
+            // Clear all filters function
+            function clearAllFilters() {
+                resetSearchForm();
+                showNotification('All search filters have been cleared', 'success');
+            }
+            
+            // Reset search form function
+            function resetSearchForm() {
+                // Reset form
+                searchForm.reset();
+                
+                // Reset all dropdowns to default state
+                updateDropdown(stateSelect, []);
+                updateDropdown(districtSelect, []);
+                updateDropdown(citySelect, []);
+                
+                // Reset advanced filters visibility
+                const advancedFiltersContent = document.getElementById('advancedFiltersContent');
+                const toggleButton = document.querySelector('.toggle-filters');
+                if (advancedFiltersContent && toggleButton) {
+                    advancedFiltersContent.style.display = 'none';
+                    toggleButton.classList.remove('active');
+                    toggleButton.querySelector('.toggle-icon').style.transform = 'rotate(0deg)';
+                }
+                
+                // Hide search results
+                searchResults.style.display = 'none';
+                
+                console.log('Search form has been reset and filters cleared');
+            }
+
+            // Search internal database (your existing donors)
+            async function searchInternalDatabase(searchCriteria) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        // Filter sample donors based on criteria
+                        const filteredDonors = sampleDonors.filter(donor => {
+                            // Blood group filter
+                            if (searchCriteria.bloodGroup && donor.bloodType !== searchCriteria.bloodGroup) {
+                                return false;
+                            }
+                            
+                            // Location filters
+                            if (searchCriteria.state || searchCriteria.district || searchCriteria.city) {
+                                const donorLocation = donor.location.toLowerCase();
+                                if (searchCriteria.state && !donorLocation.includes(searchCriteria.state.toLowerCase())) {
+                                    return false;
+                                }
+                                if (searchCriteria.district && !donorLocation.includes(searchCriteria.district.toLowerCase())) {
+                                    return false;
+                                }
+                                if (searchCriteria.city && !donorLocation.includes(searchCriteria.city.toLowerCase())) {
+                                    return false;
+                                }
+                            }
+                            
+                            // Country filter
+                            if (searchCriteria.country) {
+                                const donorLocation = donor.location.toLowerCase();
+                                // Check if location contains country-specific terms
+                                const countryTerms = {
+                                    'India': ['india', 'maharashtra', 'delhi', 'karnataka', 'tamil nadu', 'gujarat', 'rajasthan', 'west bengal', 'uttar pradesh'],
+                                    'USA': ['usa', 'california', 'new york', 'texas', 'florida'],
+                                    'UK': ['uk', 'england', 'london', 'manchester'],
+                                    'Canada': ['canada', 'ontario', 'toronto', 'ottawa'],
+                                    'Australia': ['australia', 'sydney', 'melbourne']
+                                };
+                                
+                                const terms = countryTerms[searchCriteria.country] || [searchCriteria.country.toLowerCase()];
+                                if (!terms.some(term => donorLocation.includes(term))) {
+                                    return false;
+                                }
+                            }
+                            
+                            return true;
+                        });
+                        
+                        resolve({
+                            success: true,
+                            donors: filteredDonors.map(donor => ({
+                                ...donor,
+                                source: 'internal',
+                                verified: true,
+                                distance: Math.floor(Math.random() * 30) + 1
+                            }))
+                        });
+                    }, 200);
+                });
+            }
+            
+            // Apply advanced filters to donor results
+            function applyAdvancedFilters(donors, searchCriteria) {
+                return donors.filter(donor => {
+                    // Gender filter
+                    if (searchCriteria.gender && donor.gender && donor.gender.toLowerCase() !== searchCriteria.gender.toLowerCase()) {
+                        return false;
+                    }
+                    
+                    // Age range filter (if donor has age information)
+                    if (searchCriteria.ageRange && donor.age) {
+                        const [minAge, maxAge] = searchCriteria.ageRange.split('-').map(age => parseInt(age));
+                        if (donor.age < minAge || donor.age > maxAge) {
+                            return false;
+                        }
+                    }
+                    
+                    // Availability filter
+                    if (searchCriteria.availability) {
+                        switch (searchCriteria.availability) {
+                            case 'immediate':
+                                if (!donor.availability || !donor.availability.toLowerCase().includes('available')) {
+                                    return false;
+                                }
+                                break;
+                            case 'today':
+                            case 'week':
+                            case 'month':
+                                // For sample data, assume all "Available" donors are available for these timeframes
+                                if (!donor.availability || !donor.availability.toLowerCase().includes('available')) {
+                                    return false;
+                                }
+                                break;
+                        }
+                    }
+                    
+                    // Verification filter
+                    if (searchCriteria.verified !== '' && searchCriteria.verified !== null && searchCriteria.verified !== undefined) {
+                        const isVerified = searchCriteria.verified === 'true';
+                        if (donor.verified !== isVerified) {
+                            return false;
+                        }
+                    }
+                    
+                    // Source filter
+                    if (searchCriteria.source && searchCriteria.source !== 'all' && donor.source && donor.source !== searchCriteria.source) {
+                        return false;
+                    }
+                    
+                    // Radius filter (basic implementation using distance)
+                    if (searchCriteria.radius && searchCriteria.radius !== '0' && donor.distance) {
+                        const radiusKm = parseInt(searchCriteria.radius);
+                        if (donor.distance > radiusKm) {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            // Show loading state
+            function showLoadingState() {
+                donorsList.innerHTML = `
+                    <div class="loading-state" style="text-align: center; padding: 3rem;">
+                        <div style="display: inline-block; width: 50px; height: 50px; border: 3px solid #e2e8f0; border-radius: 50%; border-top-color: var(--primary-red); animation: spin 1s ease-in-out infinite;"></div>
+                        <h3 style="color: var(--primary-red); margin-top: 1rem;">🔍 Searching donors...</h3>
+                        <p style="color: var(--gray-600);">Checking internal database and external sources</p>
+                    </div>
+                `;
+                searchResults.style.display = 'block';
+                
+                const style = document.createElement('style');
+                style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                document.head.appendChild(style);
+            }
+            
+            // Hide loading state
+            function hideLoadingState() {
+                // Loading state will be replaced by results
+            }
+            
+            // Show error state
+            function showErrorState(message) {
+                donorsList.innerHTML = `
+                    <div class="error-state" style="text-align: center; padding: 3rem; background: #fef5f5; border-radius: 1rem; border: 2px dashed #e53e3e;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e53e3e; margin-bottom: 1rem;"></i>
+                        <h3 style="color: #e53e3e; margin-bottom: 1rem;">Search Error</h3>
+                        <p style="color: #4a5568;">${message}</p>
+                        <button class="reload-page-btn" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #e53e3e; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Try Again</button>
+                    </div>
+                `;
+            }
+            
+            // Enhanced display search results function
+            function displayEnhancedSearchResults(donors, searchCriteria, searchSources) {
+                const searchSummary = [];
+                if (searchCriteria.bloodGroup) searchSummary.push(`Blood Group: ${searchCriteria.bloodGroup}`);
+                if (searchCriteria.country) searchSummary.push(`Country: ${searchCriteria.country}`);
+                if (searchCriteria.state) searchSummary.push(`State: ${searchCriteria.state}`);
+                if (searchCriteria.district) searchSummary.push(`District: ${searchCriteria.district}`);
+                if (searchCriteria.city) searchSummary.push(`City: ${searchCriteria.city}`);
+                
+                if (donors.length === 0) {
+                    donorsList.innerHTML = `
+                        <div class="no-results">
+                            <div class="no-results-content">
+                                <i class="fas fa-search"></i>
+                                <h3>No donors found</h3>
+                                <p>No donors match your search criteria: ${searchSummary.join(', ')}</p>
+                                <p>Try adjusting your filters, expanding the search radius, or check back later for new registrations.</p>
+                                <div style="margin-top: 1.5rem;">
+                                    <button class="expand-search-btn btn btn-primary" style="margin-right: 1rem;">Expand Search Area</button>
+                                    <button class="search-all-sources-btn btn btn-secondary">Search All Sources</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const donorCards = donors.map(donor => `
+                        <div class="donor-card" style="position: relative;">
+                            <div class="search-source-badge source-${donor.source}">
+                                ${getSourceLabel(donor.source)}
+                            </div>
+                            <div class="donor-info">
+                                <div class="info-item">
+                                    <div class="info-label">Name</div>
+                                    <div class="info-value">${donor.name}</div>
+                                </div>
+                                <div class="info-item blood-type">
+                                    <div class="info-label">Blood Type</div>
+                                    <div class="info-value">${donor.bloodGroup || donor.bloodType}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Location</div>
+                                    <div class="info-value">${donor.city || donor.location}, ${donor.state || ''}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Distance</div>
+                                    <div class="info-value">${donor.distance || '~'}km away</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Last Donation</div>
+                                    <div class="info-value">${donor.lastDonation}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Availability</div>
+                                    <div class="info-value">${donor.availability}</div>
+                                </div>
+                            </div>
+                            <div style="margin: 1rem 0;">
+                                <span class="verification-badge ${donor.verified ? 'verified' : 'unverified'}">
+                                    <i class="fas fa-${donor.verified ? 'shield-check' : 'clock'}"></i>
+                                    ${donor.verified ? 'Verified Donor' : 'Pending Verification'}
+                                </span>
+                                ${donor.rating ? `<span style="margin-left: 0.5rem; color: #f59e0b;">★ ${donor.rating}</span>` : ''}
+                            </div>
+                            <div class="donor-actions">
+                                <button class="contact-btn contact-donor-btn" data-phone="${donor.phone}" data-name="${donor.name}">
+                                    <i class="fas fa-phone"></i> Contact
+                                </button>
+                                <button class="contact-btn send-message-btn" data-name="${donor.name}" data-urgency="${searchCriteria.urgency}">
+                                    <i class="fas fa-envelope"></i> Message
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    donorsList.innerHTML = `
+                        <div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--gray-50); border-radius: 0.75rem; border-left: 4px solid var(--primary-red);">
+                            <h4 style="color: var(--primary-red); margin-bottom: 0.5rem;">📊 Search Summary</h4>
+                            <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">Sources searched: ${searchSources.join(', ')} | Search time: ${Date.now() - lastSearchTime}ms</p>
+                        </div>
+                        ${donorCards}
+                    `;
+                }
+
+                console.log(`✅ Enhanced search completed: ${donors.length} donors found from sources: ${searchSources.join(', ')}`);
+                resultsCount.textContent = donors.length;
+                searchResults.style.display = 'block';
+
+                // Smooth scroll to results
+                searchResults.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+            
+            // Helper function to get source label
+            function getSourceLabel(source) {
+                const labels = {
+                    'internal': 'Our DB',
+                    'government': 'Gov DB',
+                    'external': 'External',
+                    'hospitals': 'Hospitals',
+                    'eRaktKosh': 'e-RaktKosh',
+                    'redCross': 'Red Cross',
+                    'bloodConnectGlobal': 'Global',
+                    'nhsBlood': 'NHS',
+                    'canadianBlood': 'Canada',
+                    'lifebloodAU': 'Lifeblood'
+                };
+                return labels[source] || source;
+            }
+            
+            // Show loading state
+            function showLoadingState() {
+                donorsList.innerHTML = `
+                    <div class="loading-state" style="text-align: center; padding: 3rem;">
+                        <div style="display: inline-block; width: 50px; height: 50px; border: 3px solid #e2e8f0; border-radius: 50%; border-top-color: var(--primary-red); animation: spin 1s ease-in-out infinite;"></div>
+                        <h3 style="color: var(--primary-red); margin-top: 1rem;">🔍 Searching donors...</h3>
+                        <p style="color: var(--gray-600);">Checking internal database and external sources</p>
+                    </div>
+                `;
+                searchResults.style.display = 'block';
+                
+                const style = document.createElement('style');
+                style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+                document.head.appendChild(style);
+            }
+            
+            // Show error state
+            function showErrorState(message) {
+                donorsList.innerHTML = `
+                    <div class="error-state" style="text-align: center; padding: 3rem; background: #fef5f5; border-radius: 1rem; border: 2px dashed #e53e3e;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e53e3e; margin-bottom: 1rem;"></i>
+                        <h3 style="color: #e53e3e; margin-bottom: 1rem;">Search Error</h3>
+                        <p style="color: #4a5568;">${message}</p>
+                        <button class="reload-page-btn" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #e53e3e; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">Try Again</button>
+                    </div>
+                `;
+            }
+            
+            // Enhanced display search results function
+            function displayEnhancedSearchResults(donors, searchCriteria, searchSources) {
+                const searchSummary = [];
+                if (searchCriteria.bloodGroup) searchSummary.push(`Blood Group: ${searchCriteria.bloodGroup}`);
+                if (searchCriteria.country) searchSummary.push(`Country: ${searchCriteria.country}`);
+                if (searchCriteria.state) searchSummary.push(`State: ${searchCriteria.state}`);
+                if (searchCriteria.district) searchSummary.push(`District: ${searchCriteria.district}`);
+                if (searchCriteria.city) searchSummary.push(`City: ${searchCriteria.city}`);
+                
+                if (donors.length === 0) {
+                    donorsList.innerHTML = `
+                        <div class="no-results">
+                            <div class="no-results-content">
+                                <i class="fas fa-search"></i>
+                                <h3>No donors found</h3>
+                                <p>No donors match your search criteria: ${searchSummary.join(', ')}</p>
+                                <p>Try adjusting your filters, expanding the search radius, or check back later for new registrations.</p>
+                                <div style="margin-top: 1.5rem;">
+                                    <button class="expand-search-btn btn btn-primary" style="margin-right: 1rem;">Expand Search Area</button>
+                                    <button class="search-all-sources-btn btn btn-secondary">Search All Sources</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const donorCards = donors.map(donor => `
+                        <div class="donor-card" style="position: relative;">
+                            <div class="search-source-badge source-${donor.source}">
+                                ${getSourceLabel(donor.source)}
+                            </div>
+                            <div class="donor-info">
+                                <div class="info-item">
+                                    <div class="info-label">Name</div>
+                                    <div class="info-value">${donor.name}</div>
+                                </div>
+                                <div class="info-item blood-type">
+                                    <div class="info-label">Blood Type</div>
+                                    <div class="info-value">${donor.bloodGroup || donor.bloodType}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Location</div>
+                                    <div class="info-value">${donor.city || donor.location}, ${donor.state || ''}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Distance</div>
+                                    <div class="info-value">${donor.distance || '~'}km away</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Last Donation</div>
+                                    <div class="info-value">${donor.lastDonation}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Availability</div>
+                                    <div class="info-value">${donor.availability}</div>
+                                </div>
+                            </div>
+                            <div style="margin: 1rem 0;">
+                                <span class="verification-badge ${donor.verified ? 'verified' : 'unverified'}">
+                                    <i class="fas fa-${donor.verified ? 'shield-check' : 'clock'}"></i>
+                                    ${donor.verified ? 'Verified Donor' : 'Pending Verification'}
+                                </span>
+                                ${donor.rating ? `<span style="margin-left: 0.5rem; color: #f59e0b;">★ ${donor.rating}</span>` : ''}
+                            </div>
+                            <div class="donor-actions">
+                                <button class="contact-btn contact-donor-btn" data-phone="${donor.phone}" data-name="${donor.name}">
+                                    <i class="fas fa-phone"></i> Contact
+                                </button>
+                                <button class="contact-btn send-message-btn" data-name="${donor.name}" data-urgency="${searchCriteria.urgency}">
+                                    <i class="fas fa-envelope"></i> Message
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    donorsList.innerHTML = `
+                        <div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--gray-50); border-radius: 0.75rem; border-left: 4px solid var(--primary-red);">
+                            <h4 style="color: var(--primary-red); margin-bottom: 0.5rem;">📊 Search Summary</h4>
+                            <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">Sources searched: ${searchSources.join(', ')} | Search time: ${Date.now() - lastSearchTime}ms</p>
+                        </div>
+                        ${donorCards}
+                    `;
+                }
+
+                console.log(`✅ Enhanced search completed: ${donors.length} donors found from sources: ${searchSources.join(', ')}`);
+                resultsCount.textContent = donors.length;
+                searchResults.style.display = 'block';
+
+                // Smooth scroll to results
+                searchResults.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+            
+            // Helper function to get source label
+            function getSourceLabel(source) {
+                const labels = {
+                    'internal': 'Our DB',
+                    'government': 'Gov DB',
+                    'external': 'External',
+                    'hospitals': 'Hospitals',
+                    'eRaktKosh': 'e-RaktKosh',
+                    'redCross': 'Red Cross',
+                    'bloodConnectGlobal': 'Global',
+                    'nhsBlood': 'NHS',
+                    'canadianBlood': 'Canada',
+                    'lifebloodAU': 'Lifeblood'
+                };
+                return labels[source] || source;
+            }
+
+            // Initialize dropdown states
+            function initializeDropdowns() {
+                // Disable dependent dropdowns initially
+                updateDropdown(stateSelect, []);
+                updateDropdown(districtSelect, []);
+                updateDropdown(citySelect, []);
+                
+                // Add event listeners for filter count updates
+                const formElements = searchForm.querySelectorAll('select, input');
+                formElements.forEach(element => {
+                    element.addEventListener('change', updateActiveFiltersCount);
+                });
+                
+                // Initial filter count update
+                updateActiveFiltersCount();
+                
+                console.log('Cascading dropdowns initialized with enhanced filtering');
+            }
+
+            // Initialize search history UI
+            if (window.EnhancedExternalAPI) {
+                window.EnhancedExternalAPI.updateSearchHistoryUI();
+            }
+        });
+
+        // Enhanced contact donor function
+        function contactDonor(phone, donorName) {
+            if (phone) {
+                const cleanPhone = phone.replace(/[^\d+]/g, '');
+                
+                // Create contact modal
+                const modal = createContactModal(donorName, cleanPhone);
+                document.body.appendChild(modal);
+                modal.style.display = 'block';
+            }
+        }
+
+        // Enhanced send message function
+        function sendMessage(donorName, urgency) {
+            const urgencyText = urgency === 'critical' ? 'URGENT: ' : '';
+            const message = `${urgencyText}Hello ${donorName}, I found your blood donor profile and would like to connect regarding blood donation. Thank you!`;
+            
+            // Create message modal
+            const modal = createMessageModal(donorName, message);
+            document.body.appendChild(modal);
+            modal.style.display = 'block';
+        }
+        
+        // Create contact modal
+        function createContactModal(donorName, phone) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-phone"></i> Contact ${donorName}</h3>
+                        <span class="modal-close close-modal-btn">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <p>Choose how you'd like to contact ${donorName}:</p>
+                        <div style="margin: 1.5rem 0; display: flex; flex-direction: column; gap: 1rem;">
+                            <button onclick="window.open('tel:${phone}', '_self')" class="btn btn-primary" style="width: 100%;">
+                                <i class="fas fa-phone"></i> Call ${phone}
+                            </button>
+                            <button onclick="window.open('sms:${phone}', '_self')" class="btn btn-secondary" style="width: 100%;">
+                                <i class="fas fa-sms"></i> Send SMS
+                            </button>
+                            <button onclick="window.open('https://wa.me/${phone.replace(/[^\d]/g, '')}', '_blank')" class="btn" style="background: #25d366; color: white; width: 100%;">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="close-modal-btn btn btn-secondary">Close</button>
+                    </div>
+                </div>
+            `;
+            return modal;
+        }
+        
+        // Create message modal
+        function createMessageModal(donorName, message) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-envelope"></i> Message ${donorName}</h3>
+                        <span class="modal-close close-modal-btn">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <textarea id="messageText" style="width: 100%; height: 100px; padding: 1rem; border: 2px solid var(--gray-200); border-radius: 0.5rem; resize: vertical;">${message}</textarea>
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="copy-to-clipboard-btn btn btn-secondary">
+                                <i class="fas fa-copy"></i> Copy Message
+                            </button>
+                            <button class="send-via-email-btn btn btn-primary">
+                                <i class="fas fa-envelope"></i> Send via Email
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="close-modal-btn btn btn-secondary">Close</button>
+                    </div>
+                </div>
+            `;
+            return modal;
+        }
+        
+        // Utility functions
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Message copied to clipboard!', 'success');
+            });
+        }
+        
+        function sendViaEmail(message) {
+            const subject = 'Blood Donation Inquiry';
+            window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`);
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#10b981' : '#3b82f6'};
+                color: white;
+                border-radius: 0.5rem;
+                z-index: 10000;
+                font-weight: 500;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.remove(), 3000);
+        }
+        
+        // Expand search radius function
+        function expandSearchRadius() {
+            const radiusSelect = document.getElementById('searchRadius');
+            const currentValue = parseInt(radiusSelect.value);
+            if (currentValue === 0) {
+                showNotification('Search radius is already at maximum', 'info');
+                return;
+            }
+            
+            const options = [5, 10, 25, 50, 100, 0];
+            const currentIndex = options.indexOf(currentValue);
+            if (currentIndex < options.length - 1) {
+                radiusSelect.value = options[currentIndex + 1];
+                showNotification(`Search radius expanded to ${options[currentIndex + 1] === 0 ? 'unlimited' : options[currentIndex + 1] + 'km'}`, 'success');
+                
+                // Automatically trigger search
+                setTimeout(() => {
+                    document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+                }, 500);
+            }
+        }
+        
+        // Search all sources function
+        function searchAllSources() {
+            const sourceSelect = document.getElementById('searchSource');
+            sourceSelect.value = 'all';
+            showNotification('Now searching all available sources...', 'success');
+            
+            // Automatically trigger search
+            setTimeout(() => {
+                document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+            }, 500);
+        }
+
+        // Enhanced Mobile menu toggle (using global isMenuOpen from main.js)
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+
+        if (hamburger && navMenu) {
+            // Hamburger click handler
+            hamburger.addEventListener('click', function() {
+                toggleMobileMenu();
+            });
+
+            // Close menu when clicking on nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        closeMobileMenu();
+                    }
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                const currentMenuState = window.isMenuOpen || false;
+                if (currentMenuState && !navMenu.contains(event.target) && !hamburger.contains(event.target)) {
+                    closeMobileMenu();
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                const currentMenuState = window.isMenuOpen || false;
+                if (window.innerWidth > 768 && currentMenuState) {
+                    closeMobileMenu();
+                }
+            });
+        }
+
+        // Enhanced navbar scroll effects (matching main.js)
+        const navbar = document.querySelector('.navbar');
+        let lastScrollY = window.scrollY;
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+
+            if (navbar) {
+                // Add scrolled class when scrolling down
+                if (currentScrollY > 50) {
+                    navbar.classList.add('scrolled');
+                    navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                    navbar.style.backdropFilter = 'blur(20px)';
+                } else {
+                    navbar.classList.remove('scrolled');
+                    navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                    navbar.style.backdropFilter = 'blur(20px)';
+                }
+            }
+
+            lastScrollY = currentScrollY;
+        });
+
+        // Smooth scroll for anchor links (matching main.js)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // Close mobile menu if open
+                    if (window.innerWidth <= 768) {
+                        closeMobileMenu();
+                    }
+                }
+            });
+        });
+
+        // Mobile menu functions (using global isMenuOpen from main.js)
+        function toggleMobileMenu() {
+            if (hamburger && navMenu) {
+                // Use global isMenuOpen if available, otherwise initialize locally
+                if (typeof window.isMenuOpen === 'undefined') {
+                    window.isMenuOpen = false;
+                }
+                window.isMenuOpen = !window.isMenuOpen;
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+                
+                // Prevent body scroll when menu is open
+                document.body.style.overflow = window.isMenuOpen ? 'hidden' : '';
+                console.log('Mobile menu toggled:', window.isMenuOpen);
+            }
+        }
+
+        function closeMobileMenu() {
+            if (hamburger && navMenu) {
+                if (typeof window.isMenuOpen !== 'undefined') {
+                    window.isMenuOpen = false;
+                }
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+                document.body.style.overflow = '';
+                console.log('Mobile menu closed');
+            }
+        }
+
+        // Setup event listeners for CSP-compliant interactions
+        function setupEventListeners() {
+            // Search tips button
+            const searchTipsBtn = document.querySelector('.show-search-tips-btn');
+            if (searchTipsBtn) {
+                searchTipsBtn.addEventListener('click', showSearchTips);
+            }
+            
+            // Toggle advanced filters button
+            const toggleFiltersBtn = document.querySelector('.toggle-filters');
+            if (toggleFiltersBtn) {
+                toggleFiltersBtn.addEventListener('click', toggleAdvancedFilters);
+            }
+            
+            // Clear all filters button
+            const clearAllBtn = document.querySelector('.clear-all-btn');
+            if (clearAllBtn) {
+                clearAllBtn.addEventListener('click', clearAllFilters);
+            }
+            
+            // Clear search history button
+            const clearHistoryBtn = document.querySelector('.clear-search-history-btn');
+            if (clearHistoryBtn) {
+                clearHistoryBtn.addEventListener('click', function() {
+                    if (window.EnhancedExternalAPI && window.EnhancedExternalAPI.clearSearchHistory) {
+                        window.EnhancedExternalAPI.clearSearchHistory();
+                    }
+                });
+            }
+            
+            // Modal close buttons (use event delegation for dynamically created modals)
+            document.addEventListener('click', function(event) {
+                if (event.target.classList.contains('close-modal-btn')) {
+                    const modal = event.target.closest('.modal') || event.target.closest('[style*="position: fixed"]');
+                    if (modal) {
+                        modal.remove();
+                    }
+                }
+                
+                if (event.target.classList.contains('modal-close-btn')) {
+                    if (window.BloodConnect && window.BloodConnect.closeModal) {
+                        window.BloodConnect.closeModal();
+                    }
+                }
+                
+                // Reload page buttons
+                if (event.target.classList.contains('reload-page-btn')) {
+                    location.reload();
+                }
+                
+                // Expand search buttons
+                if (event.target.classList.contains('expand-search-btn')) {
+                    if (typeof expandSearchRadius === 'function') {
+                        expandSearchRadius();
+                    }
+                }
+                
+                // Search all sources buttons
+                if (event.target.classList.contains('search-all-sources-btn')) {
+                    if (typeof searchAllSources === 'function') {
+                        searchAllSources();
+                    }
+                }
+                
+                // Contact donor buttons (for dynamically generated content)
+                if (event.target.classList.contains('contact-donor-btn')) {
+                    const phone = event.target.getAttribute('data-phone');
+                    const name = event.target.getAttribute('data-name');
+                    if (typeof contactDonor === 'function') {
+                        contactDonor(phone, name);
+                    }
+                }
+                
+                // Send message buttons (for dynamically generated content)
+                if (event.target.classList.contains('send-message-btn')) {
+                    const name = event.target.getAttribute('data-name');
+                    const urgency = event.target.getAttribute('data-urgency');
+                    if (typeof sendMessage === 'function') {
+                        sendMessage(name, urgency);
+                    }
+                }
+                
+                // Copy to clipboard buttons
+                if (event.target.classList.contains('copy-to-clipboard-btn')) {
+                    const messageText = document.getElementById('messageText');
+                    if (messageText && typeof copyToClipboard === 'function') {
+                        copyToClipboard(messageText.value);
+                    }
+                }
+                
+                // Send via email buttons
+                if (event.target.classList.contains('send-via-email-btn')) {
+                    const messageText = document.getElementById('messageText');
+                    if (messageText && typeof sendViaEmail === 'function') {
+                        sendViaEmail(messageText.value);
+                    }
+                }
+            });
+        }
+        
+        // Clear all filters function
+        function clearAllFilters() {
+            document.getElementById('searchForm').reset();
+            // Also clear any dynamic dropdowns
+            const selects = ['searchState', 'searchDistrict', 'searchCity'];
+            selects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    select.innerHTML = '<option value="">-----Select-----</option>';
+                    select.disabled = true;
+                }
+            });
+        }
+
+        // Initialize on page load - enhanced navigation and auth state
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Request page loaded - initializing enhanced navigation and auth state');
+            
+            // Check authentication status for form access
+            checkAuthenticationForForm();
+            
+            // Initialize scroll animations if elements exist
+            initializeScrollAnimations();
+            
+            // Add event listeners for CSP-compliant buttons
+            setupEventListeners();
+        });
+
+        // Scroll animations initialization
+        function initializeScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe elements with animation classes
+            const animatedElements = document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right, .scale-in');
+            animatedElements.forEach(element => {
+                observer.observe(element);
+            });
+        }
+
+        // Authentication check for form access
+        function checkAuthenticationForForm() {
+            const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+            const loginOverlay = document.getElementById('loginRequiredOverlay');
+            const formContainer = document.querySelector('.form-container');
+            const requestForm = document.getElementById('requestForm');
+            const authIndicator = document.getElementById('authIndicator');
+            const authStatus = document.getElementById('authStatus');
+
+            console.log('Checking authentication for form access...');
+            console.log('Token present:', !!token);
+            console.log('User data present:', !!userData);
+
+            if (!token || !userData) {
+                // User is not logged in - show overlay and disable form
+                console.log('❌ User not authenticated - showing login overlay');
+                loginOverlay.style.display = 'flex';
+                formContainer.classList.add('disabled');
+                
+                if (requestForm) {
+                    requestForm.style.pointerEvents = 'none';
+                    requestForm.style.opacity = '0.5';
+                }
+                
+                // Update auth indicator
+                if (authIndicator && authStatus) {
+                    authIndicator.style.display = 'flex';
+                    authIndicator.className = 'auth-indicator not-authenticated';
+                    authStatus.innerHTML = '<i class="fas fa-lock"></i> Please log in to submit blood requests';
+                }
+            } else {
+                // User is logged in - hide overlay and enable form
+                console.log('✅ User authenticated - enabling form access');
+                loginOverlay.style.display = 'none';
+                formContainer.classList.remove('disabled');
+                
+                if (requestForm) {
+                    requestForm.style.pointerEvents = 'auto';
+                    requestForm.style.opacity = '1';
+                }
+
+                // Update auth indicator
+                try {
+                    const user = JSON.parse(userData);
+                    if (authIndicator && authStatus) {
+                        authIndicator.style.display = 'flex';
+                        authIndicator.className = 'auth-indicator authenticated';
+                        authStatus.innerHTML = `<i class="fas fa-check-circle"></i> Logged in as ${user.firstName || user.email || 'User'}`;
+                    }
+                    
+                    // Pre-fill user information if available
+                    prefillUserData(user);
+                } catch (error) {
+                    console.warn('Error parsing user data:', error);
+                }
+            }
+        }
+
+        // Pre-fill user data in the form
+        function prefillUserData(user) {
+            console.log('Pre-filling user data:', user);
+            
+            if (user.phoneNumber) {
+                const contactNumberField = document.getElementById('contactNumber');
+                if (contactNumberField && !contactNumberField.value) {
+                    contactNumberField.value = user.phoneNumber;
+                }
+            }
+            
+            if (user.firstName && user.lastName) {
+                const contactPersonField = document.getElementById('contactPersonName');
+                if (contactPersonField && !contactPersonField.value) {
+                    contactPersonField.value = `${user.firstName} ${user.lastName}`;
+                }
+            }
+        }
+
+        // Re-check authentication when storage changes (e.g., user logs in/out)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'authToken' || e.key === 'userData') {
+                console.log('Auth state changed - rechecking form access');
+                checkAuthenticationForForm();
+            }
+        });
+
+        // Also check when page becomes visible (in case user logged in on another tab)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                checkAuthenticationForForm();
+            }
+        });
+    </script>
+
+    <!-- Include enhanced authentication check -->
+    <script>
+        // Additional authentication monitoring for real-time updates
+        setInterval(function() {
+            const currentToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+            const loginOverlay = document.getElementById('loginRequiredOverlay');
+            
+            if (!currentToken && loginOverlay && loginOverlay.style.display === 'none') {
+                console.log('🔄 Token expired - showing login overlay');
+                checkAuthenticationForForm();
+            }
+        }, 30000); // Check every 30 seconds
+    </script>
+    <!-- Scripts already loaded above - removing duplicates -->
+</body>
+</html>

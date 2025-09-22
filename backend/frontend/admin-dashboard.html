@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - BloodConnect</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-red: #e53e3e;
+            --primary-red-dark: #c53030;
+            --primary-red-light: #fc8181;
+            --accent-red: #fef5f5;
+            --white: #ffffff;
+            --gray-50: #f7fafc;
+            --gray-100: #edf2f7;
+            --gray-200: #e2e8f0;
+            --gray-600: #4a5568;
+            --gray-700: #2d3748;
+            --gray-800: #1a202c;
+            --gray-900: #171923;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--accent-red) 0%, var(--gray-50) 100%);
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(229, 62, 62, 0.1);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-red);
+            text-decoration: none;
+        }
+
+        .admin-logo i {
+            font-size: 1.8rem;
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.1); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px -5px rgba(229, 62, 62, 0.4);
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            margin-top: 100px;
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(229, 62, 62, 0.1);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--white);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .dashboard-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(229, 62, 62, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary-red);
+        }
+
+        .data-count {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+            font-weight: 400;
+            margin-left: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            box-shadow: 0 10px 25px -5px rgba(229, 62, 62, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-2px);
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            padding-left: 2.5rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 0.5rem;
+            background: var(--white);
+            font-size: 0.9rem;
+            min-width: 150px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .data-table th {
+            background: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.9rem;
+        }
+
+        .data-table tr:hover {
+            background: var(--gray-50);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            color: var(--gray-500);
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+            margin-right: 0.75rem;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-300);
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="header-container">
+            <a href="#" class="admin-logo">
+                <i class="fas fa-heart"></i>
+                <span>BloodConnect Admin</span>
+            </a>
+            <div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="totalUsers">-</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="totalDonations">-</div>
+                <div class="stat-label">Total Donations</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-hand-holding-medical"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="totalRequests">-</div>
+                <div class="stat-label">Blood Requests</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                </div>
+                <div class="stat-number" id="totalBloodUnits">-</div>
+                <div class="stat-label">Blood Units</div>
+            </div>
+        </div>
+
+        <!-- Users Management Section -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-users"></i>
+                    Users Management
+                    <span class="data-count" id="usersCount">(0 total)</span>
+                </h2>
+                <button class="btn btn-primary" onclick="loadUsers()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+            
+            <!-- Search and Filter -->
+            <div class="search-filter">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search users..." id="userSearch">
+                </div>
+                <select class="filter-select" id="roleFilter">
+                    <option value="">All Roles</option>
+                    <option value="donor">Donors</option>
+                    <option value="recipient">Recipients</option>
+                </select>
+            </div>
+            
+            <!-- Users Table -->
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Blood Group</th>
+                        <th>City</th>
+                        <th>Donations</th>
+                        <th>Requests</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr>
+                        <td colspan="10" class="loading">
+                            <i class="fas fa-spinner"></i>
+                            Loading users...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- ALL JAVASCRIPT EMBEDDED HERE -->
+    <script>
+        // API Configuration
+        const getAPIBaseURL = () => {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+            
+            console.log('🔧 Determining API URL:', { protocol, hostname, port });
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                const devApiUrl = 'http://localhost:3002/api';
+                console.log('🔧 Development API URL:', devApiUrl);
+                return devApiUrl;
+            }
+
+            const prodApiUrl = `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
+            console.log('🔧 Production API URL:', prodApiUrl);
+            return prodApiUrl;
+        };
+
+        // Debug logging function
+        function debugLog(message) {
+            console.log(`[AdminDashboard] ${message}`);
+        }
+
+        // Check admin authentication
+        function checkAdminAuthentication() {
+            debugLog('🔍 Checking admin authentication...');
+            
+            const adminStatus = localStorage.getItem('bloodconnect_admin');
+            const adminEmail = localStorage.getItem('admin_email');
+            const adminLoginTime = localStorage.getItem('admin_login_time');
+            
+            debugLog(`📱 LocalStorage admin status: ${adminStatus}`);
+            debugLog(`📧 LocalStorage admin email: ${adminEmail}`);
+            debugLog(`🕒 LocalStorage admin login time: ${adminLoginTime}`);
+            
+            if (adminStatus !== 'true') {
+                debugLog('❌ Not authenticated as admin, redirecting to login...');
+                setTimeout(() => {
+                    window.location.href = 'admin-login.html';
+                }, 100);
+                return false;
+            }
+            
+            if (adminLoginTime) {
+                const loginTime = new Date(adminLoginTime);
+                const currentTime = new Date();
+                const timeDiff = currentTime - loginTime;
+                const minutesDiff = timeDiff / (1000 * 60);
+                
+                debugLog(`⏱️ Session age: ${minutesDiff.toFixed(2)} minutes`);
+                
+                if (minutesDiff > 30) {
+                    debugLog('⏰ Session expired, logging out...');
+                    showNotification('Session expired. Please log in again.', 'error');
+                    logout();
+                    return false;
+                }
+            }
+            
+            debugLog('✅ Admin authenticated successfully!');
+            return true;
+        }
+
+        // Get auth headers for admin API calls
+        function getAdminAuthHeaders() {
+            const adminEmail = localStorage.getItem('admin_email');
+            return {
+                'Content-Type': 'application/json',
+                'x-admin-email': adminEmail || '',
+                'x-admin-auth': 'true'
+            };
+        }
+
+        // Load dashboard statistics
+        async function loadStats() {
+            try {
+                debugLog('Loading dashboard stats...');
+                const apiUrl = `${getAPIBaseURL()}/admin/dashboard-stats`;
+                debugLog(`API URL: ${apiUrl}`);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                debugLog(`Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugLog('Response data:', data);
+                
+                if (data.success) {
+                    const totalUsers = document.getElementById('totalUsers');
+                    const totalDonations = document.getElementById('totalDonations');
+                    const totalRequests = document.getElementById('totalRequests');
+                    const totalBloodUnits = document.getElementById('totalBloodUnits');
+                    
+                    if (totalUsers) totalUsers.textContent = data.data.totalUsers.toLocaleString();
+                    if (totalDonations) totalDonations.textContent = data.data.totalDonations.toLocaleString();
+                    if (totalRequests) totalRequests.textContent = data.data.totalRequests.toLocaleString();
+                    if (totalBloodUnits) totalBloodUnits.textContent = data.data.totalBloodUnits.toLocaleString();
+                } else {
+                    throw new Error(data.message || 'Failed to load statistics');
+                }
+            } catch (error) {
+                debugLog(`Error loading stats: ${error.message}`);
+                console.error('Error loading stats:', error);
+                
+                const totalUsers = document.getElementById('totalUsers');
+                const totalDonations = document.getElementById('totalDonations');
+                const totalRequests = document.getElementById('totalRequests');
+                const totalBloodUnits = document.getElementById('totalBloodUnits');
+                
+                if (totalUsers) totalUsers.textContent = 'Error';
+                if (totalDonations) totalDonations.textContent = 'Error';
+                if (totalRequests) totalRequests.textContent = 'Error';
+                if (totalBloodUnits) totalBloodUnits.textContent = 'Error';
+            }
+        }
+
+        // Load users
+        async function loadUsers(searchTerm = '', roleFilter = '', advancedFilters = {}, page = 1, limit = 20) {
+            const usersTableBody = document.getElementById('usersTableBody');
+            const usersCount = document.getElementById('usersCount');
+            
+            if (usersTableBody) {
+                usersTableBody.innerHTML = '<tr><td colspan="10" class="loading"><i class="fas fa-spinner"></i> Loading users...</td></tr>';
+            }
+
+            try {
+                debugLog('Loading users...');
+                let apiUrl = `${getAPIBaseURL()}/admin/users?page=${page}&limit=${limit}`;
+                
+                if (searchTerm) {
+                    apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+                }
+                if (roleFilter) {
+                    apiUrl += `&role=${encodeURIComponent(roleFilter)}`;
+                }
+                
+                debugLog(`API URL: ${apiUrl}`);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                
+                debugLog(`Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                debugLog('Users response data:', data);
+                
+                if (data.success) {
+                    displayUsers(data.data.users, usersTableBody);
+                    
+                    if (usersCount) {
+                        usersCount.textContent = `(${data.data.pagination?.total || data.data.users.length} total)`;
+                    }
+                } else {
+                    throw new Error(data.message || 'Failed to load users');
+                }
+            } catch (error) {
+                debugLog(`Error loading users: ${error.message}`);
+                console.error('Error loading users:', error);
+                
+                if (usersTableBody) {
+                    usersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="10" class="empty-state">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error loading users: ${error.message}</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        // Display users in table
+        function displayUsers(users, tableBody) {
+            if (!tableBody) return;
+            
+            if (!users || users.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <p>No users found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id || user._id}</td>
+                    <td>${user.firstName} ${user.lastName}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone || 'N/A'}</td>
+                    <td><span class="status-badge ${user.role === 'donor' ? 'status-active' : 'status-pending'}">${user.role}</span></td>
+                    <td>${user.bloodGroup || 'N/A'}</td>
+                    <td>${user.city || 'N/A'}</td>
+                    <td>${user.donationsCount || 0}</td>
+                    <td>${user.requestsCount || 0}</td>
+                    <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 0.5rem;
+                color: white;
+                font-weight: 600;
+                z-index: 1000;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+            
+            switch (type) {
+                case 'success':
+                    notification.style.background = '#38a169';
+                    break;
+                case 'error':
+                    notification.style.background = '#e53e3e';
+                    break;
+                case 'warning':
+                    notification.style.background = '#d69e2e';
+                    break;
+                default:
+                    notification.style.background = '#3182ce';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('bloodconnect_admin');
+            localStorage.removeItem('admin_email');
+            localStorage.removeItem('admin_login_time');
+            sessionStorage.removeItem('bloodconnect_admin');
+            sessionStorage.removeItem('admin_email');
+            sessionStorage.removeItem('admin_login_time');
+            window.location.href = 'admin-login.html';
+        }
+
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('🚀 Initializing admin dashboard...');
+            
+            if (!checkAdminAuthentication()) {
+                return;
+            }
+            
+            loadStats();
+            loadUsers();
+            
+            debugLog('✅ Admin dashboard initialized successfully!');
+        });
+
+        console.log('✅ Admin dashboard loaded successfully');
+    </script>
+</body>
+</html>

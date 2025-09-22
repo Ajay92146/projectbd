@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Popup Removal Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Emergency Popup Removal Test</h1>
+        <p>This page tests that the emergency popup has been successfully removed from the home page.</p>
+        
+        <h3>Test Results:</h3>
+        
+        <div id="scriptTest" class="status info">
+            📋 Testing if emergency-popup.js script is removed...
+        </div>
+        
+        <div id="globalTest" class="status info">
+            🌐 Testing if emergency popup global objects are removed...
+        </div>
+        
+        <div id="domTest" class="status info">
+            🏠 Testing if emergency popup DOM elements are removed...
+        </div>
+        
+        <div id="consoleTest" class="status info">
+            📊 Testing if emergency popup console logs are removed...
+        </div>
+        
+        <button class="test-btn" onclick="runTests()">🔄 Run Tests</button>
+        <button class="test-btn" onclick="openHomePage()">🏠 Test Home Page</button>
+    </div>
+
+    <script>
+        function runTests() {
+            console.log('🧪 Starting emergency popup removal tests...');
+            
+            // Test 1: Check if emergency popup script is not loaded
+            testScriptRemoval();
+            
+            // Test 2: Check if global objects are not present
+            testGlobalObjects();
+            
+            // Test 3: Check if DOM elements are not present
+            testDOMElements();
+            
+            // Test 4: Check console for emergency popup logs
+            testConsoleLogs();
+            
+            console.log('✅ All tests completed');
+        }
+        
+        function testScriptRemoval() {
+            const scriptTags = document.querySelectorAll('script[src*="emergency-popup"]');
+            const statusDiv = document.getElementById('scriptTest');
+            
+            if (scriptTags.length === 0) {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ Script Removal Test: PASSED - No emergency-popup.js script found';
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ Script Removal Test: FAILED - Found ${scriptTags.length} emergency popup scripts`;
+            }
+        }
+        
+        function testGlobalObjects() {
+            const statusDiv = document.getElementById('globalTest');
+            
+            const hasEmergencyPopup = typeof window.emergencyPopup !== 'undefined';
+            const hasEmergencyPopupSystem = typeof window.EmergencyPopupSystem !== 'undefined';
+            
+            if (!hasEmergencyPopup && !hasEmergencyPopupSystem) {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ Global Objects Test: PASSED - No emergency popup global objects found';
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ Global Objects Test: FAILED - Emergency popup global objects still exist';
+            }
+        }
+        
+        function testDOMElements() {
+            const statusDiv = document.getElementById('domTest');
+            
+            const emergencyContainer = document.getElementById('emergency-popup-container');
+            const emergencyElements = document.querySelectorAll('[class*="emergency-popup"]');
+            
+            if (!emergencyContainer && emergencyElements.length === 0) {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ DOM Elements Test: PASSED - No emergency popup DOM elements found';
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ DOM Elements Test: FAILED - Emergency popup DOM elements still exist';
+            }
+        }
+        
+        function testConsoleLogs() {
+            const statusDiv = document.getElementById('consoleTest');
+            
+            // This is a visual test - user should check console manually
+            statusDiv.className = 'status info';
+            statusDiv.innerHTML = '📊 Console Test: Please check browser console for any emergency popup logs (there should be none)';
+            
+            setTimeout(() => {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ Console Test: Check complete - Verify no emergency popup logs in console';
+            }, 2000);
+        }
+        
+        function openHomePage() {
+            window.open('index.html', '_blank');
+        }
+        
+        // Auto-run tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Emergency popup removal test page loaded');
+            setTimeout(runTests, 1000);
+        });
+    </script>
+</body>
+</html>

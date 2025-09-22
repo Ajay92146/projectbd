@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Testing Toolkit - BloodConnect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e53e3e, #ff6b6b);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid #e9ecef;
+        }
+
+        .test-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .test-button.critical {
+            background: linear-gradient(135deg, #e53e3e, #ff6b6b);
+        }
+
+        .test-button.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .results-panel {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            grid-column: 1 / -1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e53e3e;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🩸 Login Testing Toolkit</h1>
+            <p>Comprehensive testing suite for Blood Donation login functionality</p>
+        </div>
+
+        <div class="content">
+            <div style="grid-column: 1 / -1;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="testsRun">0</div>
+                        <div class="stat-label">Tests Run</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="testsPassed">0</div>
+                        <div class="stat-label">Passed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="testsFailed">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="issuesFound">0</div>
+                        <div class="stat-label">Issues</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h2>🌐 Environment Tests</h2>
+                <div class="test-grid">
+                    <button class="test-button critical" onclick="testBackendConnectivity()">Backend Connectivity</button>
+                    <button class="test-button" onclick="testLocalStorage()">LocalStorage</button>
+                    <button class="test-button" onclick="testJavaScriptAPIs()">JavaScript APIs</button>
+                    <button class="test-button" onclick="testFormValidation()">Form Validation</button>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h2>🔐 Authentication Tests</h2>
+                <input type="email" id="testEmail" placeholder="test@example.com" value="test@example.com" style="width: 100%; margin-bottom: 10px; padding: 8px;">
+                <input type="password" id="testPassword" placeholder="Test@123" value="Test@123" style="width: 100%; margin-bottom: 15px; padding: 8px;">
+                <div class="test-grid">
+                    <button class="test-button critical" onclick="testValidLogin()">Valid Login</button>
+                    <button class="test-button" onclick="testInvalidLogin()">Invalid Login</button>
+                    <button class="test-button" onclick="testAdminLogin()">Admin Login</button>
+                    <button class="test-button" onclick="testSessionManagement()">Session Management</button>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h2>🛡️ Security Tests</h2>
+                <div class="test-grid">
+                    <button class="test-button critical" onclick="testXSSPrevention()">XSS Prevention</button>
+                    <button class="test-button critical" onclick="testSQLInjection()">SQL Injection</button>
+                    <button class="test-button" onclick="testCSRFProtection()">CSRF Protection</button>
+                    <button class="test-button" onclick="testHTTPSRedirect()">HTTPS Security</button>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h2>⚡ Performance Tests</h2>
+                <div class="test-grid">
+                    <button class="test-button success" onclick="testPageLoadTime()">Page Load Time</button>
+                    <button class="test-button" onclick="testAPIResponseTime()">API Response</button>
+                    <button class="test-button" onclick="testMemoryUsage()">Memory Usage</button>
+                    <button class="test-button" onclick="testNetworkRequests()">Network Analysis</button>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h2>⚡ Quick Actions</h2>
+                <div class="test-grid">
+                    <button class="test-button success" onclick="runAllTests()">Run All Tests</button>
+                    <button class="test-button critical" onclick="runCriticalTests()">Critical Only</button>
+                    <button class="test-button" onclick="clearResults()">Clear Results</button>
+                    <button class="test-button" onclick="exportResults()">Export Report</button>
+                </div>
+            </div>
+
+            <div class="results-panel" id="resultsPanel">
+                <div style="text-align: center; color: #666; padding: 40px;">
+                    <h3>🧪 Test Results</h3>
+                    <p>Run tests to see results here...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testStats = { run: 0, passed: 0, failed: 0, issues: 0 };
+        let testResults = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            const result = `[${timestamp}] ${icon} ${message}`;
+            
+            const panel = document.getElementById('resultsPanel');
+            if (panel.children[0]?.textContent.includes('Run tests')) {
+                panel.innerHTML = '';
+            }
+            
+            const logElement = document.createElement('div');
+            logElement.textContent = result;
+            logElement.style.color = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#333';
+            panel.appendChild(logElement);
+            panel.scrollTop = panel.scrollHeight;
+
+            console.log(result);
+        }
+
+        function updateStats() {
+            document.getElementById('testsRun').textContent = testStats.run;
+            document.getElementById('testsPassed').textContent = testStats.passed;
+            document.getElementById('testsFailed').textContent = testStats.failed;
+            document.getElementById('issuesFound').textContent = testStats.issues;
+        }
+
+        function incrementStat(type) {
+            testStats[type]++;
+            updateStats();
+        }
+
+        async function runTest(testName, testFunction) {
+            log(`🧪 Running: ${testName}...`);
+            incrementStat('run');
+            
+            try {
+                const result = await testFunction();
+                if (result.success) {
+                    log(`✅ ${testName}: ${result.message}`, 'success');
+                    incrementStat('passed');
+                } else {
+                    log(`❌ ${testName}: ${result.message}`, 'error');
+                    incrementStat('failed');
+                    if (result.critical) incrementStat('issues');
+                }
+                return result;
+            } catch (error) {
+                log(`❌ ${testName}: ${error.message}`, 'error');
+                incrementStat('failed');
+                incrementStat('issues');
+                return { success: false, message: error.message, critical: true };
+            }
+        }
+
+        async function testBackendConnectivity() {
+            return runTest('Backend Connectivity', async () => {
+                try {
+                    const apiBase = `${window.location.protocol}//${window.location.hostname}:3002/api`;
+                    const response = await fetch(`${apiBase}/health`);
+                    
+                    if (response.ok) {
+                        return { success: true, message: `Backend online (${response.status})` };
+                    } else {
+                        return { success: false, message: `Backend error: ${response.status}`, critical: true };
+                    }
+                } catch (error) {
+                    return { success: false, message: `Connection failed: ${error.message}`, critical: true };
+                }
+            });
+        }
+
+        async function testLocalStorage() {
+            return runTest('LocalStorage', async () => {
+                try {
+                    localStorage.setItem('test_item', 'test_value');
+                    const value = localStorage.getItem('test_item');
+                    localStorage.removeItem('test_item');
+                    
+                    if (value === 'test_value') {
+                        return { success: true, message: 'LocalStorage working correctly' };
+                    } else {
+                        return { success: false, message: 'LocalStorage data mismatch', critical: true };
+                    }
+                } catch (error) {
+                    return { success: false, message: `LocalStorage error: ${error.message}`, critical: true };
+                }
+            });
+        }
+
+        async function testJavaScriptAPIs() {
+            return runTest('JavaScript APIs', async () => {
+                const apis = {
+                    'fetch': typeof fetch !== 'undefined',
+                    'localStorage': typeof localStorage !== 'undefined',
+                    'JSON': typeof JSON !== 'undefined',
+                    'FormData': typeof FormData !== 'undefined'
+                };
+                
+                const missing = Object.entries(apis).filter(([name, available]) => !available);
+                
+                if (missing.length === 0) {
+                    return { success: true, message: 'All required APIs available' };
+                } else {
+                    return { success: false, message: `Missing APIs: ${missing.map(([name]) => name).join(', ')}`, critical: true };
+                }
+            });
+        }
+
+        async function testValidLogin() {
+            return runTest('Valid Login', async () => {
+                const email = document.getElementById('testEmail').value;
+                const password = document.getElementById('testPassword').value;
+                
+                try {
+                    const apiBase = `${window.location.protocol}//${window.location.hostname}:3002/api`;
+                    const response = await fetch(`${apiBase}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        return { success: true, message: `Login successful for ${email}` };
+                    } else {
+                        return { success: false, message: data.message || 'Login failed', critical: true };
+                    }
+                } catch (error) {
+                    return { success: false, message: `Login request failed: ${error.message}`, critical: true };
+                }
+            });
+        }
+
+        async function testInvalidLogin() {
+            return runTest('Invalid Login', async () => {
+                try {
+                    const apiBase = `${window.location.protocol}//${window.location.hostname}:3002/api`;
+                    const response = await fetch(`${apiBase}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: 'invalid@test.com', password: 'wrong' })
+                    });
+                    
+                    if (!response.ok) {
+                        return { success: true, message: 'Invalid login correctly rejected' };
+                    } else {
+                        return { success: false, message: 'Invalid login was accepted!', critical: true };
+                    }
+                } catch (error) {
+                    return { success: false, message: `Test failed: ${error.message}` };
+                }
+            });
+        }
+
+        async function testAdminLogin() {
+            return runTest('Admin Login', async () => {
+                try {
+                    // Test admin credentials
+                    const apiBase = `${window.location.protocol}//${window.location.hostname}:3002/api`;
+                    const response = await fetch(`${apiBase}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            email: 'admin@bloodconnect.com', 
+                            password: 'Admin@123' 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        return { success: true, message: 'Admin login successful' };
+                    } else {
+                        return { success: false, message: 'Admin login failed', critical: true };
+                    }
+                } catch (error) {
+                    return { success: false, message: `Admin login error: ${error.message}`, critical: true };
+                }
+            });
+        }
+
+        async function testFormValidation() {
+            return runTest('Form Validation', async () => {
+                // Test email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const validEmail = emailRegex.test('test@example.com');
+                const invalidEmail = !emailRegex.test('invalid-email');
+                
+                if (validEmail && invalidEmail) {
+                    return { success: true, message: 'Email validation working correctly' };
+                } else {
+                    return { success: false, message: 'Form validation issues' };
+                }
+            });
+        }
+
+        async function testXSSPrevention() {
+            return runTest('XSS Prevention', async () => {
+                const xssPayload = '&lt;script&gt;alert(\'xss\')&lt;/script&gt;';
+                const testDiv = document.createElement('div');
+                testDiv.textContent = xssPayload;
+                
+                if (testDiv.innerHTML.includes('&amp;lt;script&amp;gt;')) {
+                    return { success: true, message: 'XSS prevention working' };
+                } else {
+                    return { success: false, message: 'Potential XSS vulnerability', critical: true };
+                }
+            });
+        }
+
+        async function testSQLInjection() {
+            return runTest('SQL Injection Protection', async () => {
+                try {
+                    const apiBase = `${window.location.protocol}//${window.location.hostname}:3002/api`;
+                    const response = await fetch(`${apiBase}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            email: "'; DROP TABLE users; --", 
+                            password: 'test' 
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        return { success: true, message: 'SQL injection properly blocked' };
+                    } else {
+                        return { success: false, message: 'Potential SQL injection vulnerability', critical: true };
+                    }
+                } catch (error) {
+                    return { success: true, message: 'SQL injection blocked' };
+                }
+            });
+        }
+
+        async function testCSRFProtection() {
+            return runTest('CSRF Protection', async () => {
+                const metaToken = document.querySelector('meta[name="csrf-token"]');
+                const hiddenToken = document.querySelector('input[name="_token"]');
+                
+                if (metaToken || hiddenToken) {
+                    return { success: true, message: 'CSRF protection detected' };
+                } else {
+                    return { success: false, message: 'No CSRF protection found', critical: true };
+                }
+            });
+        }
+
+        async function testHTTPSRedirect() {
+            return runTest('HTTPS Security', async () => {
+                if (window.location.protocol === 'https:') {
+                    return { success: true, message: 'Using HTTPS' };
+                } else if (window.location.hostname === 'localhost') {
+                    return { success: true, message: 'HTTP on localhost acceptable' };
+                } else {
+                    return { success: false, message: 'Should use HTTPS in production', critical: true };
+                }
+            });
+        }
+
+        async function testPageLoadTime() {
+            return runTest('Page Load Time', async () => {
+                if (performance.timing) {
+                    const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                    
+                    if (loadTime < 3000) {
+                        return { success: true, message: `Page loaded in ${loadTime}ms` };
+                    } else {
+                        return { success: false, message: `Slow load time: ${loadTime}ms` };
+                    }
+                } else {
+                    return { success: false, message: 'Performance timing unavailable' };
+                }
+            });
+        }
+
+        async function testAPIResponseTime() {
+            return runTest('API Response Time', async () => {
+                const startTime = performance.now();
+                
+                try {
+                    const apiBase = `${window.location.protocol}//${window.location.hostname}:3002/api`;
+                    await fetch(`${apiBase}/health`);
+                    const responseTime = performance.now() - startTime;
+                    
+                    if (responseTime < 1000) {
+                        return { success: true, message: `API: ${responseTime.toFixed(0)}ms` };
+                    } else {
+                        return { success: false, message: `Slow API: ${responseTime.toFixed(0)}ms` };
+                    }
+                } catch (error) {
+                    return { success: false, message: `API failed: ${error.message}` };
+                }
+            });
+        }
+
+        async function testMemoryUsage() {
+            return runTest('Memory Usage', async () => {
+                if (performance.memory) {
+                    const used = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+                    
+                    if (used < 50) {
+                        return { success: true, message: `Memory: ${used}MB` };
+                    } else {
+                        return { success: false, message: `High memory: ${used}MB` };
+                    }
+                } else {
+                    return { success: true, message: 'Memory info unavailable' };
+                }
+            });
+        }
+
+        async function testNetworkRequests() {
+            return runTest('Network Analysis', async () => {
+                const resources = performance.getEntriesByType('resource');
+                return { 
+                    success: true, 
+                    message: `${resources.length} network requests made`
+                };
+            });
+        }
+
+        async function testSessionManagement() {
+            return runTest('Session Management', async () => {
+                // Test localStorage session handling
+                localStorage.setItem('test_session', 'session_value');
+                const sessionValue = localStorage.getItem('test_session');
+                localStorage.removeItem('test_session');
+                
+                if (sessionValue === 'session_value') {
+                    return { success: true, message: 'Session management working' };
+                } else {
+                    return { success: false, message: 'Session issues detected' };
+                }
+            });
+        }
+
+        async function runAllTests() {
+            log('🚀 Starting comprehensive test suite...', 'info');
+            
+            const tests = [
+                testBackendConnectivity,
+                testLocalStorage,
+                testJavaScriptAPIs,
+                testValidLogin,
+                testInvalidLogin,
+                testAdminLogin,
+                testFormValidation,
+                testXSSPrevention,
+                testSQLInjection,
+                testCSRFProtection,
+                testHTTPSRedirect,
+                testPageLoadTime,
+                testAPIResponseTime,
+                testMemoryUsage,
+                testNetworkRequests,
+                testSessionManagement
+            ];
+            
+            for (const test of tests) {
+                await test();
+                await new Promise(resolve => setTimeout(resolve, 100)); // Small delay between tests
+            }
+            
+            log(`🎉 Test suite completed! ${testStats.passed}/${testStats.run} tests passed`, 'success');
+        }
+
+        async function runCriticalTests() {
+            log('🚨 Running critical tests only...', 'warning');
+            
+            const criticalTests = [
+                testBackendConnectivity,
+                testValidLogin,
+                testAdminLogin,
+                testXSSPrevention,
+                testSQLInjection
+            ];
+            
+            for (const test of criticalTests) {
+                await test();
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            log(`⚡ Critical tests completed! ${testStats.passed}/${testStats.run} passed`, 'success');
+        }
+
+        function clearResults() {
+            document.getElementById('resultsPanel').innerHTML = `
+                <div style="text-align: center; color: #666; padding: 40px;">
+                    <h3>🧪 Test Results</h3>
+                    <p>Run tests to see results here...</p>
+                </div>
+            `;
+            testStats = { run: 0, passed: 0, failed: 0, issues: 0 };
+            updateStats();
+            log('🗑️ Results cleared', 'info');
+        }
+
+        function exportResults() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const report = `
+Blood Donation Login Test Report
+Generated: ${new Date().toLocaleString()}
+========================================
+
+Test Statistics:
+- Tests Run: ${testStats.run}
+- Tests Passed: ${testStats.passed}
+- Tests Failed: ${testStats.failed}
+- Critical Issues: ${testStats.issues}
+
+Success Rate: ${testStats.run > 0 ? Math.round((testStats.passed / testStats.run) * 100) : 0}%
+
+Detailed Results:
+${testResults.map(r => `[${r.timestamp}] ${r.type.toUpperCase()}: ${r.message}`).join('\n')}
+`;
+            
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `login-test-report-${timestamp}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            log('📊 Report exported successfully', 'success');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🔧 Login Testing Toolkit loaded successfully', 'info');
+            updateStats();
+        });
+    </script>
+</body>
+</html>

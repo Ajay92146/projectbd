@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #007cba;
+            background: #f0f8ff;
+        }
+        .success {
+            border-left-color: #46b450;
+            background: #edfaef;
+        }
+        .error {
+            border-left-color: #dc3232;
+            background: #fdf8f8;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Admin Login Page Test</h1>
+        
+        <div class="test-section">
+            <h2>Functionality Tests</h2>
+            <button onclick="testFunctions()">Test Required Functions</button>
+            <button onclick="testFormElements()">Test Form Elements</button>
+            <button onclick="testValidation()">Test Validation Functions</button>
+        </div>
+        
+        <div id="results"></div>
+        
+        <script>
+            function displayResult(message, isSuccess = true) {
+                const resultsDiv = document.getElementById('results');
+                const className = isSuccess ? 'success' : 'error';
+                resultsDiv.innerHTML += `<div class="test-section ${className}">${message}</div>`;
+            }
+            
+            function testFunctions() {
+                document.getElementById('results').innerHTML = '';
+                
+                const functions = [
+                    { name: 'toggleAdminPassword', func: window.toggleAdminPassword },
+                    { name: 'processAdminLogin', func: window.processAdminLogin },
+                    { name: 'checkPasswordStrength', func: window.checkPasswordStrength },
+                    { name: 'validateEmail', func: window.validateEmail },
+                    { name: 'validatePassword', func: window.validatePassword },
+                    { name: 'checkExistingAdminLogin', func: window.checkExistingAdminLogin }
+                ];
+                
+                functions.forEach(({ name, func }) => {
+                    if (typeof func === 'function') {
+                        displayResult(`✅ ${name} function exists`, true);
+                    } else {
+                        displayResult(`❌ ${name} function is missing`, false);
+                    }
+                });
+            }
+            
+            function testFormElements() {
+                document.getElementById('results').innerHTML = '';
+                
+                const elements = [
+                    { id: 'adminLoginForm', name: 'Login Form' },
+                    { id: 'adminEmail', name: 'Email Input' },
+                    { id: 'adminPassword', name: 'Password Input' },
+                    { id: 'rememberMe', name: 'Remember Me Checkbox' },
+                    { id: 'adminLoginBtn', name: 'Login Button' },
+                    { id: 'strengthMeter', name: 'Password Strength Meter' },
+                    { id: 'strengthText', name: 'Password Strength Text' }
+                ];
+                
+                elements.forEach(({ id, name }) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        displayResult(`✅ ${name} element found`, true);
+                    } else {
+                        displayResult(`❌ ${name} element missing`, false);
+                    }
+                });
+            }
+            
+            function testValidation() {
+                document.getElementById('results').innerHTML = '';
+                
+                // Test email validation
+                const validEmail = 'test@example.com';
+                const invalidEmail = 'invalid-email';
+                
+                if (window.validateEmail && typeof window.validateEmail === 'function') {
+                    const validResult = window.validateEmail(validEmail);
+                    const invalidResult = window.validateEmail(invalidEmail);
+                    
+                    if (validResult === true && invalidResult === false) {
+                        displayResult(`✅ Email validation working correctly`, true);
+                    } else {
+                        displayResult(`❌ Email validation not working correctly`, false);
+                    }
+                } else {
+                    displayResult(`❌ validateEmail function not available`, false);
+                }
+                
+                // Test password validation
+                const validPassword = 'ValidPass123!';
+                const invalidPassword = 'weak';
+                
+                if (window.validatePassword && typeof window.validatePassword === 'function') {
+                    const validResult = window.validatePassword(validPassword);
+                    const invalidResult = window.validatePassword(invalidPassword);
+                    
+                    if (validResult === true && invalidResult === false) {
+                        displayResult(`✅ Password validation working correctly`, true);
+                    } else {
+                        displayResult(`❌ Password validation not working correctly`, false);
+                    }
+                } else {
+                    displayResult(`❌ validatePassword function not available`, false);
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>

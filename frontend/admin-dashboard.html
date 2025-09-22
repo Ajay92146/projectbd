@@ -108,7 +108,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -354,11 +354,7 @@
                 <span>BloodConnect Admin</span>
             </a>
             <div>
-                <button class="btn btn-primary" onclick="refreshAllData()" style="margin-right: 10px;">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh All
-                </button>
-                <button class="logout-btn" onclick="logout()">
+                <button class="logout-btn" id="logoutBtn">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
                 </button>
@@ -409,26 +405,6 @@
                 <div class="stat-number" id="totalBloodUnits">-</div>
                 <div class="stat-label">Blood Units</div>
             </div>
-            
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-donate"></i>
-                    </div>
-                </div>
-                <div class="stat-number" id="totalUserDonations">-</div>
-                <div class="stat-label">User Donations</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-procedures"></i>
-                    </div>
-                </div>
-                <div class="stat-number" id="totalUserRequests">-</div>
-                <div class="stat-label">User Requests</div>
-            </div>
         </div>
 
         <!-- Users Management Section -->
@@ -439,7 +415,7 @@
                     Users Management
                     <span class="data-count" id="usersCount">(0 total)</span>
                 </h2>
-                <button class="btn btn-primary" onclick="loadUsers()">
+                <button class="btn btn-primary" id="refreshUsersBtn">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
@@ -453,47 +429,30 @@
                 </div>
                 <select class="filter-select" id="roleFilter">
                     <option value="">All Roles</option>
-                    <option value="donor">Donors</option>
-                    <option value="recipient">Recipients</option>
+                    <option value="donor">Donor</option>
+                    <option value="recipient">Recipient</option>
+                    <option value="admin">Admin</option>
                 </select>
             </div>
             
             <!-- Users Table -->
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Role</th>
-                        <th>Blood Group</th>
-                        <th>City</th>
-                        <th>Donations</th>
-                        <th>Requests</th>
-                        <th>Joined</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                    <tr>
-                        <td colspan="10" class="loading">
-                            <i class="fas fa-spinner"></i>
-                            Loading users...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div id="usersTableContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    Loading users...
+                </div>
+            </div>
         </div>
 
-        <!-- User Donations Section -->
+        <!-- Blood Donations Section -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2 class="section-title">
-                    <i class="fas fa-donate"></i>
-                    User Donations
-                    <span class="data-count" id="userDonationsCount">(0 total)</span>
+                    <i class="fas fa-tint"></i>
+                    Blood Donations
+                    <span class="data-count" id="donationsCount">(0 total)</span>
                 </h2>
-                <button class="btn btn-primary" onclick="loadUserDonations()">
+                <button class="btn btn-primary" id="refreshDonationsBtn">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
@@ -505,15 +464,8 @@
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" class="search-input" placeholder="Search donations..." id="donationSearch">
                 </div>
-                <select class="filter-select" id="donationStatusFilter">
-                    <option value="">All Status</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Deferred">Deferred</option>
-                </select>
-                <select class="filter-select" id="donationBloodGroupFilter">
-                    <option value="">All Blood Groups</option>
+                <select class="filter-select" id="bloodTypeFilter">
+                    <option value="">All Blood Types</option>
                     <option value="A+">A+</option>
                     <option value="A-">A-</option>
                     <option value="B+">B+</option>
@@ -525,42 +477,24 @@
                 </select>
             </div>
             
-            <!-- User Donations Table -->
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Donor Name</th>
-                        <th>Blood Group</th>
-                        <th>Units</th>
-                        <th>Donation Date</th>
-                        <th>Center</th>
-                        <th>City</th>
-                        <th>Status</th>
-                        <th>Certificate</th>
-                        <th>Next Eligible</th>
-                    </tr>
-                </thead>
-                <tbody id="userDonationsTableBody">
-                    <tr>
-                        <td colspan="10" class="loading">
-                            <i class="fas fa-spinner"></i>
-                            Loading user donations...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Donations Table -->
+            <div id="donationsTableContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    Loading donations...
+                </div>
+            </div>
         </div>
 
-        <!-- User Requests Section -->
+        <!-- Blood Requests Section -->
         <div class="dashboard-section">
             <div class="section-header">
                 <h2 class="section-title">
-                    <i class="fas fa-procedures"></i>
-                    User Requests
-                    <span class="data-count" id="userRequestsCount">(0 total)</span>
+                    <i class="fas fa-hand-holding-medical"></i>
+                    Blood Requests
+                    <span class="data-count" id="requestsCount">(0 total)</span>
                 </h2>
-                <button class="btn btn-primary" onclick="loadUserRequests()">
+                <button class="btn btn-primary" id="refreshRequestsBtn">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
@@ -574,689 +508,373 @@
                 </div>
                 <select class="filter-select" id="requestStatusFilter">
                     <option value="">All Status</option>
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Partially Fulfilled">Partially Fulfilled</option>
-                    <option value="Fulfilled">Fulfilled</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Expired">Expired</option>
-                </select>
-                <select class="filter-select" id="requestUrgencyFilter">
-                    <option value="">All Urgency</option>
-                    <option value="Critical">Critical</option>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                </select>
-                <select class="filter-select" id="requestBloodGroupFilter">
-                    <option value="">All Blood Groups</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
+                    <option value="pending">Pending</option>
+                    <option value="fulfilled">Fulfilled</option>
+                    <option value="expired">Expired</option>
                 </select>
             </div>
             
-            <!-- User Requests Table -->
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>User Name</th>
-                        <th>Patient Name</th>
-                        <th>Blood Group</th>
-                        <th>Units Required</th>
-                        <th>Units Fulfilled</th>
-                        <th>Urgency</th>
-                        <th>Hospital</th>
-                        <th>Status</th>
-                        <th>Request Date</th>
-                    </tr>
-                </thead>
-                <tbody id="userRequestsTableBody">
-                    <tr>
-                        <td colspan="10" class="loading">
-                            <i class="fas fa-spinner"></i>
-                            Loading user requests...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Requests Table -->
+            <div id="requestsTableContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    Loading requests...
+                </div>
+            </div>
         </div>
+        
     </main>
 
-    <!-- ALL JAVASCRIPT EMBEDDED HERE -->
     <script>
-        // API Configuration
-        const getAPIBaseURL = () => {
-            const protocol = window.location.protocol;
-            const hostname = window.location.hostname;
-            const port = window.location.port;
-            
-            console.log('🔧 Determining API URL:', { protocol, hostname, port });
-            
-            if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                const devApiUrl = 'http://localhost:3002/api';
-                console.log('🔧 Development API URL:', devApiUrl);
-                return devApiUrl;
-            }
+        // All JavaScript moved to external script block to comply with CSP
+        
+        // Global variables for data storage
+        let usersData = [];
+        let donationsData = [];
+        let requestsData = [];
 
-            const prodApiUrl = `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
-            console.log('🔧 Production API URL:', prodApiUrl);
-            return prodApiUrl;
-        };
+        // Event listeners setup
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all event listeners
+            initializeEventListeners();
+            
+            // Initialize dashboard
+            initializeDashboard();
+        });
 
-        // Debug logging function
-        function debugLog(message) {
-            console.log(`[AdminDashboard] ${message}`);
+        function initializeEventListeners() {
+            // Header buttons
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            // Refresh buttons
+            document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
+            document.getElementById('refreshDonationsBtn').addEventListener('click', loadDonations);
+            document.getElementById('refreshRequestsBtn').addEventListener('click', loadRequests);
+            
+            // Search and filter inputs
+            document.getElementById('userSearch').addEventListener('input', filterUsers);
+            document.getElementById('roleFilter').addEventListener('change', filterUsers);
+            
+            document.getElementById('donationSearch').addEventListener('input', filterDonations);
+            document.getElementById('bloodTypeFilter').addEventListener('change', filterDonations);
+            
+            document.getElementById('requestSearch').addEventListener('input', filterRequests);
+            document.getElementById('requestStatusFilter').addEventListener('change', filterRequests);
         }
 
-        // Check admin authentication
-        function checkAdminAuthentication() {
-            debugLog('🔍 Checking admin authentication...');
-            
-            const adminStatus = localStorage.getItem('bloodconnect_admin');
-            const adminEmail = localStorage.getItem('admin_email');
-            const adminLoginTime = localStorage.getItem('admin_login_time');
-            
-            debugLog(`📱 LocalStorage admin status: ${adminStatus}`);
-            debugLog(`📧 LocalStorage admin email: ${adminEmail}`);
-            debugLog(`🕒 LocalStorage admin login time: ${adminLoginTime}`);
-            
-            if (adminStatus !== 'true') {
-                debugLog('❌ Not authenticated as admin, redirecting to login...');
-                setTimeout(() => {
-                    window.location.href = 'admin-login.html';
-                }, 100);
-                return false;
-            }
-            
-            if (adminLoginTime) {
-                const loginTime = new Date(adminLoginTime);
-                const currentTime = new Date();
-                const timeDiff = currentTime - loginTime;
-                const minutesDiff = timeDiff / (1000 * 60);
-                
-                debugLog(`⏱️ Session age: ${minutesDiff.toFixed(2)} minutes`);
-                
-                if (minutesDiff > 30) {
-                    debugLog('⏰ Session expired, logging out...');
-                    showNotification('Session expired. Please log in again.', 'error');
-                    logout();
-                    return false;
-                }
-            }
-            
-            debugLog('✅ Admin authenticated successfully!');
-            return true;
-        }
-
-        // Get auth headers for admin API calls
-        function getAdminAuthHeaders() {
-            const adminEmail = localStorage.getItem('admin_email');
-            return {
-                'Content-Type': 'application/json',
-                'x-admin-email': adminEmail || '',
-                'x-admin-auth': 'true'
-            };
-        }
-
-        // Load dashboard statistics
-        async function loadStats() {
-            try {
-                debugLog('Loading dashboard stats...');
-                const apiUrl = `${getAPIBaseURL()}/admin/dashboard-stats`;
-                debugLog(`API URL: ${apiUrl}`);
-                
-                const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    headers: getAdminAuthHeaders()
-                });
-                debugLog(`Response status: ${response.status}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                debugLog('Response data:', data);
-                
-                if (data.success) {
-                    const totalUsers = document.getElementById('totalUsers');
-                    const totalDonations = document.getElementById('totalDonations');
-                    const totalRequests = document.getElementById('totalRequests');
-                    const totalBloodUnits = document.getElementById('totalBloodUnits');
-                    const totalUserDonations = document.getElementById('totalUserDonations');
-                    const totalUserRequests = document.getElementById('totalUserRequests');
-                    
-                    if (totalUsers) totalUsers.textContent = data.data.totalUsers.toLocaleString();
-                    if (totalDonations) totalDonations.textContent = data.data.totalDonations.toLocaleString();
-                    if (totalRequests) totalRequests.textContent = data.data.totalRequests.toLocaleString();
-                    if (totalBloodUnits) totalBloodUnits.textContent = data.data.totalBloodUnits.toLocaleString();
-                    if (totalUserDonations) totalUserDonations.textContent = data.data.totalUserDonations.toLocaleString();
-                    if (totalUserRequests) totalUserRequests.textContent = data.data.totalUserRequests.toLocaleString();
-                } else {
-                    throw new Error(data.message || 'Failed to load statistics');
-                }
-            } catch (error) {
-                debugLog(`Error loading stats: ${error.message}`);
-                console.error('Error loading stats:', error);
-                
-                const totalUsers = document.getElementById('totalUsers');
-                const totalDonations = document.getElementById('totalDonations');
-                const totalRequests = document.getElementById('totalRequests');
-                const totalBloodUnits = document.getElementById('totalBloodUnits');
-                const totalUserDonations = document.getElementById('totalUserDonations');
-                const totalUserRequests = document.getElementById('totalUserRequests');
-                
-                if (totalUsers) totalUsers.textContent = 'Error';
-                if (totalDonations) totalDonations.textContent = 'Error';
-                if (totalRequests) totalRequests.textContent = 'Error';
-                if (totalBloodUnits) totalBloodUnits.textContent = 'Error';
-                if (totalUserDonations) totalUserDonations.textContent = 'Error';
-                if (totalUserRequests) totalUserRequests.textContent = 'Error';
-            }
-        }
-
-        // Load users
-        async function loadUsers(searchTerm = '', roleFilter = '', advancedFilters = {}, page = 1, limit = 20) {
-            const usersTableBody = document.getElementById('usersTableBody');
-            const usersCount = document.getElementById('usersCount');
-            
-            if (usersTableBody) {
-                usersTableBody.innerHTML = '<tr><td colspan="10" class="loading"><i class="fas fa-spinner"></i> Loading users...</td></tr>';
-            }
-
-            try {
-                debugLog('Loading users...');
-                let apiUrl = `${getAPIBaseURL()}/admin/users?page=${page}&limit=${limit}`;
-                
-                if (searchTerm) {
-                    apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
-                }
-                if (roleFilter) {
-                    apiUrl += `&role=${encodeURIComponent(roleFilter)}`;
-                }
-                
-                debugLog(`API URL: ${apiUrl}`);
-                
-                const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    headers: getAdminAuthHeaders()
-                });
-                
-                debugLog(`Response status: ${response.status}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                debugLog('Users response data:', data);
-                
-                if (data.success) {
-                    displayUsers(data.data.users, usersTableBody);
-                    
-                    if (usersCount) {
-                        usersCount.textContent = `(${data.data.pagination?.total || data.data.users.length} total)`;
-                    }
-                } else {
-                    throw new Error(data.message || 'Failed to load users');
-                }
-            } catch (error) {
-                debugLog(`Error loading users: ${error.message}`);
-                console.error('Error loading users:', error);
-                
-                if (usersTableBody) {
-                    usersTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="10" class="empty-state">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <p>Error loading users: ${error.message}</p>
-                            </td>
-                        </tr>
-                    `;
-                }
-            }
-        }
-
-        // Display users in table
-        function displayUsers(users, tableBody) {
-            if (!tableBody) return;
-            
-            if (!users || users.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="10" class="empty-state">
-                            <i class="fas fa-users"></i>
-                            <p>No users found</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tableBody.innerHTML = users.map(user => `
-                <tr>
-                    <td>${user.id || user._id}</td>
-                    <td>${user.firstName} ${user.lastName}</td>
-                    <td>${user.email}</td>
-                    <td>${user.phone || 'N/A'}</td>
-                    <td><span class="status-badge ${user.role === 'donor' ? 'status-active' : 'status-pending'}">${user.role}</span></td>
-                    <td>${user.bloodGroup || 'N/A'}</td>
-                    <td>${user.city || 'N/A'}</td>
-                    <td>${user.donationsCount || 0}</td>
-                    <td>${user.requestsCount || 0}</td>
-                    <td>${new Date(user.createdAt).toLocaleDateString()}</td>
-                </tr>
-            `).join('');
-        }
-
-        // Load user donations
-        async function loadUserDonations(searchTerm = '', statusFilter = '', bloodGroupFilter = '', page = 1, limit = 20) {
-            const userDonationsTableBody = document.getElementById('userDonationsTableBody');
-            const userDonationsCount = document.getElementById('userDonationsCount');
-            
-            if (userDonationsTableBody) {
-                userDonationsTableBody.innerHTML = '<tr><td colspan="10" class="loading"><i class="fas fa-spinner"></i> Loading user donations...</td></tr>';
-            }
-
-            try {
-                debugLog('Loading user donations...');
-                let apiUrl = `${getAPIBaseURL()}/admin/user-donations?page=${page}&limit=${limit}`;
-                
-                if (searchTerm) {
-                    apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
-                }
-                if (statusFilter) {
-                    apiUrl += `&status=${encodeURIComponent(statusFilter)}`;
-                }
-                if (bloodGroupFilter) {
-                    apiUrl += `&bloodGroup=${encodeURIComponent(bloodGroupFilter)}`;
-                }
-                
-                debugLog(`API URL: ${apiUrl}`);
-                
-                const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    headers: getAdminAuthHeaders()
-                });
-                
-                debugLog(`Response status: ${response.status}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                debugLog('User donations response data:', data);
-                
-                if (data.success) {
-                    displayUserDonations(data.data.userDonations, userDonationsTableBody);
-                    
-                    if (userDonationsCount) {
-                        userDonationsCount.textContent = `(${data.data.pagination?.total || data.data.userDonations.length} total)`;
-                    }
-                } else {
-                    throw new Error(data.message || 'Failed to load user donations');
-                }
-            } catch (error) {
-                debugLog(`Error loading user donations: ${error.message}`);
-                console.error('Error loading user donations:', error);
-                
-                if (userDonationsTableBody) {
-                    userDonationsTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="10" class="empty-state">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <p>Error loading user donations: ${error.message}</p>
-                            </td>
-                        </tr>
-                    `;
-                }
-            }
-        }
-
-        // Display user donations in table
-        function displayUserDonations(userDonations, tableBody) {
-            if (!tableBody) return;
-            
-            if (!userDonations || userDonations.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="10" class="empty-state">
-                            <i class="fas fa-donate"></i>
-                            <p>No user donations found</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tableBody.innerHTML = userDonations.map(donation => `
-                <tr>
-                    <td>${donation._id}</td>
-                    <td>${donation.userId ? `${donation.userId.firstName} ${donation.userId.lastName}` : 'N/A'}</td>
-                    <td>${donation.bloodGroup}</td>
-                    <td>${donation.unitsCollected}</td>
-                    <td>${new Date(donation.donationDate).toLocaleDateString()}</td>
-                    <td>${donation.donationCenter?.name || 'N/A'}</td>
-                    <td>${donation.donationCenter?.city || 'N/A'}</td>
-                    <td><span class="status-badge ${donation.status === 'Completed' ? 'status-active' : 'status-pending'}">${donation.status}</span></td>
-                    <td>${donation.certificateNumber || 'N/A'}</td>
-                    <td>${new Date(donation.nextEligibleDate).toLocaleDateString()}</td>
-                </tr>
-            `).join('');
-        }
-
-        // Load user requests
-        async function loadUserRequests(searchTerm = '', statusFilter = '', urgencyFilter = '', bloodGroupFilter = '', page = 1, limit = 20) {
-            const userRequestsTableBody = document.getElementById('userRequestsTableBody');
-            const userRequestsCount = document.getElementById('userRequestsCount');
-            
-            if (userRequestsTableBody) {
-                userRequestsTableBody.innerHTML = '<tr><td colspan="10" class="loading"><i class="fas fa-spinner"></i> Loading user requests...</td></tr>';
-            }
-
-            try {
-                debugLog('Loading user requests...');
-                let apiUrl = `${getAPIBaseURL()}/admin/user-requests?page=${page}&limit=${limit}`;
-                
-                if (searchTerm) {
-                    apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
-                }
-                if (statusFilter) {
-                    apiUrl += `&status=${encodeURIComponent(statusFilter)}`;
-                }
-                if (urgencyFilter) {
-                    apiUrl += `&urgency=${encodeURIComponent(urgencyFilter)}`;
-                }
-                if (bloodGroupFilter) {
-                    apiUrl += `&bloodGroup=${encodeURIComponent(bloodGroupFilter)}`;
-                }
-                
-                debugLog(`API URL: ${apiUrl}`);
-                
-                const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    headers: getAdminAuthHeaders()
-                });
-                
-                debugLog(`Response status: ${response.status}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                debugLog('User requests response data:', data);
-                
-                if (data.success) {
-                    displayUserRequests(data.data.userRequests, userRequestsTableBody);
-                    
-                    if (userRequestsCount) {
-                        userRequestsCount.textContent = `(${data.data.pagination?.total || data.data.userRequests.length} total)`;
-                    }
-                } else {
-                    throw new Error(data.message || 'Failed to load user requests');
-                }
-            } catch (error) {
-                debugLog(`Error loading user requests: ${error.message}`);
-                console.error('Error loading user requests:', error);
-                
-                if (userRequestsTableBody) {
-                    userRequestsTableBody.innerHTML = `
-                        <tr>
-                            <td colspan="10" class="empty-state">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <p>Error loading user requests: ${error.message}</p>
-                            </td>
-                        </tr>
-                    `;
-                }
-            }
-        }
-
-        // Display user requests in table
-        function displayUserRequests(userRequests, tableBody) {
-            if (!tableBody) return;
-            
-            if (!userRequests || userRequests.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="10" class="empty-state">
-                            <i class="fas fa-procedures"></i>
-                            <p>No user requests found</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tableBody.innerHTML = userRequests.map(request => `
-                <tr>
-                    <td>${request._id}</td>
-                    <td>${request.userId ? `${request.userId.firstName} ${request.userId.lastName}` : 'N/A'}</td>
-                    <td>${request.patientName}</td>
-                    <td>${request.bloodGroup}</td>
-                    <td>${request.requiredUnits}</td>
-                    <td>${request.fulfilledUnits}</td>
-                    <td><span class="status-badge ${request.urgency === 'Critical' || request.urgency === 'High' ? 'status-pending' : 'status-active'}">${request.urgency}</span></td>
-                    <td>${request.hospital?.name || 'N/A'}</td>
-                    <td><span class="status-badge ${request.status === 'Fulfilled' ? 'status-active' : 'status-pending'}">${request.status}</span></td>
-                    <td>${new Date(request.requestDate).toLocaleDateString()}</td>
-                </tr>
-            `).join('');
-        }
-
-        // Show notification
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification notification-${type}`;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 1rem 1.5rem;
-                border-radius: 0.5rem;
-                color: white;
-                font-weight: 600;
-                z-index: 1000;
-                opacity: 0;
-                transform: translateX(100%);
-                transition: all 0.3s ease;
-            `;
-            
-            switch (type) {
-                case 'success':
-                    notification.style.background = '#38a169';
-                    break;
-                case 'error':
-                    notification.style.background = '#e53e3e';
-                    break;
-                case 'warning':
-                    notification.style.background = '#d69e2e';
-                    break;
-                default:
-                    notification.style.background = '#3182ce';
-            }
-            
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.opacity = '1';
-                notification.style.transform = 'translateX(0)';
-            }, 100);
-            
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 5000);
-        }
-
-        // Logout function
+        // Dashboard functions
         function logout() {
-            debugLog('🔐 Starting logout process...');
+            if (confirm('Are you sure you want to logout?')) {
+                console.log('Logging out...');
+                // Add your logout logic here
+                // Example: window.location.href = '/login';
+            }
+        }
+
+        function initializeDashboard() {
+            // Load all initial data
+            loadStatistics();
+            loadUsers();
+            loadDonations();
+            loadRequests();
+        }
+
+        function loadStatistics() {
+            // Load dashboard statistics
+            // Replace with your actual API calls
+            document.getElementById('totalUsers').textContent = '0';
+            document.getElementById('totalDonations').textContent = '0';
+            document.getElementById('totalRequests').textContent = '0';
+            document.getElementById('totalBloodUnits').textContent = '0';
+        }
+
+        // Users Management Functions
+        function loadUsers() {
+            const container = document.getElementById('usersTableContainer');
+            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading users...</div>';
             
-            // Clear all admin session data
-            localStorage.removeItem('bloodconnect_admin');
-            localStorage.removeItem('admin_email');
-            localStorage.removeItem('admin_login_time');
-            sessionStorage.removeItem('bloodconnect_admin');
-            sessionStorage.removeItem('admin_email');
-            sessionStorage.removeItem('admin_login_time');
-            
-            debugLog('✅ Session data cleared, redirecting to login...');
-            
-            // Show logout message
-            showNotification('Logged out successfully!', 'success');
-            
-            // Redirect after a short delay
+            // Simulate API call - replace with your actual API
             setTimeout(() => {
-                window.location.href = 'admin-login.html';
+                // Example data structure - replace with your actual data
+                usersData = [
+                    {
+                        id: 1,
+                        name: 'John Doe',
+                        email: 'john@example.com',
+                        role: 'donor',
+                        bloodType: 'O+',
+                        status: 'active'
+                    }
+                    // Add more sample data or load from API
+                ];
+                displayUsers(usersData);
             }, 1000);
         }
 
-        // Refresh all data function
-        function refreshAllData() {
-            debugLog('🔄 Refreshing all dashboard data...');
-            loadStats();
-            loadUsers();
-            loadUserDonations();
-            loadUserRequests();
-            showNotification('Data refreshed successfully!', 'success');
-        }
-
-        // Initialize dashboard when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            debugLog('🚀 Initializing admin dashboard...');
+        function displayUsers(users) {
+            const container = document.getElementById('usersTableContainer');
+            const usersCount = document.getElementById('usersCount');
             
-            if (!checkAdminAuthentication()) {
+            usersCount.textContent = `(${users.length} total)`;
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No users found</p>
+                    </div>
+                `;
                 return;
             }
-            
-            // Load all data
-            loadStats();
-            loadUsers();
-            loadUserDonations();
-            loadUserRequests();
-            
-            // Set up search event listeners
-            const userSearch = document.getElementById('userSearch');
-            if (userSearch) {
-                userSearch.addEventListener('input', (e) => {
-                    const searchTerm = e.target.value;
-                    const roleFilter = document.getElementById('roleFilter').value;
-                    loadUsers(searchTerm, roleFilter);
-                });
-            }
-            
-            const roleFilter = document.getElementById('roleFilter');
-            if (roleFilter) {
-                roleFilter.addEventListener('change', (e) => {
-                    const roleFilter = e.target.value;
-                    const searchTerm = document.getElementById('userSearch').value;
-                    loadUsers(searchTerm, roleFilter);
-                });
-            }
-            
-            // Set up donation search event listeners
-            const donationSearch = document.getElementById('donationSearch');
-            if (donationSearch) {
-                donationSearch.addEventListener('input', (e) => {
-                    const searchTerm = e.target.value;
-                    const statusFilter = document.getElementById('donationStatusFilter').value;
-                    const bloodGroupFilter = document.getElementById('donationBloodGroupFilter').value;
-                    loadUserDonations(searchTerm, statusFilter, bloodGroupFilter);
-                });
-            }
-            
-            const donationStatusFilter = document.getElementById('donationStatusFilter');
-            if (donationStatusFilter) {
-                donationStatusFilter.addEventListener('change', (e) => {
-                    const statusFilter = e.target.value;
-                    const searchTerm = document.getElementById('donationSearch').value;
-                    const bloodGroupFilter = document.getElementById('donationBloodGroupFilter').value;
-                    loadUserDonations(searchTerm, statusFilter, bloodGroupFilter);
-                });
-            }
-            
-            const donationBloodGroupFilter = document.getElementById('donationBloodGroupFilter');
-            if (donationBloodGroupFilter) {
-                donationBloodGroupFilter.addEventListener('change', (e) => {
-                    const bloodGroupFilter = e.target.value;
-                    const searchTerm = document.getElementById('donationSearch').value;
-                    const statusFilter = document.getElementById('donationStatusFilter').value;
-                    loadUserDonations(searchTerm, statusFilter, bloodGroupFilter);
-                });
-            }
-            
-            // Set up request search event listeners
-            const requestSearch = document.getElementById('requestSearch');
-            if (requestSearch) {
-                requestSearch.addEventListener('input', (e) => {
-                    const searchTerm = e.target.value;
-                    const statusFilter = document.getElementById('requestStatusFilter').value;
-                    const urgencyFilter = document.getElementById('requestUrgencyFilter').value;
-                    const bloodGroupFilter = document.getElementById('requestBloodGroupFilter').value;
-                    loadUserRequests(searchTerm, statusFilter, urgencyFilter, bloodGroupFilter);
-                });
-            }
-            
-            const requestStatusFilter = document.getElementById('requestStatusFilter');
-            if (requestStatusFilter) {
-                requestStatusFilter.addEventListener('change', (e) => {
-                    const statusFilter = e.target.value;
-                    const searchTerm = document.getElementById('requestSearch').value;
-                    const urgencyFilter = document.getElementById('requestUrgencyFilter').value;
-                    const bloodGroupFilter = document.getElementById('requestBloodGroupFilter').value;
-                    loadUserRequests(searchTerm, statusFilter, urgencyFilter, bloodGroupFilter);
-                });
-            }
-            
-            const requestUrgencyFilter = document.getElementById('requestUrgencyFilter');
-            if (requestUrgencyFilter) {
-                requestUrgencyFilter.addEventListener('change', (e) => {
-                    const urgencyFilter = e.target.value;
-                    const searchTerm = document.getElementById('requestSearch').value;
-                    const statusFilter = document.getElementById('requestStatusFilter').value;
-                    const bloodGroupFilter = document.getElementById('requestBloodGroupFilter').value;
-                    loadUserRequests(searchTerm, statusFilter, urgencyFilter, bloodGroupFilter);
-                });
-            }
-            
-            const requestBloodGroupFilter = document.getElementById('requestBloodGroupFilter');
-            if (requestBloodGroupFilter) {
-                requestBloodGroupFilter.addEventListener('change', (e) => {
-                    const bloodGroupFilter = e.target.value;
-                    const searchTerm = document.getElementById('requestSearch').value;
-                    const statusFilter = document.getElementById('requestStatusFilter').value;
-                    const urgencyFilter = document.getElementById('requestUrgencyFilter').value;
-                    loadUserRequests(searchTerm, statusFilter, urgencyFilter, bloodGroupFilter);
-                });
-            }
-            
-            debugLog('✅ Admin dashboard initialized successfully!');
-        });
 
-        console.log('✅ Admin dashboard loaded successfully');
-        
-        // Make functions globally available
-        window.loadUsers = loadUsers;
-        window.loadUserDonations = loadUserDonations;
-        window.loadUserRequests = loadUserRequests;
-        window.refreshAllData = refreshAllData;
-        window.logout = logout;
+            let tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Blood Type</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            users.forEach(user => {
+                tableHTML += `
+                    <tr>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>${user.bloodType}</td>
+                        <td><span class="status-badge status-${user.status}">${user.status}</span></td>
+                        <td>
+                            <button class="btn btn-primary edit-user-btn" data-user-id="${user.id}">Edit</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+
+            // Add event listeners to edit buttons
+            container.querySelectorAll('.edit-user-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.target.getAttribute('data-user-id');
+                    editUser(userId);
+                });
+            });
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            
+            let filteredUsers = usersData.filter(user => {
+                const matchesSearch = user.name.toLowerCase().includes(searchTerm) || 
+                                    user.email.toLowerCase().includes(searchTerm);
+                const matchesRole = roleFilter === '' || user.role === roleFilter;
+                
+                return matchesSearch && matchesRole;
+            });
+            
+            displayUsers(filteredUsers);
+        }
+
+        function editUser(userId) {
+            console.log('Editing user:', userId);
+            // Add your edit user logic here
+        }
+
+        // Blood Donations Functions
+        function loadDonations() {
+            const container = document.getElementById('donationsTableContainer');
+            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading donations...</div>';
+            
+            // Simulate API call
+            setTimeout(() => {
+                donationsData = [
+                    // Add your donations data structure here
+                ];
+                displayDonations(donationsData);
+            }, 1000);
+        }
+
+        function displayDonations(donations) {
+            const container = document.getElementById('donationsTableContainer');
+            const donationsCount = document.getElementById('donationsCount');
+            
+            donationsCount.textContent = `(${donations.length} total)`;
+            
+            if (donations.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tint"></i>
+                        <p>No donations found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Add your donations table HTML here
+            let tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Donor</th>
+                            <th>Blood Type</th>
+                            <th>Units</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            donations.forEach(donation => {
+                tableHTML += `
+                    <tr>
+                        <td>${donation.donorName}</td>
+                        <td>${donation.bloodType}</td>
+                        <td>${donation.units}</td>
+                        <td>${donation.date}</td>
+                        <td><span class="status-badge status-${donation.status}">${donation.status}</span></td>
+                        <td>
+                            <button class="btn btn-primary view-donation-btn" data-donation-id="${donation.id}">View</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+
+            // Add event listeners to view buttons
+            container.querySelectorAll('.view-donation-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const donationId = e.target.getAttribute('data-donation-id');
+                    viewDonation(donationId);
+                });
+            });
+        }
+
+        function filterDonations() {
+            const searchTerm = document.getElementById('donationSearch').value.toLowerCase();
+            const bloodTypeFilter = document.getElementById('bloodTypeFilter').value;
+            
+            let filteredDonations = donationsData.filter(donation => {
+                const matchesSearch = donation.donorName.toLowerCase().includes(searchTerm);
+                const matchesBloodType = bloodTypeFilter === '' || donation.bloodType === bloodTypeFilter;
+                
+                return matchesSearch && matchesBloodType;
+            });
+            
+            displayDonations(filteredDonations);
+        }
+
+        function viewDonation(donationId) {
+            console.log('Viewing donation:', donationId);
+            // Add your view donation logic here
+        }
+
+        // Blood Requests Functions
+        function loadRequests() {
+            const container = document.getElementById('requestsTableContainer');
+            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading requests...</div>';
+            
+            // Simulate API call
+            setTimeout(() => {
+                requestsData = [
+                    // Add your requests data structure here
+                ];
+                displayRequests(requestsData);
+            }, 1000);
+        }
+
+        function displayRequests(requests) {
+            const container = document.getElementById('requestsTableContainer');
+            const requestsCount = document.getElementById('requestsCount');
+            
+            requestsCount.textContent = `(${requests.length} total)`;
+            
+            if (requests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-hand-holding-medical"></i>
+                        <p>No requests found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Add your requests table HTML here
+            let tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Requester</th>
+                            <th>Blood Type</th>
+                            <th>Units Needed</th>
+                            <th>Urgency</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            requests.forEach(request => {
+                tableHTML += `
+                    <tr>
+                        <td>${request.requesterName}</td>
+                        <td>${request.bloodType}</td>
+                        <td>${request.unitsNeeded}</td>
+                        <td>${request.urgency}</td>
+                        <td>${request.date}</td>
+                        <td><span class="status-badge status-${request.status}">${request.status}</span></td>
+                        <td>
+                            <button class="btn btn-primary view-request-btn" data-request-id="${request.id}">View</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+
+            // Add event listeners to view buttons
+            container.querySelectorAll('.view-request-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const requestId = e.target.getAttribute('data-request-id');
+                    viewRequest(requestId);
+                });
+            });
+        }
+
+        function filterRequests() {
+            const searchTerm = document.getElementById('requestSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('requestStatusFilter').value;
+            
+            let filteredRequests = requestsData.filter(request => {
+                const matchesSearch = request.requesterName.toLowerCase().includes(searchTerm);
+                const matchesStatus = statusFilter === '' || request.status === statusFilter;
+                
+                return matchesSearch && matchesStatus;
+            });
+            
+            displayRequests(filteredRequests);
+        }
+
+        function viewRequest(requestId) {
+            console.log('Viewing request:', requestId);
+            // Add your view request logic here
+        }
+
     </script>
 </body>
 </html>

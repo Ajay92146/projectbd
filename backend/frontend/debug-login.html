@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Debug Tool - Blood Donation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .debug-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+        }
+        
+        .test-button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .test-button:hover {
+            background: #c53030;
+        }
+        
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        
+        .warning {
+            border-color: #ffc107;
+            background-color: #fff3cd;
+        }
+        
+        input[type="email"], input[type="password"] {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        
+        h2 {
+            color: #e53e3e;
+            border-bottom: 2px solid #e53e3e;
+            padding-bottom: 10px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background-color: #28a745;
+        }
+        
+        .status-offline {
+            background-color: #dc3545;
+        }
+        
+        .status-unknown {
+            background-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <h1>🩸 Blood Donation Login Debug Tool</h1>
+    <p><strong>Current URL:</strong> <span id="current-url"></span></p>
+    
+    <!-- Environment Information -->
+    <div class="debug-container">
+        <h2>🌐 Environment Information</h2>
+        <div id="env-info" class="result"></div>
+    </div>
+    
+    <!-- Backend Connectivity Tests -->
+    <div class="debug-container">
+        <h2>🔗 Backend Connectivity Tests</h2>
+        <div class="test-section">
+            <button class="test-button" onclick="testHealthEndpoint()">Test Health Endpoint</button>
+            <button class="test-button" onclick="testCORSEndpoint()">Test CORS Endpoint</button>
+            <button class="test-button" onclick="testAuthEndpoint()">Test Auth Endpoint (No Credentials)</button>
+            <div id="connectivity-results" class="result"></div>
+        </div>
+    </div>
+    
+    <!-- Login Form Testing -->
+    <div class="debug-container">
+        <h2>🔐 Login Form Testing</h2>
+        <div class="test-section">
+            <div class="form-group">
+                <label for="test-email">Email:</label>
+                <input type="email" id="test-email" placeholder="test@example.com" value="test@example.com">
+            </div>
+            <div class="form-group">
+                <label for="test-password">Password:</label>
+                <input type="password" id="test-password" placeholder="password" value="test123">
+            </div>
+            <button class="test-button" onclick="testLoginRequest()">Test Login Request</button>
+            <button class="test-button" onclick="testRegisterRequest()">Test Register Request</button>
+            <div id="login-results" class="result"></div>
+        </div>
+    </div>
+    
+    <!-- JavaScript Detection -->
+    <div class="debug-container">
+        <h2>📦 JavaScript Libraries</h2>
+        <div class="test-section">
+            <button class="test-button" onclick="checkJavaScriptLibraries()">Check Available Libraries</button>
+            <div id="js-results" class="result"></div>
+        </div>
+    </div>
+    
+    <!-- Network Information -->
+    <div class="debug-container">
+        <h2>📡 Network Information</h2>
+        <div class="test-section">
+            <button class="test-button" onclick="checkNetworkInfo()">Check Network Details</button>
+            <div id="network-results" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('current-url').textContent = window.location.href;
+            showEnvironmentInfo();
+        });
+
+        // Get API base URL dynamically
+        function getAPIBaseURL() {
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return `${protocol}//${hostname}:3002/api`;
+            }
+            
+            return `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
+        }
+
+        // Show environment information
+        function showEnvironmentInfo() {
+            const info = {
+                'URL': window.location.href,
+                'Protocol': window.location.protocol,
+                'Hostname': window.location.hostname,
+                'Port': window.location.port || 'default',
+                'User Agent': navigator.userAgent,
+                'API Base URL': getAPIBaseURL(),
+                'Local Storage Available': typeof(Storage) !== "undefined",
+                'Console Available': typeof(console) !== "undefined"
+            };
+            
+            document.getElementById('env-info').textContent = JSON.stringify(info, null, 2);
+        }
+
+        // Test health endpoint
+        async function testHealthEndpoint() {
+            const resultDiv = document.getElementById('connectivity-results');
+            resultDiv.textContent = '🧪 Testing health endpoint...\n';
+            
+            try {
+                const apiBase = getAPIBaseURL();
+                const url = `${apiBase}/health`;
+                
+                console.log('Testing health endpoint:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.className = response.ok ? 'result success' : 'result error';
+                resultDiv.textContent += `✅ Health Endpoint Response:\n`;
+                resultDiv.textContent += `Status: ${response.status} ${response.statusText}\n`;
+                resultDiv.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ Health Endpoint Error:\n`;
+                resultDiv.textContent += `Error: ${error.message}\n`;
+                resultDiv.textContent += `Stack: ${error.stack}\n`;
+            }
+        }
+
+        // Test CORS endpoint
+        async function testCORSEndpoint() {
+            const resultDiv = document.getElementById('connectivity-results');
+            resultDiv.textContent += '\n🧪 Testing CORS endpoint...\n';
+            
+            try {
+                const apiBase = getAPIBaseURL();
+                const url = `${apiBase}/cors-test`;
+                
+                console.log('Testing CORS endpoint:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.textContent += `✅ CORS Test Response:\n`;
+                resultDiv.textContent += `Status: ${response.status} ${response.statusText}\n`;
+                resultDiv.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+                
+            } catch (error) {
+                resultDiv.textContent += `❌ CORS Test Error:\n`;
+                resultDiv.textContent += `Error: ${error.message}\n`;
+            }
+        }
+
+        // Test auth endpoint without credentials
+        async function testAuthEndpoint() {
+            const resultDiv = document.getElementById('connectivity-results');
+            resultDiv.textContent += '\n🧪 Testing auth endpoint...\n';
+            
+            try {
+                const apiBase = getAPIBaseURL();
+                const url = `${apiBase}/auth/profile`;
+                
+                console.log('Testing auth endpoint:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.textContent += `📝 Auth Endpoint Response (Expected 401):\n`;
+                resultDiv.textContent += `Status: ${response.status} ${response.statusText}\n`;
+                resultDiv.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+                
+                if (response.status === 401) {
+                    resultDiv.textContent += `✅ Auth endpoint working correctly (401 expected)\n`;
+                }
+                
+            } catch (error) {
+                resultDiv.textContent += `❌ Auth Endpoint Error:\n`;
+                resultDiv.textContent += `Error: ${error.message}\n`;
+            }
+        }
+
+        // Test login request
+        async function testLoginRequest() {
+            const resultDiv = document.getElementById('login-results');
+            const email = document.getElementById('test-email').value;
+            const password = document.getElementById('test-password').value;
+            
+            resultDiv.textContent = '🔐 Testing login request...\n';
+            
+            try {
+                const apiBase = getAPIBaseURL();
+                const url = `${apiBase}/auth/login`;
+                
+                const loginData = {
+                    email: email,
+                    password: password
+                };
+                
+                console.log('Testing login with:', { email, password: '***hidden***' });
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.className = response.ok ? 'result success' : 'result error';
+                resultDiv.textContent += `📝 Login Response:\n`;
+                resultDiv.textContent += `Status: ${response.status} ${response.statusText}\n`;
+                resultDiv.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+                
+                if (response.ok && data.data && data.data.token) {
+                    resultDiv.textContent += `✅ Login successful! Token received.\n`;
+                } else {
+                    resultDiv.textContent += `❌ Login failed. Check credentials or backend.\n`;
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent += `❌ Login Request Error:\n`;
+                resultDiv.textContent += `Error: ${error.message}\n`;
+                resultDiv.textContent += `Stack: ${error.stack}\n`;
+            }
+        }
+
+        // Test register request
+        async function testRegisterRequest() {
+            const resultDiv = document.getElementById('login-results');
+            const email = document.getElementById('test-email').value;
+            const password = document.getElementById('test-password').value;
+            
+            resultDiv.textContent += '\n👤 Testing register request...\n';
+            
+            try {
+                const apiBase = getAPIBaseURL();
+                const url = `${apiBase}/auth/register`;
+                
+                const registerData = {
+                    firstName: 'Test',
+                    lastName: 'User',
+                    email: email,
+                    password: password
+                };
+                
+                console.log('Testing register with:', { ...registerData, password: '***hidden***' });
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(registerData)
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.textContent += `📝 Register Response:\n`;
+                resultDiv.textContent += `Status: ${response.status} ${response.statusText}\n`;
+                resultDiv.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+                
+                if (response.ok) {
+                    resultDiv.textContent += `✅ Registration successful!\n`;
+                } else {
+                    resultDiv.textContent += `❌ Registration failed. ${data.message || 'Unknown error'}\n`;
+                }
+                
+            } catch (error) {
+                resultDiv.textContent += `❌ Register Request Error:\n`;
+                resultDiv.textContent += `Error: ${error.message}\n`;
+            }
+        }
+
+        // Check JavaScript libraries
+        function checkJavaScriptLibraries() {
+            const resultDiv = document.getElementById('js-results');
+            
+            const libraries = {
+                'window.API': typeof window.API !== 'undefined',
+                'window.BloodConnect': typeof window.BloodConnect !== 'undefined',
+                'window.authStateManager': typeof window.authStateManager !== 'undefined',
+                'fetch': typeof fetch !== 'undefined',
+                'localStorage': typeof localStorage !== 'undefined',
+                'sessionStorage': typeof sessionStorage !== 'undefined',
+                'JSON': typeof JSON !== 'undefined',
+                'console': typeof console !== 'undefined'
+            };
+            
+            resultDiv.textContent = 'JavaScript Libraries Status:\n';
+            for (const [lib, available] of Object.entries(libraries)) {
+                const status = available ? '✅' : '❌';
+                resultDiv.textContent += `${status} ${lib}: ${available}\n`;
+            }
+            
+            // Check if API object has required methods
+            if (window.API) {
+                resultDiv.textContent += '\nAPI Object Methods:\n';
+                try {
+                    resultDiv.textContent += `- API.auth: ${typeof window.API.auth}\n`;
+                    resultDiv.textContent += `- API.auth.login: ${typeof window.API.auth?.login}\n`;
+                    resultDiv.textContent += `- API.client: ${typeof window.API.client}\n`;
+                } catch (e) {
+                    resultDiv.textContent += `Error checking API object: ${e.message}\n`;
+                }
+            }
+            
+            // Check BloodConnect object methods
+            if (window.BloodConnect) {
+                resultDiv.textContent += '\nBloodConnect Object Methods:\n';
+                try {
+                    resultDiv.textContent += `- showModal: ${typeof window.BloodConnect.showModal}\n`;
+                    resultDiv.textContent += `- setLoadingState: ${typeof window.BloodConnect.setLoadingState}\n`;
+                    resultDiv.textContent += `- validateField: ${typeof window.BloodConnect.validateField}\n`;
+                } catch (e) {
+                    resultDiv.textContent += `Error checking BloodConnect object: ${e.message}\n`;
+                }
+            }
+        }
+
+        // Check network information
+        function checkNetworkInfo() {
+            const resultDiv = document.getElementById('network-results');
+            
+            const networkInfo = {
+                'Online': navigator.onLine,
+                'Connection': navigator.connection ? {
+                    'Type': navigator.connection.effectiveType,
+                    'Downlink': navigator.connection.downlink,
+                    'RTT': navigator.connection.rtt
+                } : 'Not available',
+                'Cookies Enabled': navigator.cookieEnabled,
+                'Language': navigator.language,
+                'Platform': navigator.platform,
+                'Viewport': `${window.innerWidth}x${window.innerHeight}`,
+                'Screen': `${window.screen.width}x${window.screen.height}`,
+                'Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            
+            resultDiv.textContent = JSON.stringify(networkInfo, null, 2);
+        }
+
+        // Global error handler
+        window.addEventListener('error', function(event) {
+            console.error('Global JavaScript Error:', event.error);
+            
+            const errorInfo = {
+                message: event.message,
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                error: event.error ? event.error.stack : 'No stack trace'
+            };
+            
+            // Create error display if it doesn't exist
+            let errorDiv = document.getElementById('global-errors');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.id = 'global-errors';
+                errorDiv.className = 'debug-container';
+                errorDiv.innerHTML = '<h2>🚨 JavaScript Errors</h2><div class="result error" id="error-content"></div>';
+                document.body.appendChild(errorDiv);
+            }
+            
+            const errorContent = document.getElementById('error-content');
+            errorContent.textContent += `${new Date().toISOString()}: ${JSON.stringify(errorInfo, null, 2)}\n\n`;
+        });
+        
+        // Console override for debugging
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            // Could add logging to page here if needed
+        };
+    </script>
+</body>
+</html>

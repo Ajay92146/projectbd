@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Shared Utilities</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 15px 0;
+            padding: 15px;
+            border-left: 4px solid #007cba;
+            background: #f0f8ff;
+        }
+        .success {
+            border-left-color: #46b450;
+            background: #edfaef;
+        }
+        .error {
+            border-left-color: #dc3232;
+            background: #fdf8f8;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Shared Utilities Test</h1>
+        <p>This page tests the shared utilities functionality.</p>
+        
+        <div class="test-section">
+            <h2>Utility Tests</h2>
+            <button onclick="testSharedUtils()">Test Shared Utilities</button>
+            <button onclick="testAuthUtils()">Test Auth Utilities</button>
+            <button onclick="testUIUtils()">Test UI Utilities</button>
+            <button onclick="testDataUtils()">Test Data Utilities</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <!-- Include the shared utilities -->
+    <script src="js/shared-utils.js"></script>
+    
+    <script>
+        function displayResult(message, isSuccess = true) {
+            const resultsDiv = document.getElementById('results');
+            const className = isSuccess ? 'success' : 'error';
+            resultsDiv.innerHTML += `<div class="test-section ${className}">${message}</div>`;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        function testSharedUtils() {
+            clearResults();
+            
+            // Test if SharedUtils is available
+            if (typeof window.SharedUtils !== 'undefined') {
+                displayResult('✅ SharedUtils object is available', true);
+                
+                // Test debugLog
+                try {
+                    SharedUtils.debugLog('Test message', 'TestContext');
+                    displayResult('✅ debugLog function works correctly', true);
+                } catch (error) {
+                    displayResult(`❌ debugLog function error: ${error.message}`, false);
+                }
+                
+                // Test apiCall
+                try {
+                    if (typeof SharedUtils.apiCall === 'function') {
+                        displayResult('✅ apiCall function exists', true);
+                    } else {
+                        displayResult('❌ apiCall function is missing', false);
+                    }
+                } catch (error) {
+                    displayResult(`❌ apiCall function error: ${error.message}`, false);
+                }
+            } else {
+                displayResult('❌ SharedUtils object is not available', false);
+            }
+        }
+        
+        function testAuthUtils() {
+            clearResults();
+            
+            if (typeof SharedUtils.AuthUtils !== 'undefined') {
+                displayResult('✅ AuthUtils object is available', true);
+                
+                // Test functions
+                const functions = ['getToken', 'clearAuthData', 'isAuthenticated'];
+                functions.forEach(funcName => {
+                    if (typeof SharedUtils.AuthUtils[funcName] === 'function') {
+                        displayResult(`✅ ${funcName} function exists`, true);
+                    } else {
+                        displayResult(`❌ ${funcName} function is missing`, false);
+                    }
+                });
+                
+                // Test clearAuthData
+                try {
+                    SharedUtils.AuthUtils.clearAuthData(false);
+                    displayResult('✅ clearAuthData (user mode) works', true);
+                    
+                    SharedUtils.AuthUtils.clearAuthData(true);
+                    displayResult('✅ clearAuthData (admin mode) works', true);
+                } catch (error) {
+                    displayResult(`❌ clearAuthData error: ${error.message}`, false);
+                }
+            } else {
+                displayResult('❌ AuthUtils object is not available', false);
+            }
+        }
+        
+        function testUIUtils() {
+            clearResults();
+            
+            if (typeof SharedUtils.UIUtils !== 'undefined') {
+                displayResult('✅ UIUtils object is available', true);
+                
+                // Test functions
+                const functions = ['showLoading', 'showEmptyState', 'showErrorState'];
+                functions.forEach(funcName => {
+                    if (typeof SharedUtils.UIUtils[funcName] === 'function') {
+                        displayResult(`✅ ${funcName} function exists`, true);
+                    } else {
+                        displayResult(`❌ ${funcName} function is missing`, false);
+                    }
+                });
+            } else {
+                displayResult('❌ UIUtils object is not available', false);
+            }
+        }
+        
+        function testDataUtils() {
+            clearResults();
+            
+            if (typeof SharedUtils.DataUtils !== 'undefined') {
+                displayResult('✅ DataUtils object is available', true);
+                
+                // Test functions
+                const functions = ['formatDate', 'formatBloodGroup', 'formatLocation', 'formatStatus'];
+                functions.forEach(funcName => {
+                    if (typeof SharedUtils.DataUtils[funcName] === 'function') {
+                        displayResult(`✅ ${funcName} function exists`, true);
+                    } else {
+                        displayResult(`❌ ${funcName} function is missing`, false);
+                    }
+                });
+                
+                // Test functionality
+                try {
+                    const dateResult = SharedUtils.DataUtils.formatDate('2023-01-01');
+                    displayResult(`✅ formatDate works: ${dateResult}`, true);
+                    
+                    const bloodGroupResult = SharedUtils.DataUtils.formatBloodGroup('O+');
+                    displayResult(`✅ formatBloodGroup works: ${bloodGroupResult}`, true);
+                    
+                    const locationResult = SharedUtils.DataUtils.formatLocation('New York', 'NY');
+                    displayResult(`✅ formatLocation works: ${locationResult}`, true);
+                    
+                    const statusResult = SharedUtils.DataUtils.formatStatus('completed');
+                    displayResult(`✅ formatStatus works: ${statusResult}`, true);
+                } catch (error) {
+                    displayResult(`❌ DataUtils functionality error: ${error.message}`, false);
+                }
+            } else {
+                displayResult('❌ DataUtils object is not available', false);
+            }
+        }
+    </script>
+</body>
+</html>

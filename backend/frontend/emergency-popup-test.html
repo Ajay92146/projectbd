@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Popup System - Testing Interface</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 50%, #fecaca 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #dc2626;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .feature-card h3 {
+            color: #dc2626;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .feature-card p {
+            color: #4b5563;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .test-section {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .test-section h2 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .test-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .test-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .test-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+        
+        .test-btn.secondary {
+            background: #6b7280;
+        }
+        
+        .test-btn.secondary:hover {
+            background: #4b5563;
+        }
+        
+        .test-btn.success {
+            background: #059669;
+        }
+        
+        .test-btn.success:hover {
+            background: #047857;
+        }
+        
+        .status-panel {
+            background: #1f2937;
+            color: #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            margin-top: 30px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status-panel h3 {
+            color: #f3f4f6;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+        
+        .status-line {
+            margin-bottom: 5px;
+            padding: 3px 0;
+        }
+        
+        .status-success {
+            color: #10b981;
+        }
+        
+        .status-error {
+            color: #ef4444;
+        }
+        
+        .status-warning {
+            color: #f59e0b;
+        }
+        
+        .status-info {
+            color: #3b82f6;
+        }
+        
+        @media (max-width: 768px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .test-buttons {
+                flex-direction: column;
+            }
+            
+            .test-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="header">
+            <h1>🚨 Emergency Popup System</h1>
+            <p>Complete Testing Interface for Enhanced Emergency Blood Request Popup</p>
+        </div>
+        
+        <!-- Features Overview -->
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>📞 Phone Integration</h3>
+                <p>Hospital and patient phone numbers with click-to-call functionality for mobile devices.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🩸 Enhanced "I CAN HELP"</h3>
+                <p>Confirmation dialog, context storage, and smart navigation to donation page with emergency data.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📋 "SEE ALL" Requests</h3>
+                <p>Modal showing all pending emergency requests with individual action buttons and sharing options.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>❌ Advanced Close</h3>
+                <p>Multiple close triggers: X button, CLOSE button, click outside, ESC key with smooth animations.</p>
+            </div>
+        </div>
+        
+        <!-- Individual Popup Tests -->
+        <div class="test-section">
+            <h2>🧪 Individual Feature Tests</h2>
+            <p>Test each enhanced feature of the emergency popup system:</p>
+            
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testSinglePopup()">
+                    🚨 Test Emergency Popup
+                </button>
+                
+                <button class="test-btn" onclick="testAllRequests()">
+                    📋 Test "SEE ALL" View
+                </button>
+                
+                <button class="test-btn" onclick="testPhoneNumbers()">
+                    📞 Test Phone Integration
+                </button>
+                
+                <button class="test-btn" onclick="testNavigation()">
+                    🔗 Test Navigation Flow
+                </button>
+            </div>
+        </div>
+        
+        <!-- System Tests -->
+        <div class="test-section">
+            <h2>⚙️ System Tests</h2>
+            <p>Comprehensive testing of the emergency popup system:</p>
+            
+            <div class="test-buttons">
+                <button class="test-btn success" onclick="runFullSystemTest()">
+                    🔬 Full System Test
+                </button>
+                
+                <button class="test-btn secondary" onclick="checkSystemStatus()">
+                    📊 System Status
+                </button>
+                
+                <button class="test-btn secondary" onclick="resetSystem()">
+                    🔄 Reset System
+                </button>
+                
+                <button class="test-btn secondary" onclick="clearConsole()">
+                    🗑️ Clear Console
+                </button>
+            </div>
+        </div>
+        
+        <!-- Scenario Tests -->
+        <div class="test-section">
+            <h2>🎭 Scenario Tests</h2>
+            <p>Test different real-world scenarios:</p>
+            
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testCriticalEmergency()">
+                    🆘 Critical Emergency
+                </button>
+                
+                <button class="test-btn" onclick="testMultipleRequests()">
+                    📊 Multiple Requests
+                </button>
+                
+                <button class="test-btn" onclick="testMobileView()">
+                    📱 Mobile View
+                </button>
+                
+                <button class="test-btn" onclick="testErrorHandling()">
+                    ⚠️ Error Handling
+                </button>
+            </div>
+        </div>
+        
+        <!-- Status Console -->
+        <div class="status-panel" id="statusPanel">
+            <h3>📟 System Console</h3>
+            <div id="consoleOutput">
+                <div class="status-line status-info">🚀 Emergency Popup Testing Interface Ready</div>
+                <div class="status-line status-info">📋 Click any test button above to begin testing</div>
+                <div class="status-line status-warning">⚠️ Make sure emergency-popup.js is loaded</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include Emergency Popup System -->
+    <script src="js/emergency-popup.js"></script>
+    
+    <script>
+        // Console output management
+        function logToConsole(message, type = 'info') {
+            const output = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const statusClass = `status-${type}`;
+            
+            const icons = {
+                info: 'ℹ️',
+                success: '✅',
+                error: '❌',
+                warning: '⚠️'
+            };
+            
+            const icon = icons[type] || 'ℹ️';
+            
+            output.innerHTML += `<div class="status-line ${statusClass}">${icon} [${timestamp}] ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function clearConsole() {
+            document.getElementById('consoleOutput').innerHTML = `
+                <div class="status-line status-info">🧹 Console cleared</div>
+            `;
+        }
+        
+        // Test Functions
+        function testSinglePopup() {
+            logToConsole('Testing single emergency popup with phone numbers...', 'info');
+            
+            if (window.emergencyPopup) {
+                window.emergencyPopup.testPopup();
+                logToConsole('Emergency popup displayed successfully', 'success');
+                logToConsole('✓ Phone numbers should be clickable', 'info');
+                logToConsole('✓ Test "I CAN HELP" button for navigation', 'info');
+                logToConsole('✓ Test close functionality (X, CLOSE, ESC, click outside)', 'info');
+            } else {
+                logToConsole('Emergency popup system not available', 'error');
+            }
+        }
+        
+        function testAllRequests() {
+            logToConsole('Testing "SEE ALL" emergency requests view...', 'info');
+            
+            if (window.emergencyPopup) {
+                window.emergencyPopup.testAllEmergencies();
+                logToConsole('All emergency requests view displayed', 'success');
+                logToConsole('✓ Check scrollable list of requests', 'info');
+                logToConsole('✓ Test individual "Help" and "Share" buttons', 'info');
+            } else {
+                logToConsole('Emergency popup system not available', 'error');
+            }
+        }
+        
+        function testPhoneNumbers() {
+            logToConsole('Testing phone number integration...', 'info');
+            
+            const testData = {
+                hospitalPhone: '+91-9876543210',
+                patientContact: '+91-9123456789',
+                emergencyContact: '+91-9123456789'
+            };
+            
+            logToConsole(`Hospital Phone: ${testData.hospitalPhone}`, 'info');
+            logToConsole(`Patient Contact: ${testData.patientContact}`, 'info');
+            logToConsole('✓ Phone numbers should be clickable links', 'success');
+            logToConsole('✓ On mobile: should open dialer app', 'info');
+            
+            testSinglePopup(); // Show popup to see phone numbers
+        }
+        
+        function testNavigation() {
+            logToConsole('Testing navigation flow...', 'info');
+            logToConsole('1. Click "I CAN HELP" button', 'info');
+            logToConsole('2. Should show confirmation dialog', 'info');
+            logToConsole('3. Should store context in session storage', 'info');
+            logToConsole('4. Should navigate to donation page with parameters', 'info');
+            
+            // Check session storage capabilities
+            try {
+                sessionStorage.setItem('test', 'working');
+                sessionStorage.removeItem('test');
+                logToConsole('✓ Session storage available for context preservation', 'success');
+            } catch (e) {
+                logToConsole('⚠️ Session storage not available', 'warning');
+            }
+            
+            testSinglePopup();
+        }
+        
+        function runFullSystemTest() {
+            logToConsole('Running comprehensive system test...', 'info');
+            
+            if (window.emergencyPopup) {
+                const results = window.emergencyPopup.runSystemTest();
+                logToConsole('System test completed', 'success');
+                
+                // Log individual test results
+                setTimeout(() => {
+                    logToConsole('📊 Test Results Summary:', 'info');
+                    Object.entries(results).forEach(([test, passed]) => {
+                        const status = passed ? 'success' : 'error';
+                        const icon = passed ? '✅' : '❌';
+                        logToConsole(`${icon} ${test}: ${passed ? 'PASSED' : 'FAILED'}`, status);
+                    });
+                }, 1000);
+            } else {
+                logToConsole('Emergency popup system not initialized', 'error');
+            }
+        }
+        
+        function checkSystemStatus() {
+            logToConsole('Checking system status...', 'info');
+            
+            if (window.emergencyPopup) {
+                const status = window.emergencyPopup.getStatus();
+                logToConsole('📊 System Status Report:', 'info');
+                logToConsole(`Initialized: ${status.isInitialized}`, status.isInitialized ? 'success' : 'error');
+                logToConsole(`Popup Visible: ${status.isPopupVisible}`, 'info');
+                logToConsole(`Last Check: ${status.lastEmergencyCheck || 'Never'}`, 'info');
+                logToConsole(`Check Interval: ${status.checkInterval / 1000 / 60} minutes`, 'info');
+                logToConsole(`Shown Emergencies: ${status.shownEmergenciesCount}`, 'info');
+            } else {
+                logToConsole('Emergency popup system not available', 'error');
+            }
+        }
+        
+        function resetSystem() {
+            logToConsole('Resetting emergency popup system...', 'info');
+            
+            if (window.emergencyPopup) {
+                window.emergencyPopup.resetShownEmergencies();
+                window.emergencyPopup.closePopup();
+                logToConsole('✓ Shown emergencies list cleared', 'success');
+                logToConsole('✓ Popup closed', 'success');
+                logToConsole('System reset complete', 'success');
+            } else {
+                logToConsole('Emergency popup system not available', 'error');
+            }
+        }
+        
+        function testCriticalEmergency() {
+            logToConsole('Testing critical emergency scenario...', 'info');
+            
+            if (window.emergencyPopup) {
+                const criticalRequest = {
+                    _id: 'critical-test',
+                    patientName: 'Emergency Patient',
+                    bloodGroup: 'O-',
+                    requiredUnits: 4,
+                    urgency: 'Critical',
+                    hospitalName: 'Emergency Hospital',
+                    location: 'Critical Care Unit',
+                    hospitalPhone: '911',
+                    patientContact: '+91-9999999999',
+                    hoursLeft: 2,
+                    daysLeft: 0,
+                    additionalNotes: 'IMMEDIATE TRANSFUSION REQUIRED - LIFE THREATENING'
+                };
+                
+                window.emergencyPopup.displayEmergencyPopup(criticalRequest);
+                logToConsole('Critical emergency scenario activated', 'warning');
+                logToConsole('⚠️ Should show critical animations and styling', 'warning');
+            } else {
+                logToConsole('Emergency popup system not available', 'error');
+            }
+        }
+        
+        function testMultipleRequests() {
+            logToConsole('Testing multiple emergency requests...', 'info');
+            testAllRequests();
+        }
+        
+        function testMobileView() {
+            logToConsole('Testing mobile responsive view...', 'info');
+            logToConsole('📱 Resize browser window to test mobile layout', 'info');
+            logToConsole('✓ Popup should adapt to screen size', 'info');
+            logToConsole('✓ Buttons should be touch-friendly', 'info');
+            logToConsole('✓ Phone numbers should trigger dialer on mobile', 'info');
+            
+            testSinglePopup();
+        }
+        
+        function testErrorHandling() {
+            logToConsole('Testing error handling scenarios...', 'info');
+            
+            if (window.emergencyPopup) {
+                // Test with invalid data
+                window.emergencyPopup.showEmergencyRequestsError();
+                logToConsole('Error state displayed', 'warning');
+                logToConsole('✓ Should show retry and close options', 'info');
+            } else {
+                logToConsole('Emergency popup system not available', 'error');
+            }
+        }
+        
+        // Initialize testing interface
+        document.addEventListener('DOMContentLoaded', function() {
+            logToConsole('Emergency Popup Testing Interface Loaded', 'success');
+            
+            // Check if emergency popup system is available
+            setTimeout(() => {
+                if (window.emergencyPopup) {
+                    logToConsole('✅ Emergency popup system detected', 'success');
+                    logToConsole('🚀 All test functions ready', 'success');
+                } else {
+                    logToConsole('❌ Emergency popup system not found', 'error');
+                    logToConsole('💡 Make sure emergency-popup.js is loaded', 'warning');
+                }
+            }, 1000);
+        });
+        
+        // Override console.log to capture emergency popup logs
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            
+            // Capture emergency popup related logs
+            const message = args.join(' ');
+            if (message.includes('🚨') || message.includes('Emergency') || message.includes('emergency')) {
+                logToConsole(message, 'info');
+            }
+        };
+    </script>
+</body>
+</html>

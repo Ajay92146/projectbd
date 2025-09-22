@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Button Testing Suite - BloodConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 { color: #e53e3e; margin-bottom: 10px; }
+        .test-section {
+            background: white;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .test-header {
+            background: #e53e3e;
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .test-content { padding: 20px; }
+        .form-test {
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .form-test h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e53e3e;
+        }
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .password-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            padding-right: 45px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #e53e3e;
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #a0aec0;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .password-toggle:hover {
+            color: #e53e3e;
+            background: rgba(229, 62, 62, 0.1);
+        }
+        .test-button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .test-button:hover { background: #c53030; }
+        .test-button.secondary { background: #4a5568; }
+        .test-button.secondary:hover { background: #2d3748; }
+        .test-results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 6px;
+            border-left: 4px solid #38a169;
+        }
+        .test-result {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .test-result.pass {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        .test-result.fail {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        .console-output {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-eye"></i> BloodConnect - Eye Button Testing Suite</h1>
+            <p>Test all password visibility toggles in the application</p>
+        </div>
+
+        <div class="test-section">
+            <div class="test-header">
+                <span><i class="fas fa-eye"></i> Password Visibility Toggle Testing</span>
+                <button class="test-button secondary" onclick="runAllTests()">Run All Tests</button>
+            </div>
+            <div class="test-content">
+                
+                <div class="form-test">
+                    <h3>1. Login Form Eye Button</h3>
+                    <div class="form-group">
+                        <label for="loginPassword">Login Password</label>
+                        <div class="password-container">
+                            <input type="password" id="loginPassword" placeholder="Enter password" value="TestPassword123">
+                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', 'loginEye')">
+                                <i class="fas fa-eye" id="loginEye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="test-button" onclick="testEyeButton('loginPassword', 'loginEye', 'loginResults')">Test Login Eye Button</button>
+                    <div id="loginResults" class="test-results" style="display: none;"></div>
+                </div>
+
+                <div class="form-test">
+                    <h3>2. Registration Form Eye Button</h3>
+                    <div class="form-group">
+                        <label for="registerPassword">Registration Password</label>
+                        <div class="password-container">
+                            <input type="password" id="registerPassword" placeholder="Create password" value="SecurePass456">
+                            <button type="button" class="password-toggle" onclick="togglePassword('registerPassword', 'registerEye')">
+                                <i class="fas fa-eye" id="registerEye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="test-button" onclick="testEyeButton('registerPassword', 'registerEye', 'registerResults')">Test Register Eye Button</button>
+                    <div id="registerResults" class="test-results" style="display: none;"></div>
+                </div>
+
+                <div class="form-test">
+                    <h3>3. Admin Login Eye Button</h3>
+                    <div class="form-group">
+                        <label for="adminPassword">Admin Password</label>
+                        <div class="password-container">
+                            <input type="password" id="adminPassword" placeholder="Admin password" value="AdminSecure789">
+                            <button type="button" class="password-toggle" onclick="togglePassword('adminPassword', 'adminEye')">
+                                <i class="fas fa-eye" id="adminEye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="test-button" onclick="testEyeButton('adminPassword', 'adminEye', 'adminResults')">Test Admin Eye Button</button>
+                    <div id="adminResults" class="test-results" style="display: none;"></div>
+                </div>
+
+                <div class="form-test">
+                    <h3>4. Change Password Form Eye Buttons</h3>
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <div class="password-container">
+                            <input type="password" id="currentPassword" placeholder="Current password" value="OldPassword123">
+                            <button type="button" class="password-toggle" onclick="togglePassword('currentPassword', 'currentEye')">
+                                <i class="fas fa-eye" id="currentEye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <div class="password-container">
+                            <input type="password" id="newPassword" placeholder="New password" value="NewPassword456">
+                            <button type="button" class="password-toggle" onclick="togglePassword('newPassword', 'newEye')">
+                                <i class="fas fa-eye" id="newEye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="test-button" onclick="testMultipleEyeButtons()">Test Multiple Eye Buttons</button>
+                    <div id="multipleResults" class="test-results" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-header">
+                <span><i class="fas fa-terminal"></i> Test Console</span>
+                <button class="test-button secondary" onclick="clearConsole()">Clear</button>
+            </div>
+            <div class="test-content">
+                <div id="testConsole" class="console-output">
+                    <div>🔧 Eye Button Testing Suite Initialized</div>
+                    <div>Ready to run tests...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function logToConsole(message, type = 'info') {
+            const console = document.getElementById('testConsole');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'pass' ? '✅' : type === 'fail' ? '❌' : '📝';
+            console.innerHTML += `<div>[${timestamp}] ${icon} ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('testConsole').innerHTML = '<div>🔧 Console cleared</div>';
+        }
+
+        function togglePassword(passwordId, eyeId) {
+            const passwordField = document.getElementById(passwordId);
+            const eyeIcon = document.getElementById(eyeId);
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+            logToConsole(`${passwordId} visibility toggled`);
+        }
+
+        function testEyeButton(passwordId, eyeId, resultsId) {
+            const resultsDiv = document.getElementById(resultsId);
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '';
+            
+            const passwordField = document.getElementById(passwordId);
+            const eyeIcon = document.getElementById(eyeId);
+            let results = [];
+            
+            // Test initial state
+            if (passwordField.type === 'password' && eyeIcon.classList.contains('fa-eye')) {
+                results.push('<div class="test-result pass">✅ Initial state: Password hidden, eye icon visible</div>');
+            } else {
+                results.push('<div class="test-result fail">❌ Initial state incorrect</div>');
+            }
+            
+            // Test toggle to visible
+            togglePassword(passwordId, eyeId);
+            if (passwordField.type === 'text' && eyeIcon.classList.contains('fa-eye-slash')) {
+                results.push('<div class="test-result pass">✅ Toggle to visible: Password shown, eye-slash icon</div>');
+            } else {
+                results.push('<div class="test-result fail">❌ Toggle to visible failed</div>');
+            }
+            
+            // Test toggle back to hidden
+            togglePassword(passwordId, eyeId);
+            if (passwordField.type === 'password' && eyeIcon.classList.contains('fa-eye')) {
+                results.push('<div class="test-result pass">✅ Toggle back to hidden: Password hidden, eye icon</div>');
+            } else {
+                results.push('<div class="test-result fail">❌ Toggle back to hidden failed</div>');
+            }
+            
+            resultsDiv.innerHTML = results.join('');
+            logToConsole(`${passwordId} eye button test completed`, 'info');
+        }
+
+        function testMultipleEyeButtons() {
+            const resultsDiv = document.getElementById('multipleResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '';
+            
+            const fields = [
+                { passwordId: 'currentPassword', eyeId: 'currentEye', name: 'Current Password' },
+                { passwordId: 'newPassword', eyeId: 'newEye', name: 'New Password' }
+            ];
+            
+            let results = [];
+            
+            fields.forEach(field => {
+                const passwordField = document.getElementById(field.passwordId);
+                const eyeIcon = document.getElementById(field.eyeId);
+                
+                // Test initial state
+                if (passwordField.type === 'password' && eyeIcon.classList.contains('fa-eye')) {
+                    results.push(`<div class="test-result pass">✅ ${field.name}: Initial state correct</div>`);
+                } else {
+                    results.push(`<div class="test-result fail">❌ ${field.name}: Initial state incorrect</div>`);
+                }
+                
+                // Test toggle
+                togglePassword(field.passwordId, field.eyeId);
+                if (passwordField.type === 'text' && eyeIcon.classList.contains('fa-eye-slash')) {
+                    results.push(`<div class="test-result pass">✅ ${field.name}: Toggle works</div>`);
+                } else {
+                    results.push(`<div class="test-result fail">❌ ${field.name}: Toggle failed</div>`);
+                }
+                
+                // Toggle back
+                togglePassword(field.passwordId, field.eyeId);
+            });
+            
+            resultsDiv.innerHTML = results.join('');
+            logToConsole('Multiple eye buttons test completed', 'info');
+        }
+
+        function runAllTests() {
+            logToConsole('Starting comprehensive eye button testing...', 'info');
+            testEyeButton('loginPassword', 'loginEye', 'loginResults');
+            setTimeout(() => testEyeButton('registerPassword', 'registerEye', 'registerResults'), 500);
+            setTimeout(() => testEyeButton('adminPassword', 'adminEye', 'adminResults'), 1000);
+            setTimeout(() => testMultipleEyeButtons(), 1500);
+            setTimeout(() => logToConsole('All eye button tests completed!', 'pass'), 2000);
+        }
+
+        // Initialize
+        logToConsole('Eye Button Testing Suite ready', 'pass');
+    </script>
+</body>
+</html>

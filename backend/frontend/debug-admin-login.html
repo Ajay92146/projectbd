@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Admin Login - BloodConnect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .debug-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #c53030;
+        }
+        
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .debug-info {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #0ea5e9;
+        }
+        
+        .debug-info h3 {
+            margin-top: 0;
+            color: #0369a1;
+        }
+        
+        .debug-info p {
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔧 Debug Admin Login</h1>
+        
+        <div class="debug-info">
+            <h3>Debug Information:</h3>
+            <p><strong>Current URL:</strong> <span id="currentUrl"></span></p>
+            <p><strong>Local Storage Admin:</strong> <span id="adminStorage"></span></p>
+            <p><strong>Admin Email Storage:</strong> <span id="emailStorage"></span></p>
+        </div>
+        
+        <form id="debugAdminForm">
+            <div class="form-group">
+                <label for="adminEmail">Admin Email:</label>
+                <input type="email" id="adminEmail" value="admin@bloodconnect.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="adminPassword">Admin Password:</label>
+                <input type="password" id="adminPassword" value="Admin@123" required>
+            </div>
+            
+            <button type="submit" id="loginBtn">Login to Dashboard</button>
+        </form>
+        
+        <div class="message error" id="errorMessage"></div>
+        <div class="message success" id="successMessage"></div>
+        
+        <div class="debug-info" style="margin-top: 30px;">
+            <h3>Console Logs:</h3>
+            <div id="consoleLogs" style="max-height: 200px; overflow-y: auto;"></div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="clearStorage()" style="background: #dc2626;">Clear Admin Storage</button>
+            <button onclick="goToDashboard()" style="background: #059669; margin-left: 10px;">Go to Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        // Debug logging
+        function addLog(message) {
+            const logs = document.getElementById('consoleLogs');
+            const logEntry = document.createElement('p');
+            logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            logs.appendChild(logEntry);
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+        
+        // Update debug info
+        function updateDebugInfo() {
+            document.getElementById('currentUrl').textContent = window.location.href;
+            document.getElementById('adminStorage').textContent = localStorage.getItem('bloodconnect_admin') || 'Not set';
+            document.getElementById('emailStorage').textContent = localStorage.getItem('admin_email') || 'Not set';
+        }
+        
+        // Clear storage function
+        function clearStorage() {
+            localStorage.removeItem('bloodconnect_admin');
+            localStorage.removeItem('admin_email');
+            addLog('✅ Cleared admin storage');
+            updateDebugInfo();
+        }
+        
+        // Go to dashboard function
+        function goToDashboard() {
+            addLog('🔄 Attempting to go to dashboard...');
+            window.location.href = 'admin-dashboard.html';
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('🔧 Debug admin login page loaded');
+            updateDebugInfo();
+            
+            // Check if already logged in
+            if (localStorage.getItem('bloodconnect_admin') === 'true') {
+                addLog('✅ Already logged in as admin');
+                document.getElementById('successMessage').textContent = 'Already logged in as admin';
+                document.getElementById('successMessage').style.display = 'block';
+            }
+            
+            // Form submission
+            document.getElementById('debugAdminForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addLog('📝 Form submitted');
+                
+                const email = document.getElementById('adminEmail').value;
+                const password = document.getElementById('adminPassword').value;
+                
+                addLog(`📧 Email entered: ${email}`);
+                addLog(`🔑 Password entered: ${password}`);
+                
+                const errorMessage = document.getElementById('errorMessage');
+                const successMessage = document.getElementById('successMessage');
+                
+                // Hide previous messages
+                errorMessage.style.display = 'none';
+                successMessage.style.display = 'none';
+                
+                // Check credentials
+                if (email === 'admin@bloodconnect.com' && password === 'Admin@123') {
+                    addLog('✅ Credentials match! Setting up admin session...');
+                    
+                    // Store admin session
+                    localStorage.setItem('bloodconnect_admin', 'true');
+                    localStorage.setItem('admin_email', email);
+                    
+                    addLog('💾 Admin session stored in localStorage');
+                    updateDebugInfo();
+                    
+                    // Show success message
+                    successMessage.textContent = 'Login successful! Redirecting to dashboard...';
+                    successMessage.style.display = 'block';
+                    
+                    addLog('🔄 Redirecting to admin dashboard in 2 seconds...');
+                    
+                    // Redirect with longer delay for debugging
+                    setTimeout(() => {
+                        addLog('🚀 Redirecting now...');
+                        window.location.href = 'admin-dashboard.html';
+                    }, 2000);
+                } else {
+                    addLog('❌ Invalid credentials');
+                    errorMessage.textContent = 'Invalid admin credentials. Please try again.';
+                    errorMessage.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
