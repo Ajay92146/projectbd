@@ -184,10 +184,37 @@ async function processAdminLogin(email, password, rememberMe) {
 function checkExistingAdminLogin() {
     // Check both localStorage and sessionStorage
     const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
-    if (adminStatus === 'true') {
-        debugLog('Already logged in as admin, redirecting to dashboard');
-        window.location.href = 'admin-dashboard.html';
-        return true;
+    const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+    const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
+    
+    debugLog(`Checking existing login - Status: ${adminStatus}, Email: ${adminEmail}, LoginTime: ${adminLoginTime}`);
+    
+    if (adminStatus === 'true' && adminEmail && adminLoginTime) {
+        // Check if session is still valid (30 minutes)
+        const loginTime = new Date(adminLoginTime);
+        const currentTime = new Date();
+        const timeDiff = currentTime - loginTime;
+        const minutesDiff = timeDiff / (1000 * 60);
+        
+        debugLog(`Session age: ${minutesDiff.toFixed(2)} minutes`);
+        
+        if (minutesDiff <= 30) {
+            debugLog('Valid session found, redirecting to dashboard');
+            // Add a small delay to prevent redirect loops
+            setTimeout(() => {
+                window.location.href = 'admin-dashboard.html';
+            }, 500);
+            return true;
+        } else {
+            debugLog('Session expired, clearing storage');
+            // Clear expired session
+            localStorage.removeItem('bloodconnect_admin');
+            localStorage.removeItem('admin_email');
+            localStorage.removeItem('admin_login_time');
+            sessionStorage.removeItem('bloodconnect_admin');
+            sessionStorage.removeItem('admin_email');
+            sessionStorage.removeItem('admin_login_time');
+        }
     }
     return false;
 }
@@ -209,6 +236,13 @@ function validatePassword(password) {
 function initializeAdminLogin() {
     debugLog('🚀 Admin login page initialized');
     debugLog(`Current URL: ${window.location.href}`);
+    
+    // Prevent multiple initialization
+    if (window.adminLoginInitialized) {
+        debugLog('Admin login already initialized, skipping...');
+        return;
+    }
+    window.adminLoginInitialized = true;
     
     // Check if already logged in
     if (checkExistingAdminLogin()) {

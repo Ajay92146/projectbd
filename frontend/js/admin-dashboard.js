@@ -12,23 +12,31 @@ function debugLog(message) {
 function checkAdminAuthentication() {
     debugLog('🔍 Checking admin authentication...');
     
-    // Get admin status from localStorage
-    const adminStatus = localStorage.getItem('bloodconnect_admin');
-    const adminEmail = localStorage.getItem('admin_email');
-    const adminLoginTime = localStorage.getItem('admin_login_time');
+    // Check both localStorage and sessionStorage
+    const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
+    const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+    const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
     
-    debugLog(`📱 LocalStorage admin status: ${adminStatus}`);
-    debugLog(`📧 LocalStorage admin email: ${adminEmail}`);
-    debugLog(`🕒 LocalStorage admin login time: ${adminLoginTime}`);
+    debugLog(`📱 Admin status: ${adminStatus}`);
+    debugLog(`📧 Admin email: ${adminEmail}`);
+    debugLog(`🕒 Admin login time: ${adminLoginTime}`);
     debugLog(`🌐 Current URL: ${window.location.href}`);
     
+    // Check if we're already on the login page to prevent redirect loops
+    if (window.location.pathname.includes('admin-login.html')) {
+        debugLog('Already on login page, skipping redirect');
+        return false;
+    }
+    
     // Check if admin is authenticated
-    if (adminStatus !== 'true') {
+    if (adminStatus !== 'true' || !adminEmail || !adminLoginTime) {
         debugLog('❌ Not authenticated as admin, redirecting to login...');
-        // Add delay to ensure any ongoing localStorage operations complete
+        // Add delay to ensure any ongoing operations complete and prevent loops
         setTimeout(() => {
-            window.location.href = 'admin-login.html';
-        }, 100);
+            if (!window.location.pathname.includes('admin-login.html')) {
+                window.location.href = 'admin-login.html';
+            }
+        }, 500);
         return false;
     }
     
@@ -44,7 +52,20 @@ function checkAdminAuthentication() {
         if (minutesDiff > 30) {
             debugLog('⏰ Session expired, logging out...');
             showNotification('Session expired. Please log in again.', 'error');
-            logout();
+            
+            // Clear expired session
+            localStorage.removeItem('bloodconnect_admin');
+            localStorage.removeItem('admin_email');
+            localStorage.removeItem('admin_login_time');
+            sessionStorage.removeItem('bloodconnect_admin');
+            sessionStorage.removeItem('admin_email');
+            sessionStorage.removeItem('admin_login_time');
+            
+            setTimeout(() => {
+                if (!window.location.pathname.includes('admin-login.html')) {
+                    window.location.href = 'admin-login.html';
+                }
+            }, 2000);
             return false;
         }
     }
@@ -558,6 +579,13 @@ function logout() {
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     debugLog('🚀 Initializing admin dashboard...');
+    
+    // Prevent multiple initialization
+    if (window.adminDashboardInitialized) {
+        debugLog('Admin dashboard already initialized, skipping...');
+        return;
+    }
+    window.adminDashboardInitialized = true;
     
     // Check authentication first
     if (!checkAdminAuthentication()) {
