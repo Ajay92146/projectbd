@@ -286,48 +286,51 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
-            table-layout: fixed;
-            min-width: 1400px;
+            table-layout: auto;
         }
 
         .data-table th,
         .data-table td {
-            padding: 0.75rem 0.5rem;
+            padding: 0.75rem 0.75rem;
             text-align: left;
             border-bottom: 1px solid var(--gray-200);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
-        /* Special handling for contact number column */
-        .data-table th:nth-child(5),
-        .data-table td:nth-child(5) {
+        /* User Management Table - optimized column widths */
+        #usersTableContainer .data-table th:nth-child(1),
+        #usersTableContainer .data-table td:nth-child(1) { width: 8%; max-width: 120px; } /* ID */
+        #usersTableContainer .data-table th:nth-child(2),
+        #usersTableContainer .data-table td:nth-child(2) { width: 15%; } /* Name */
+        #usersTableContainer .data-table th:nth-child(3),
+        #usersTableContainer .data-table td:nth-child(3) { width: 20%; } /* Email */
+        #usersTableContainer .data-table th:nth-child(4),
+        #usersTableContainer .data-table td:nth-child(4) { width: 12%; } /* Phone */
+        #usersTableContainer .data-table th:nth-child(5),
+        #usersTableContainer .data-table td:nth-child(5) { width: 8%; } /* Role */
+        #usersTableContainer .data-table th:nth-child(6),
+        #usersTableContainer .data-table td:nth-child(6) { width: 10%; } /* Blood Group */
+        #usersTableContainer .data-table th:nth-child(7),
+        #usersTableContainer .data-table td:nth-child(7) { width: 10%; } /* City */
+        #usersTableContainer .data-table th:nth-child(8),
+        #usersTableContainer .data-table td:nth-child(8) { width: 8%; } /* Donations */
+        #usersTableContainer .data-table th:nth-child(9),
+        #usersTableContainer .data-table td:nth-child(9) { width: 9%; } /* Requests */
+        #usersTableContainer .data-table th:nth-child(10),
+        #usersTableContainer .data-table td:nth-child(10) { width: 10%; } /* Joined */
+
+        /* Requests Table - specific contact column handling */
+        #requestsTableContainer .data-table th:nth-child(5),
+        #requestsTableContainer .data-table td:nth-child(5) {
             white-space: normal;
             word-wrap: break-word;
             text-overflow: unset;
             overflow: visible;
+            width: 120px;
         }
-
-        .data-table th:nth-child(1), 
-        .data-table td:nth-child(1) { width: 100px; } /* ID */
-        .data-table th:nth-child(2), 
-        .data-table td:nth-child(2) { width: 140px; } /* Name */
-        .data-table th:nth-child(3), 
-        .data-table td:nth-child(3) { width: 100px; } /* Blood Group */
-        .data-table th:nth-child(4), 
-        .data-table td:nth-child(4) { width: 100px; } /* Units */
-        .data-table th:nth-child(5), 
-        .data-table td:nth-child(5) { width: 120px; } /* Contact Number */
-        .data-table th:nth-child(6), 
-        .data-table td:nth-child(6) { width: 100px; } /* Status */
-        .data-table th:nth-child(7), 
-        .data-table td:nth-child(7) { width: 140px; } /* Hospital */
-        .data-table th:nth-child(8), 
-        .data-table td:nth-child(8) { width: 80px; } /* Urgency */
-        .data-table th:nth-child(9), 
-        .data-table td:nth-child(9) { width: 100px; } /* Date */
 
         .data-table th {
             background: var(--gray-50);

@@ -3110,9 +3110,26 @@
             console.log('Token present:', !!token);
             console.log('User data present:', !!userData);
 
-            if (!token || !userData) {
-                // User is not logged in - disable form and show message
+            // Validate token and userData - clear if invalid
+            let isValidAuth = false;
+            if (token && userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    // Check if user data has required fields
+                    if (user && (user.firstName || user.email)) {
+                        isValidAuth = true;
+                    }
+                } catch (error) {
+                    console.warn('Invalid user data found, clearing...');
+                    clearAuthenticationData();
+                }
+            }
+
+            if (!isValidAuth) {
+                // User is not logged in or invalid auth - clear form and disable
                 console.log('❌ User not authenticated - form disabled');
+                clearFormFields();
+                
                 if (loginOverlay) {
                     loginOverlay.style.display = 'none'; // Don't show overlay initially
                 }
@@ -3160,6 +3177,47 @@
                 } catch (error) {
                     console.warn('Error parsing user data:', error);
                 }
+            }
+        }
+
+        // Clear authentication data
+        function clearAuthenticationData() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            sessionStorage.removeItem('authToken');
+            sessionStorage.removeItem('userData');
+            console.log('Authentication data cleared');
+        }
+
+        // Clear all form fields
+        function clearFormFields() {
+            const form = document.getElementById('donorApplicationForm');
+            if (form) {
+                // Clear text inputs
+                const textInputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="number"]');
+                textInputs.forEach(input => {
+                    input.value = '';
+                });
+                
+                // Reset select elements
+                const selects = form.querySelectorAll('select');
+                selects.forEach(select => {
+                    select.selectedIndex = 0;
+                });
+                
+                // Clear textareas
+                const textareas = form.querySelectorAll('textarea');
+                textareas.forEach(textarea => {
+                    textarea.value = '';
+                });
+                
+                // Uncheck checkboxes
+                const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                console.log('Form fields cleared');
             }
         }
 
