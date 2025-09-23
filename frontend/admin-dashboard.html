@@ -598,6 +598,7 @@
 <script src="js/auth-state.js"></script>
 <script src="js/admin-dashboard.js"></script>
     <script>
+        <script>
         // Global variables for data storage
         let usersData = [];
         let donationsData = [];
@@ -605,324 +606,129 @@
 
         // Event listeners setup
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize all event listeners
-            initializeEventListeners();
-            
-            // Initialize dashboard - using the external JS functions
-            // Do not initialize here as it's already done in admin-dashboard.js
-            // initializeDashboard();
+            // Wait for external scripts to load before setting up event listeners
+            setTimeout(() => {
+                initializeEventListeners();
+            }, 500); // Increased delay to ensure external scripts are loaded
         });
 
         function initializeEventListeners() {
             // Header buttons
-            document.getElementById('logoutBtn').addEventListener('click', window.logout);
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn && typeof window.logout === 'function') {
+                logoutBtn.addEventListener('click', window.logout);
+            } else {
+                console.warn('Logout button or function not found');
+            }
             
-            // Refresh buttons
-            document.getElementById('refreshUsersBtn').addEventListener('click', window.loadUsers);
-            document.getElementById('refreshDonationsBtn').addEventListener('click', window.loadDonations);
-            document.getElementById('refreshRequestsBtn').addEventListener('click', window.loadRequests);
+            // Refresh buttons - directly call external functions
+            const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+            if (refreshUsersBtn && typeof window.loadUsers === 'function') {
+                refreshUsersBtn.addEventListener('click', () => window.loadUsers());
+            }
+            
+            const refreshDonationsBtn = document.getElementById('refreshDonationsBtn');
+            if (refreshDonationsBtn && typeof window.loadDonations === 'function') {
+                refreshDonationsBtn.addEventListener('click', () => window.loadDonations());
+            }
+            
+            const refreshRequestsBtn = document.getElementById('refreshRequestsBtn');
+            if (refreshRequestsBtn && typeof window.loadRequests === 'function') {
+                refreshRequestsBtn.addEventListener('click', () => window.loadRequests());
+            }
             
             // Search and filter inputs
-            document.getElementById('userSearch').addEventListener('input', filterUsers);
-            document.getElementById('roleFilter').addEventListener('change', filterUsers);
-            
-            document.getElementById('donationSearch').addEventListener('input', filterDonations);
-            document.getElementById('bloodTypeFilter').addEventListener('change', filterDonations);
-            
-            document.getElementById('requestSearch').addEventListener('input', filterRequests);
-            document.getElementById('requestStatusFilter').addEventListener('change', filterRequests);
-        }
-
-        // Dashboard functions are now handled by admin-dashboard.js
-        // These functions are kept as references to the external functions
-        
-        function initializeDashboard() {
-            // This function is now handled by admin-dashboard.js
-            if (typeof window.loadStats === 'function') {
-                window.loadStats();
-            }
-            if (typeof window.loadUsers === 'function') {
-                window.loadUsers();
-            }
-        }
-
-        // Users Management Functions are now handled by admin-dashboard.js
-        // This is a fallback implementation if the external function is not available
-        function loadUsers() {
-            // Use the external function if available
-            if (typeof window.loadUsers === 'function') {
-                window.loadUsers();
-                return;
+            const userSearch = document.getElementById('userSearch');
+            if (userSearch && typeof filterUsers === 'function') {
+                userSearch.addEventListener('input', filterUsers);
             }
             
-            // Fallback implementation
-            const container = document.getElementById('usersTableContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading users...</div>';
-            console.error('External loadUsers function not found. Please check if admin-dashboard.js is properly loaded.');
-        }
-
-        function displayUsers(users) {
-            const container = document.getElementById('usersTableContainer');
-            const usersCount = document.getElementById('usersCount');
-            
-            usersCount.textContent = `(${users.length} total)`;
-            
-            if (users.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <p>No users found</p>
-                    </div>
-                `;
-                return;
+            const roleFilter = document.getElementById('roleFilter');
+            if (roleFilter && typeof filterUsers === 'function') {
+                roleFilter.addEventListener('change', filterUsers);
             }
-
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Blood Type</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            users.forEach(user => {
-                tableHTML += `
-                    <tr>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.role}</td>
-                        <td>${user.bloodType}</td>
-                        <td><span class="status-badge status-${user.status}">${user.status}</span></td>
-                        <td>
-                            <button class="btn btn-primary edit-user-btn" data-user-id="${user.id}">Edit</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
-
-            // Add event listeners to edit buttons
-            container.querySelectorAll('.edit-user-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = e.target.getAttribute('data-user-id');
-                    editUser(userId);
-                });
-            });
+            
+            const donationSearch = document.getElementById('donationSearch');
+            if (donationSearch && typeof filterDonations === 'function') {
+                donationSearch.addEventListener('input', filterDonations);
+            }
+            
+            const bloodTypeFilter = document.getElementById('bloodTypeFilter');
+            if (bloodTypeFilter && typeof filterDonations === 'function') {
+                bloodTypeFilter.addEventListener('change', filterDonations);
+            }
+            
+            const requestSearch = document.getElementById('requestSearch');
+            if (requestSearch && typeof filterRequests === 'function') {
+                requestSearch.addEventListener('input', filterRequests);
+            }
+            
+            const requestStatusFilter = document.getElementById('requestStatusFilter');
+            if (requestStatusFilter && typeof filterRequests === 'function') {
+                requestStatusFilter.addEventListener('change', filterRequests);
+            }
         }
 
+        // Filter functions for search/filter functionality
         function filterUsers() {
             const searchTerm = document.getElementById('userSearch').value.toLowerCase();
             const roleFilter = document.getElementById('roleFilter').value;
             
-            let filteredUsers = usersData.filter(user => {
-                const matchesSearch = user.name.toLowerCase().includes(searchTerm) || 
-                                    user.email.toLowerCase().includes(searchTerm);
-                const matchesRole = roleFilter === '' || user.role === roleFilter;
-                
-                return matchesSearch && matchesRole;
-            });
-            
-            displayUsers(filteredUsers);
-        }
-
-        function editUser(userId) {
-            console.log('Editing user:', userId);
-            // Add your edit user logic here
-        }
-
-        // Blood Donations Functions are now handled by admin-dashboard.js
-        function loadDonations() {
-            // Use the external function if available
-            if (typeof window.loadDonations === 'function') {
-                window.loadDonations();
-                return;
-            }
-            
-            // Fallback implementation
-            const container = document.getElementById('donationsTableContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading donations...</div>';
-            console.error('External loadDonations function not found. Please check if admin-dashboard.js is properly loaded.');
-        }
-
-        function displayDonations(donations) {
-            const container = document.getElementById('donationsTableContainer');
-            const donationsCount = document.getElementById('donationsCount');
-            
-            donationsCount.textContent = `(${donations.length} total)`;
-            
-            if (donations.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-tint"></i>
-                        <p>No donations found</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Add your donations table HTML here
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Donor</th>
-                            <th>Blood Type</th>
-                            <th>Units</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            donations.forEach(donation => {
-                tableHTML += `
-                    <tr>
-                        <td>${donation.donorName}</td>
-                        <td>${donation.bloodType}</td>
-                        <td>${donation.units}</td>
-                        <td>${donation.date}</td>
-                        <td><span class="status-badge status-${donation.status}">${donation.status}</span></td>
-                        <td>
-                            <button class="btn btn-primary view-donation-btn" data-donation-id="${donation.id}">View</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
-
-            // Add event listeners to view buttons
-            container.querySelectorAll('.view-donation-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const donationId = e.target.getAttribute('data-donation-id');
-                    viewDonation(donationId);
+            if (window.usersData && Array.isArray(window.usersData)) {
+                let filteredUsers = window.usersData.filter(user => {
+                    const matchesSearch = (user.firstName + ' ' + user.lastName).toLowerCase().includes(searchTerm) || 
+                                        user.email.toLowerCase().includes(searchTerm);
+                    const matchesRole = roleFilter === '' || user.role === roleFilter;
+                    
+                    return matchesSearch && matchesRole;
                 });
-            });
+                
+                // Call external display function if available
+                if (typeof window.displayUsers === 'function') {
+                    const tableBody = document.getElementById('usersTableBody');
+                    window.displayUsers(filteredUsers, tableBody);
+                }
+            }
         }
 
         function filterDonations() {
             const searchTerm = document.getElementById('donationSearch').value.toLowerCase();
             const bloodTypeFilter = document.getElementById('bloodTypeFilter').value;
             
-            let filteredDonations = donationsData.filter(donation => {
-                const matchesSearch = donation.donorName.toLowerCase().includes(searchTerm);
-                const matchesBloodType = bloodTypeFilter === '' || donation.bloodType === bloodTypeFilter;
-                
-                return matchesSearch && matchesBloodType;
-            });
-            
-            displayDonations(filteredDonations);
-        }
-
-        function viewDonation(donationId) {
-            console.log('Viewing donation:', donationId);
-            // Add your view donation logic here
-        }
-
-        // Blood Requests Functions
-        function loadRequests() {
-            // Use the external function if available
-            if (typeof window.loadRequests === 'function') {
-                window.loadRequests();
-                return;
-            }
-            
-            // Fallback implementation
-            const container = document.getElementById('requestsTableContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading requests...</div>';
-            console.error('External loadRequests function not found. Please check if admin-dashboard.js is properly loaded.');
-        }
-
-        function displayRequests(requests) {
-            const container = document.getElementById('requestsTableContainer');
-            const requestsCount = document.getElementById('requestsCount');
-            
-            requestsCount.textContent = `(${requests.length} total)`;
-            
-            if (requests.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-hand-holding-medical"></i>
-                        <p>No requests found</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Add your requests table HTML here
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Requester</th>
-                            <th>Blood Type</th>
-                            <th>Units Needed</th>
-                            <th>Urgency</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            requests.forEach(request => {
-                tableHTML += `
-                    <tr>
-                        <td>${request.requesterName}</td>
-                        <td>${request.bloodType}</td>
-                        <td>${request.unitsNeeded}</td>
-                        <td>${request.urgency}</td>
-                        <td>${request.date}</td>
-                        <td><span class="status-badge status-${request.status}">${request.status}</span></td>
-                        <td>
-                            <button class="btn btn-primary view-request-btn" data-request-id="${request.id}">View</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
-
-            // Add event listeners to view buttons
-            container.querySelectorAll('.view-request-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const requestId = e.target.getAttribute('data-request-id');
-                    viewRequest(requestId);
+            if (window.donationsData && Array.isArray(window.donationsData)) {
+                let filteredDonations = window.donationsData.filter(donation => {
+                    const matchesSearch = donation.name.toLowerCase().includes(searchTerm);
+                    const matchesBloodType = bloodTypeFilter === '' || donation.bloodGroup === bloodTypeFilter;
+                    
+                    return matchesSearch && matchesBloodType;
                 });
-            });
+                
+                // Call external display function if available
+                if (typeof window.displayDonations === 'function') {
+                    const tableBody = document.getElementById('donationsTableBody');
+                    window.displayDonations(filteredDonations, tableBody);
+                }
+            }
         }
 
         function filterRequests() {
             const searchTerm = document.getElementById('requestSearch').value.toLowerCase();
             const statusFilter = document.getElementById('requestStatusFilter').value;
             
-            let filteredRequests = requestsData.filter(request => {
-                const matchesSearch = request.requesterName.toLowerCase().includes(searchTerm);
-                const matchesStatus = statusFilter === '' || request.status === statusFilter;
+            if (window.requestsData && Array.isArray(window.requestsData)) {
+                let filteredRequests = window.requestsData.filter(request => {
+                    const matchesSearch = (request.patientName || request.requesterName || '').toLowerCase().includes(searchTerm);
+                    const matchesStatus = statusFilter === '' || request.status === statusFilter;
+                    
+                    return matchesSearch && matchesStatus;
+                });
                 
-                return matchesSearch && matchesStatus;
-            });
-            
-            displayRequests(filteredRequests);
-        }
-
-        function viewRequest(requestId) {
-            console.log('Viewing request:', requestId);
-            // Add your view request logic here
+                // Call external display function if available
+                if (typeof window.displayRequests === 'function') {
+                    const tableBody = document.getElementById('requestsTableBody');
+                    window.displayRequests(filteredRequests, tableBody);
+                }
+            }
         }
 
     </script>

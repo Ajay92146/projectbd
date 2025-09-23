@@ -109,31 +109,37 @@ async function processAdminLogin(email, password, rememberMe) {
         if (response.success) {
             debugLog('✅ Admin credentials are correct!');
             
-            // Store admin session with verification
+            // Store admin session with verification and fallback
             try {
                 // Clear any existing admin data first
-                localStorage.removeItem('bloodconnect_admin');
-                localStorage.removeItem('admin_email');
-                localStorage.removeItem('admin_login_time');
-                sessionStorage.removeItem('bloodconnect_admin');
-                sessionStorage.removeItem('admin_email');
-                sessionStorage.removeItem('admin_login_time');
+                const storages = [localStorage, sessionStorage];
+                storages.forEach(storage => {
+                    storage.removeItem('bloodconnect_admin');
+                    storage.removeItem('admin_email');
+                    storage.removeItem('admin_login_time');
+                });
                 
                 // Set new admin session data based on remember me preference
-                const storage = rememberMe ? localStorage : sessionStorage;
-                storage.setItem('bloodconnect_admin', 'true');
-                storage.setItem('admin_email', email);
-                storage.setItem('admin_login_time', new Date().toISOString());
+                const primaryStorage = rememberMe ? localStorage : sessionStorage;
+                primaryStorage.setItem('bloodconnect_admin', 'true');
+                primaryStorage.setItem('admin_email', email);
+                primaryStorage.setItem('admin_login_time', new Date().toISOString());
                 
-                // Verify storage was successful
-                const storedStatus = storage.getItem('bloodconnect_admin');
-                const storedEmail = storage.getItem('admin_email');
+                // Mirror to the other storage as fallback
+                const secondaryStorage = rememberMe ? sessionStorage : localStorage;
+                secondaryStorage.setItem('bloodconnect_admin', 'true');
+                secondaryStorage.setItem('admin_email', email);
+                secondaryStorage.setItem('admin_login_time', new Date().toISOString());
+                
+                // Verify storage was successful in primary
+                const storedStatus = primaryStorage.getItem('bloodconnect_admin');
+                const storedEmail = primaryStorage.getItem('admin_email');
                 
                 debugLog(`💾 Stored admin status: ${storedStatus}`);
                 debugLog(`💾 Stored admin email: ${storedEmail}`);
                 
                 if (storedStatus === 'true' && storedEmail === email) {
-                    debugLog('✅ LocalStorage verification successful!');
+                    debugLog('✅ Storage verification successful!');
                     
                     // Show success message
                     if (successMessage) {
@@ -152,7 +158,17 @@ async function processAdminLogin(email, password, rememberMe) {
                 }
             } catch (storageError) {
                 debugLog(`❌ Storage error: ${storageError.message}`);
-                throw new Error('Session storage failed. Please try again.');
+                // Fallback: Try the other storage type
+                const fallbackStorage = rememberMe ? sessionStorage : localStorage;
+                fallbackStorage.setItem('bloodconnect_admin', 'true');
+                fallbackStorage.setItem('admin_email', email);
+                fallbackStorage.setItem('admin_login_time', new Date().toISOString());
+                
+                if (fallbackStorage.getItem('bloodconnect_admin') === 'true') {
+                    debugLog('✅ Fallback storage successful!');
+                } else {
+                    throw new Error('Session storage failed even in fallback. Please check browser settings.');
+                }
             }
             
         } else {
