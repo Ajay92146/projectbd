@@ -390,6 +390,70 @@ router.get('/user-donations', adminAuthMiddleware, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/admin/requests
+ * @desc    Get all blood requests with pagination and filtering
+ * @access  Admin only
+ */
+router.get('/requests', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { page = 1, limit = 10, search = '', status = '', urgency = '', bloodGroup = '' } = req.query;
+        
+        // Build search query
+        let query = { isActive: true };
+        
+        if (search) {
+            query.$or = [
+                { patientName: { $regex: search, $options: 'i' } },
+                { contactPersonName: { $regex: search, $options: 'i' } },
+                { hospitalName: { $regex: search, $options: 'i' } },
+                { location: { $regex: search, $options: 'i' } },
+                { contactNumber: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        if (status) {
+            query.status = status;
+        }
+        
+        if (urgency) {
+            query.urgency = urgency;
+        }
+        
+        if (bloodGroup) {
+            query.bloodGroup = bloodGroup;
+        }
+        
+        // Execute query with pagination
+        const requests = await Request.find(query)
+            .sort({ requestDate: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+        
+        // Get total count
+        const total = await Request.countDocuments(query);
+        
+        res.json({
+            success: true,
+            data: {
+                requests,
+                pagination: {
+                    page: parseInt(page),
+                    pages: Math.ceil(total / limit),
+                    total: total,
+                    limit: parseInt(limit)
+                }
+            }
+        });
+    } catch (error) {
+        logger.error('Error fetching requests:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch requests'
+        });
+    }
+});
+
+/**
  * @route   GET /api/admin/user-requests
  * @desc    Get all user requests with pagination and filtering
  * @access  Admin only

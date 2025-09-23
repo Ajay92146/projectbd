@@ -437,10 +437,30 @@
             
             <!-- Users Table -->
             <div id="usersTableContainer">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    Loading users...
-                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Blood Group</th>
+                            <th>City</th>
+                            <th>Donations</th>
+                            <th>Requests</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr>
+                            <td colspan="10" class="loading">
+                                <i class="fas fa-spinner"></i>
+                                Loading users...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -479,10 +499,28 @@
             
             <!-- Donations Table -->
             <div id="donationsTableContainer">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    Loading donations...
-                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Donor Name</th>
+                            <th>Email</th>
+                            <th>Blood Group</th>
+                            <th>City</th>
+                            <th>Contact</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="donationsTableBody">
+                        <tr>
+                            <td colspan="8" class="loading">
+                                <i class="fas fa-spinner"></i>
+                                Loading donations...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -516,10 +554,28 @@
             
             <!-- Requests Table -->
             <div id="requestsTableContainer">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    Loading requests...
-                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient Name</th>
+                            <th>Blood Group</th>
+                            <th>Units Needed</th>
+                            <th>Status</th>
+                            <th>Hospital</th>
+                            <th>Urgency</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsTableBody">
+                        <tr>
+                            <td colspan="8" class="loading">
+                                <i class="fas fa-spinner"></i>
+                                Loading requests...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         

@@ -410,16 +410,46 @@ function displayUsers(users, tableBody) {
     
     tableBody.innerHTML = users.map(user => `
         <tr>
-            <td>${user.id}</td>
-            <td>${user.firstName} ${user.lastName}</td>
-            <td>${user.email}</td>
-            <td>${user.phone || 'N/A'}</td>
-            <td><span class="status-badge ${user.role === 'donor' ? 'status-active' : 'status-pending'}">${user.role}</span></td>
+            <td>${user._id || user.id || 'N/A'}</td>
+            <td>${user.firstName || ''} ${user.lastName || ''}</td>
+            <td>${user.email || 'N/A'}</td>
+            <td>${user.phoneNumber || user.phone || 'N/A'}</td>
+            <td><span class="status-badge ${user.role === 'donor' ? 'status-active' : 'status-pending'}">${user.role || 'user'}</span></td>
             <td>${user.bloodGroup || 'N/A'}</td>
             <td>${user.city || 'N/A'}</td>
             <td>${user.donationsCount || 0}</td>
             <td>${user.requestsCount || 0}</td>
             <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+        </tr>
+    `).join('');
+}
+
+// Display donations in table
+function displayDonations(donations, tableBody) {
+    if (!tableBody) return;
+    
+    if (!donations || donations.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="empty-state">
+                    <i class="fas fa-tint"></i>
+                    <p>No donations found</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tableBody.innerHTML = donations.map(donation => `
+        <tr>
+            <td>${donation._id || donation.id || 'N/A'}</td>
+            <td>${donation.name || 'N/A'}</td>
+            <td>${donation.email || 'N/A'}</td>
+            <td>${donation.bloodGroup || 'N/A'}</td>
+            <td>${donation.city || 'N/A'}</td>
+            <td>${donation.contactNumber || donation.phone || 'N/A'}</td>
+            <td><span class="status-badge ${donation.isAvailable ? 'status-active' : 'status-pending'}">${donation.isAvailable ? 'Available' : 'Unavailable'}</span></td>
+            <td>${new Date(donation.registrationDate || donation.createdAt).toLocaleDateString()}</td>
         </tr>
     `).join('');
 }
