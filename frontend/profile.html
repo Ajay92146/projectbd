@@ -1061,24 +1061,24 @@
                                 <i class="fas fa-user"></i>
                                 <span>My Profile</span>
                             </a>
-                            <a href="profile.html?tab=donations" class="dropdown-item" onclick="switchToTab('donations'); return false;">
+                            <a href="#" class="dropdown-item" onclick="window.switchToTab('donations'); event.preventDefault();">
                                 <i class="fas fa-hand-holding-heart"></i>
                                 <span>My Donations</span>
                             </a>
-                            <a href="profile.html?tab=requests" class="dropdown-item" onclick="switchToTab('requests'); return false;">
+                            <a href="#" class="dropdown-item" onclick="window.switchToTab('requests'); event.preventDefault();">
                                 <i class="fas fa-search"></i>
                                 <span>My Requests</span>
                             </a>
-                            <a href="profile.html?tab=settings" class="dropdown-item" onclick="switchToTab('settings'); return false;">
+                            <a href="#" class="dropdown-item" onclick="window.switchToTab('settings'); event.preventDefault();">
                                 <i class="fas fa-cog"></i>
                                 <span>Settings</span>
                             </a>
-                            <a href="profile.html?tab=change-password" class="dropdown-item" onclick="switchToTab('changePassword'); return false;">
+                            <a href="#" class="dropdown-item" onclick="window.switchToTab('changePassword'); event.preventDefault();">
                                 <i class="fas fa-key"></i>
                                 <span>Change Password</span>
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a href="#" class="dropdown-item logout-item" id="logoutBtn" onclick="handleLogout(event)">
+                            <a href="#" class="dropdown-item logout-item" id="logoutBtn" onclick="window.handleLogout(event);">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span>Logout</span>
                             </a>
@@ -1250,157 +1250,8 @@
     
     <!-- Profile Navigation Script -->
     <script>
-        // Initialize profile dropdown functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const profileDropdown = document.querySelector('.profile-dropdown');
-            const profileToggle = document.querySelector('.profile-toggle');
-            const profileDropdownMenu = document.querySelector('.profile-dropdown-menu');
-            
-            if (profileToggle && profileDropdown) {
-                profileToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    profileDropdown.classList.toggle('active');
-                });
-                
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!profileDropdown.contains(e.target)) {
-                        profileDropdown.classList.remove('active');
-                    }
-                });
-            }
-            
-            // Handle logout
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Use AuthStateManager if available
-                    if (window.authStateManager && typeof window.authStateManager.logout === 'function') {
-                        console.log('Using AuthStateManager logout');
-                        window.authStateManager.logout();
-                    } else {
-                        console.log('Using fallback logout');
-                        // Fallback logout if AuthStateManager is not available
-                        localStorage.removeItem('bloodconnect_token');
-                        localStorage.removeItem('bloodconnect_user');
-                        localStorage.removeItem('bloodconnect_demo_user');
-                        localStorage.removeItem('bloodconnect_remember');
-                        localStorage.removeItem('bloodconnect_redirect');
-                        
-                        // Clear any session storage as well
-                        sessionStorage.clear();
-                        
-                        // Show confirmation message
-                        alert('You have been logged out successfully!');
-                        
-                        // Redirect to home page
-                        window.location.href = 'index.html';
-                    }
-                });
-            }
-            
-            // Also handle logout for any other logout buttons that might exist
-            const allLogoutBtns = document.querySelectorAll('.logout-item, .logout-btn, [data-action="logout"]');
-            allLogoutBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Use AuthStateManager if available
-                    if (window.authStateManager && typeof window.authStateManager.logout === 'function') {
-                        console.log('Using AuthStateManager logout (from additional buttons)');
-                        window.authStateManager.logout();
-                    } else {
-                        console.log('Using fallback logout (from additional buttons)');
-                        // Fallback logout
-                        localStorage.removeItem('bloodconnect_token');
-                        localStorage.removeItem('bloodconnect_user');
-                        localStorage.removeItem('bloodconnect_demo_user');
-                        localStorage.removeItem('bloodconnect_remember');
-                        localStorage.removeItem('bloodconnect_redirect');
-                        
-                        // Clear session storage
-                        sessionStorage.clear();
-                        
-                        // Show confirmation
-                        alert('You have been logged out successfully!');
-                        
-                        // Redirect to home
-                        window.location.href = 'index.html';
-                    }
-                });
-            });
-            
-            // Wait for AuthStateManager to be available and try again
-            setTimeout(() => {
-                if (window.authStateManager) {
-                    console.log('AuthStateManager is now available:', window.authStateManager);
-                }
-            }, 1000);
-            
-            // Enhanced tab functionality
-            const tabButtons = document.querySelectorAll('.tab-button');
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const tabName = this.getAttribute('data-tab');
-                    if (tabName) {
-                        switchToTab(tabName);
-                    }
-                });
-            });
-        });
-    </script>
-    
-    <!-- Global Logout Handler -->
-    <script>
-        // Global logout function that can be called from anywhere
-        function handleLogout(event) {
-            if (event) {
-                event.preventDefault();
-            }
-            
-            console.log('🚪 Logout initiated');
-            
-            // Try multiple logout approaches
-            if (window.authStateManager && typeof window.authStateManager.logout === 'function') {
-                console.log('✅ Using AuthStateManager logout');
-                window.authStateManager.logout();
-            } else {
-                console.log('⚠️ AuthStateManager not available, using direct logout');
-                
-                // Direct logout approach
-                try {
-                    // Clear all authentication data
-                    localStorage.removeItem('bloodconnect_token');
-                    localStorage.removeItem('bloodconnect_user');
-                    localStorage.removeItem('bloodconnect_demo_user');
-                    localStorage.removeItem('bloodconnect_remember');
-                    localStorage.removeItem('bloodconnect_redirect');
-                    
-                    // Clear session storage
-                    sessionStorage.clear();
-                    
-                    console.log('🗑️ Authentication data cleared');
-                    
-                    // Show confirmation
-                    alert('You have been logged out successfully!');
-                    
-                    // Force page reload and redirect
-                    window.location.replace('index.html');
-                } catch (error) {
-                    console.error('Logout error:', error);
-                    // Force redirect even if there's an error
-                    window.location.href = 'index.html';
-                }
-            }
-        }
-        
-        // Make the function globally available
-        window.handleLogout = handleLogout;
-        
-        // Global tab switching function
-        function switchToTab(tabName) {
+        // Ensure functions are available immediately
+        window.switchToTab = function(tabName) {
             console.log('🔄 Switching to tab:', tabName);
             
             // Hide all tab contents
@@ -1450,26 +1301,106 @@
                 const newUrl = window.location.pathname + '?tab=' + tabName;
                 history.pushState({tab: tabName}, '', newUrl);
             }
-        }
+        };
         
-        // Make the function globally available
-        window.switchToTab = switchToTab;
+        // Global logout function
+        window.handleLogout = function(event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
+            console.log('🚪 Logout initiated');
+            
+            // Try multiple logout approaches
+            if (window.authStateManager && typeof window.authStateManager.logout === 'function') {
+                console.log('✅ Using AuthStateManager logout');
+                window.authStateManager.logout();
+            } else {
+                console.log('⚠️ AuthStateManager not available, using direct logout');
+                
+                // Direct logout approach
+                try {
+                    // Clear all authentication data
+                    localStorage.removeItem('bloodconnect_token');
+                    localStorage.removeItem('bloodconnect_user');
+                    localStorage.removeItem('bloodconnect_demo_user');
+                    localStorage.removeItem('bloodconnect_remember');
+                    localStorage.removeItem('bloodconnect_redirect');
+                    
+                    // Clear session storage
+                    sessionStorage.clear();
+                    
+                    console.log('🗑️ Authentication data cleared');
+                    
+                    // Show confirmation
+                    alert('You have been logged out successfully!');
+                    
+                    // Force page reload and redirect
+                    window.location.replace('index.html');
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    // Force redirect even if there's an error
+                    window.location.href = 'index.html';
+                }
+            }
+        };
         
-        // Handle URL parameters on page load
-        function handleInitialTab() {
+        // Initialize profile dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Profile page JavaScript initializing...');
+            
+            const profileDropdown = document.querySelector('.profile-dropdown');
+            const profileToggle = document.querySelector('.profile-toggle');
+            const profileDropdownMenu = document.querySelector('.profile-dropdown-menu');
+            
+            if (profileToggle && profileDropdown) {
+                profileToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    profileDropdown.classList.toggle('active');
+                    console.log('📋 Profile dropdown toggled');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!profileDropdown.contains(e.target)) {
+                        profileDropdown.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Enhanced tab functionality
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    if (tabName) {
+                        window.switchToTab(tabName);
+                    }
+                });
+            });
+            
+            // Handle logout buttons
+            const logoutBtns = document.querySelectorAll('.logout-item, .logout-btn, [data-action="logout"], #logoutBtn');
+            logoutBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.handleLogout(e);
+                });
+            });
+            
+            // Handle URL parameters on page load
             const urlParams = new URLSearchParams(window.location.search);
             const tabParam = urlParams.get('tab');
             
             if (tabParam) {
                 console.log('🔗 URL parameter found, switching to tab:', tabParam);
                 setTimeout(() => {
-                    switchToTab(tabParam);
+                    window.switchToTab(tabParam);
                 }, 100);
             }
-        }
-        
-        // Call on page load
-        handleInitialTab();
+            
+            console.log('✅ Profile page JavaScript initialized successfully');
+        });
     </script>
 </body>
 </html>
