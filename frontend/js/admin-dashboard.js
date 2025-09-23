@@ -431,7 +431,7 @@ function displayUsers(users, tableBody) {
     
     tableBody.innerHTML = users.map(user => `
         <tr>
-            <td>${user._id || user.id || 'N/A'}</td>
+            <td title="${user._id || user.id || 'N/A'}">${(user._id || user.id || 'N/A').substring(0, 8)}...</td>
             <td>${user.firstName || ''} ${user.lastName || ''}</td>
             <td>${user.email || 'N/A'}</td>
             <td>${user.phoneNumber || user.phone || 'N/A'}</td>
@@ -440,7 +440,7 @@ function displayUsers(users, tableBody) {
             <td>${user.city || 'N/A'}</td>
             <td>${user.donationsCount || 0}</td>
             <td>${user.requestsCount || 0}</td>
-            <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+            <td title="${new Date(user.createdAt).toLocaleString()}">${new Date(user.createdAt).toLocaleDateString('en-GB').split('/').reverse().join('/')}</td>
         </tr>
     `).join('');
 }

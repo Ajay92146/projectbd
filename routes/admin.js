@@ -231,18 +231,55 @@ router.get('/users', adminAuthMiddleware, async (req, res) => {
             .limit(limit * 1)
             .skip((page - 1) * limit);
         
+        // Enhance users with donation and request counts
+        const enhancedUsers = await Promise.all(users.map(async (user) => {
+            const userObj = user.toObject();
+            
+            // Count donations from both Donor and UserDonation collections
+            const donorCount = await Donor.countDocuments({ 
+                email: user.email, 
+                isActive: true 
+            });
+            const userDonationCount = await UserDonation.countDocuments({ 
+                userId: user._id, 
+                isActive: true 
+            });
+            
+            // Count requests from both Request and UserRequest collections
+            const requestCount = await Request.countDocuments({ 
+                $or: [
+                    { email: user.email },
+                    { contactNumber: user.phoneNumber }
+                ],
+                isActive: true 
+            });
+            const userRequestCount = await UserRequest.countDocuments({ 
+                userId: user._id, 
+                isActive: true 
+            });
+            
+            userObj.donationsCount = donorCount + userDonationCount;
+            userObj.requestsCount = requestCount + userRequestCount;
+            
+            return userObj;
+        }));
+        
         // Get total count
         const total = await User.countDocuments(query);
         
         res.json({
             success: true,
             data: {
-                users,
+                users: enhancedUsers,
                 pagination: {
                     currentPage: parseInt(page),
                     totalPages: Math.ceil(total / limit),
                     totalUsers: total,
-                    usersPerPage: parseInt(limit)
+                    usersPerPage: parseInt(limit),
+                    page: parseInt(page),
+                    pages: Math.ceil(total / limit),
+                    total: total,
+                    limit: parseInt(limit)
                 }
             }
         });
