@@ -781,15 +781,15 @@ function displayRequests(requests, tableBody) {
     
     tableBody.innerHTML = requests.map(request => `
         <tr>
-            <td title="${request.id || request._id}">${(request.id || request._id || 'N/A').substring(0, 8)}...</td>
+            <td title="${request._id || request.id}">${(request._id || request.id || 'N/A').substring(0, 8)}...</td>
             <td>${request.patientName || request.requesterName || 'N/A'}</td>
             <td>${request.bloodGroup || 'N/A'}</td>
-            <td>${request.unitsNeeded || request.units || '1'}</td>
+            <td>${request.requiredUnits || request.unitsNeeded || request.units || '1'}</td>
             <td>${request.contactNumber || request.phone || request.emergencyContact || 'N/A'}</td>
-            <td><span class="status-badge status-${request.status || 'pending'}">${request.status || 'pending'}</span></td>
-            <td>${request.hospital || request.hospitalName || request.location || 'N/A'}</td>
-            <td><span class="urgency-badge urgency-${request.urgency || 'normal'}">${request.urgency || 'normal'}</span></td>
-            <td title="${new Date(request.createdAt || request.date || Date.now()).toLocaleString()}">${new Date(request.createdAt || request.date || Date.now()).toLocaleDateString('en-GB').split('/').reverse().join('/')}</td>
+            <td><span class="status-badge status-${(request.status || 'pending').toLowerCase()}">${request.status || 'Pending'}</span></td>
+            <td>${request.hospitalName || request.hospital || request.location || 'N/A'}</td>
+            <td><span class="urgency-badge urgency-${(request.urgency || 'normal').toLowerCase()}">${request.urgency || 'Medium'}</span></td>
+            <td title="${new Date(request.createdAt || request.requestDate || request.date || Date.now()).toLocaleString()}">${new Date(request.createdAt || request.requestDate || request.date || Date.now()).toLocaleDateString('en-GB').split('/').reverse().join('/')}</td>
         </tr>
     `).join('');
     
