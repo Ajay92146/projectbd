@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodConnect - Redirecting...</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #fee2e2 0%, #f9fafb 100%);
+        }
+        .redirect-container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            font-size: 2rem;
+            color: #e53e3e;
+            margin-bottom: 1rem;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #fee2e2;
+            border-top: 4px solid #e53e3e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .links {
+            margin-top: 2rem;
+        }
+        .links a {
+            display: inline-block;
+            margin: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #e53e3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: background 0.3s;
+        }
+        .links a:hover {
+            background: #c53030;
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <div class="logo">
+            <i class="fas fa-heart"></i> BloodConnect
+        </div>
+        <h2>Redirecting to BloodConnect...</h2>
+        <div class="spinner"></div>
+        <p>If you're not redirected automatically, please choose:</p>
+        <div class="links">
+            <a href="frontend/index.html">Main Website</a>
+            <a href="frontend/admin-login.html">Admin Login</a>
+            <a href="frontend/login.html">User Login</a>
+        </div>
+    </div>
+
+    <script>
+        // Auto redirect to main website after 2 seconds
+        setTimeout(() => {
+            window.location.href = 'frontend/index.html';
+        }, 2000);
+    </script>
+</body>
+</html>
