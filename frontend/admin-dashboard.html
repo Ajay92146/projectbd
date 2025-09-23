@@ -525,7 +525,19 @@
         
     </main>
 
-    <script src="js/api.js"></script>
+    <!-- Load scripts in the correct order -->
+<script>
+    // Define updateNavigation function globally before any scripts load
+    window.updateNavigation = function() {
+        console.log('Navigation update placeholder');
+        // This is a placeholder function that will be overridden by auth-state.js if loaded
+        if (window.authStateManager) {
+            window.authStateManager.updateNavigation();
+        }
+    };
+</script>
+
+<script src="js/api.js"></script>
 <script src="js/admin-auth-utils.js"></script>
 <script src="js/auth-state.js"></script>
 <script src="js/admin-dashboard.js"></script>
@@ -540,18 +552,19 @@
             // Initialize all event listeners
             initializeEventListeners();
             
-            // Initialize dashboard
-            initializeDashboard();
+            // Initialize dashboard - using the external JS functions
+            // Do not initialize here as it's already done in admin-dashboard.js
+            // initializeDashboard();
         });
 
         function initializeEventListeners() {
             // Header buttons
-            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('logoutBtn').addEventListener('click', window.logout);
             
             // Refresh buttons
-            document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
-            document.getElementById('refreshDonationsBtn').addEventListener('click', loadDonations);
-            document.getElementById('refreshRequestsBtn').addEventListener('click', loadRequests);
+            document.getElementById('refreshUsersBtn').addEventListener('click', window.loadUsers);
+            document.getElementById('refreshDonationsBtn').addEventListener('click', window.loadDonations);
+            document.getElementById('refreshRequestsBtn').addEventListener('click', window.loadRequests);
             
             // Search and filter inputs
             document.getElementById('userSearch').addEventListener('input', filterUsers);
@@ -564,49 +577,32 @@
             document.getElementById('requestStatusFilter').addEventListener('change', filterRequests);
         }
 
-        // Dashboard functions
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                console.log('Logging out...');
-                // Add your logout logic here
-                // Example: window.location.href = '/login';
+        // Dashboard functions are now handled by admin-dashboard.js
+        // These functions are kept as references to the external functions
+        
+        function initializeDashboard() {
+            // This function is now handled by admin-dashboard.js
+            if (typeof window.loadStats === 'function') {
+                window.loadStats();
+            }
+            if (typeof window.loadUsers === 'function') {
+                window.loadUsers();
             }
         }
 
-        function initializeDashboard() {
-            // Load all initial data
-            loadStatistics();
-            loadUsers();
-            loadDonations();
-            loadRequests();
-        }
-
-        function loadStatistics() {
-            // Use the loadStats function from the external JS file
-            loadStats();
-        }
-
-        // Users Management Functions
+        // Users Management Functions are now handled by admin-dashboard.js
+        // This is a fallback implementation if the external function is not available
         function loadUsers() {
+            // Use the external function if available
+            if (typeof window.loadUsers === 'function') {
+                window.loadUsers();
+                return;
+            }
+            
+            // Fallback implementation
             const container = document.getElementById('usersTableContainer');
             container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading users...</div>';
-            
-            // Simulate API call - replace with your actual API
-            setTimeout(() => {
-                // Example data structure - replace with your actual data
-                usersData = [
-                    {
-                        id: 1,
-                        name: 'John Doe',
-                        email: 'john@example.com',
-                        role: 'donor',
-                        bloodType: 'O+',
-                        status: 'active'
-                    }
-                    // Add more sample data or load from API
-                ];
-                displayUsers(usersData);
-            }, 1000);
+            console.error('External loadUsers function not found. Please check if admin-dashboard.js is properly loaded.');
         }
 
         function displayUsers(users) {
@@ -687,18 +683,18 @@
             // Add your edit user logic here
         }
 
-        // Blood Donations Functions
+        // Blood Donations Functions are now handled by admin-dashboard.js
         function loadDonations() {
+            // Use the external function if available
+            if (typeof window.loadDonations === 'function') {
+                window.loadDonations();
+                return;
+            }
+            
+            // Fallback implementation
             const container = document.getElementById('donationsTableContainer');
             container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading donations...</div>';
-            
-            // Simulate API call
-            setTimeout(() => {
-                donationsData = [
-                    // Add your donations data structure here
-                ];
-                displayDonations(donationsData);
-            }, 1000);
+            console.error('External loadDonations function not found. Please check if admin-dashboard.js is properly loaded.');
         }
 
         function displayDonations(donations) {
@@ -781,16 +777,16 @@
 
         // Blood Requests Functions
         function loadRequests() {
+            // Use the external function if available
+            if (typeof window.loadRequests === 'function') {
+                window.loadRequests();
+                return;
+            }
+            
+            // Fallback implementation
             const container = document.getElementById('requestsTableContainer');
             container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading requests...</div>';
-            
-            // Simulate API call
-            setTimeout(() => {
-                requestsData = [
-                    // Add your requests data structure here hahga
-                ];
-                displayRequests(requestsData);
-            }, 1000);
+            console.error('External loadRequests function not found. Please check if admin-dashboard.js is properly loaded.');
         }
 
         function displayRequests(requests) {

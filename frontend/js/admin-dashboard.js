@@ -537,19 +537,216 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadStats();
     loadUsers();
+    loadDonations();
+    loadRequests();
     
     // Set up auto-refresh
     setInterval(() => {
         loadStats();
+        loadDonations();
+        loadRequests();
         updateLastUpdatedTime();
     }, 30000); // Refresh every 30 seconds
     
     debugLog('✅ Admin dashboard initialized successfully!');
 });
 
+// Enhanced loadDonations with pagination and filtering
+async function loadDonations(searchTerm = '', bloodTypeFilter = '', page = 1, limit = 20) {
+    const donationsTableBody = document.getElementById('donationsTableBody');
+    const donationsCount = document.getElementById('donationsCount');
+    
+    if (donationsTableBody) {
+        donationsTableBody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner"></i> Loading donations...</td></tr>';
+    }
+
+    try {
+        debugLog('Loading donations...');
+        let apiUrl = `${getAPIBaseURL()}/admin/donations?page=${page}&limit=${limit}`;
+        
+        // Add search and filter parameters
+        if (searchTerm) {
+            apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+        if (bloodTypeFilter) {
+            apiUrl += `&bloodType=${encodeURIComponent(bloodTypeFilter)}`;
+        }
+        
+        debugLog(`API URL: ${apiUrl}`);
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
+        
+        debugLog(`Response status: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        debugLog('Donations response data:', data);
+        
+        if (data.success) {
+            // Store donations data globally
+            window.donationsData = data.data.donations;
+            
+            displayDonations(data.data.donations, donationsTableBody);
+            updatePagination(data.data.pagination, 'donations', loadDonations);
+            
+            if (donationsCount) {
+                donationsCount.textContent = `(${data.data.pagination.total} total)`;
+            }
+        } else {
+            throw new Error(data.message || 'Failed to load donations');
+        }
+    } catch (error) {
+        debugLog(`Error loading donations: ${error.message}`);
+        console.error('Error loading donations:', error);
+        
+        if (donationsTableBody) {
+            donationsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading donations: ${error.message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+}
+
 // Make functions globally available
 window.loadStats = loadStats;
 window.loadUsers = loadUsers;
+window.loadDonations = loadDonations;
+window.loadRequests = loadRequests;
 window.loadStatistics = loadStats; // Alias for auto-refresh service
 window.showNotification = showNotification;
 window.logout = logout;
+window.filterRequests = filterRequests;
+
+/**
+ * Enhanced loadRequests with pagination and filtering
+ */
+async function loadRequests(searchTerm = '', statusFilter = '', page = 1, limit = 20) {
+    const requestsTableBody = document.getElementById('requestsTableBody');
+    const requestsCount = document.getElementById('requestsCount');
+    
+    if (requestsTableBody) {
+        requestsTableBody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner"></i> Loading requests...</td></tr>';
+    }
+
+    try {
+        debugLog('Loading requests...');
+        let apiUrl = `${getAPIBaseURL()}/admin/requests?page=${page}&limit=${limit}`;
+        
+        // Add search and filter parameters
+        if (searchTerm) {
+            apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+        if (statusFilter) {
+            apiUrl += `&status=${encodeURIComponent(statusFilter)}`;
+        }
+        
+        debugLog(`API URL: ${apiUrl}`);
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
+        
+        debugLog(`Response status: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        debugLog('Requests response data:', data);
+        
+        if (data.success) {
+            // Store requests data globally
+            window.requestsData = data.data.requests;
+            
+            displayRequests(data.data.requests, requestsTableBody);
+            updatePagination(data.data.pagination, 'requests', loadRequests);
+            
+            if (requestsCount) {
+                requestsCount.textContent = `(${data.data.pagination.total} total)`;
+            }
+            
+            // Update requests count in the dashboard
+            const totalRequests = document.getElementById('totalRequests');
+            if (totalRequests && data.data.pagination) {
+                totalRequests.textContent = data.data.pagination.total.toLocaleString();
+            }
+        } else {
+            throw new Error(data.message || 'Failed to load requests');
+        }
+    } catch (error) {
+        debugLog(`Error loading requests: ${error.message}`);
+        console.error('Error loading requests:', error);
+        
+        if (requestsTableBody) {
+            requestsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading requests: ${error.message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        showNotification('Failed to load requests. Please try again.', 'error');
+    }
+}
+
+// Display requests in table
+function displayRequests(requests, tableBody) {
+    if (!tableBody) return;
+    
+    if (!requests || requests.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="empty-state">
+                    <i class="fas fa-tint"></i>
+                    <p>No blood requests found</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tableBody.innerHTML = requests.map(request => `
+        <tr>
+            <td>${request.id || request._id}</td>
+            <td>${request.patientName || request.requesterName || 'N/A'}</td>
+            <td>${request.bloodGroup || 'N/A'}</td>
+            <td>${request.unitsNeeded || request.units || '1'}</td>
+            <td><span class="status-badge status-${request.status || 'pending'}">${request.status || 'pending'}</span></td>
+            <td>${request.hospital || request.location || 'N/A'}</td>
+            <td><span class="urgency-badge urgency-${request.urgency || 'normal'}">${request.urgency || 'normal'}</span></td>
+            <td>${new Date(request.createdAt || request.date || Date.now()).toLocaleDateString()}</td>
+        </tr>
+    `).join('');
+    
+    // Add event listeners for view buttons if they exist
+    const viewButtons = tableBody.querySelectorAll('.view-request-btn');
+    if (viewButtons.length > 0) {
+        viewButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const requestId = button.getAttribute('data-id');
+                if (typeof viewRequest === 'function') {
+                    viewRequest(requestId);
+                }
+            });
+        });
+    }
+}
+
+// Make loadRequests globally available
+window.loadRequests = loadRequests;

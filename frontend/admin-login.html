@@ -439,174 +439,66 @@
         </div>
     </div>
 
-    <!-- JavaScript -->
+    <!-- JavaScript Libraries -->
+    <script src="js/api.js"></script>
+    <script src="js/admin-login.js"></script>
+    
     <script>
-        // Debug logging function
-        function debugLog(message) {
-            console.log(`[AdminLogin] ${message}`);
-        }
-
-        // Get API base URL
-        function getAPIBaseURL() {
-            const protocol = window.location.protocol;
-            const hostname = window.location.hostname;
-            const port = window.location.port;
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Admin login page loaded');
             
-            debugLog(`🔧 Determining API URL: ${protocol}//${hostname}:${port}`);
-            
-            if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                const devApiUrl = 'http://localhost:3002/api';
-                debugLog(`🔧 Development API URL: ${devApiUrl}`);
-                return devApiUrl;
-            }
-
-            const prodApiUrl = `${protocol}//${hostname}${port ? ':' + port : ''}/api`;
-            debugLog(`🔧 Production API URL: ${prodApiUrl}`);
-            return prodApiUrl;
-        }
-
-        // Check if admin is already logged in
-        function checkExistingAuth() {
-            debugLog('🔍 Checking existing authentication...');
-            
-            const adminStatus = localStorage.getItem('bloodconnect_admin');
-            const adminEmail = localStorage.getItem('admin_email');
-            const adminLoginTime = localStorage.getItem('admin_login_time');
-            
-            debugLog(`📱 LocalStorage admin status: ${adminStatus}`);
-            debugLog(`📧 LocalStorage admin email: ${adminEmail}`);
-            debugLog(`🕒 LocalStorage admin login time: ${adminLoginTime}`);
-            
-            if (adminStatus === 'true' && adminEmail && adminLoginTime) {
-                const loginTime = new Date(adminLoginTime);
-                const currentTime = new Date();
-                const timeDiff = currentTime - loginTime;
-                const minutesDiff = timeDiff / (1000 * 60);
-                
-                debugLog(`⏱️ Session age: ${minutesDiff.toFixed(2)} minutes`);
-                
-                if (minutesDiff < 30) {
-                    debugLog('✅ Valid session found, redirecting to dashboard...');
-                    window.location.href = 'admin-dashboard.html';
-                    return;
-                }
-            }
-            
-            debugLog('❌ No valid session found');
-        }
-
-        // Show error message
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        // Hide error message
-        function hideError() {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.style.display = 'none';
-        }
-
-        // Set loading state
-        function setLoading(loading) {
-            const loginBtn = document.getElementById('loginBtn');
-            const loadingIcon = document.getElementById('loadingIcon');
-            const loginIcon = document.getElementById('loginIcon');
-            const loginText = document.getElementById('loginText');
-            
-            if (loading) {
-                loginBtn.disabled = true;
-                loadingIcon.classList.add('show');
-                loginIcon.style.display = 'none';
-                loginText.textContent = 'Logging in...';
-            } else {
-                loginBtn.disabled = false;
-                loadingIcon.classList.remove('show');
-                loginIcon.style.display = 'inline-block';
-                loginText.textContent = 'Login to Dashboard';
-            }
-        }
-
-        // Handle admin login
-        async function handleAdminLogin(email, password) {
-            try {
-                debugLog('🔐 Attempting admin login...');
-                const apiUrl = `${getAPIBaseURL()}/admin/login`;
-                debugLog(`API URL: ${apiUrl}`);
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
-                });
-                
-                debugLog(`Response status: ${response.status}`);
-                
-                const data = await response.json();
-                debugLog('Response data:', data);
-                
-                if (data.success) {
-                    debugLog('✅ Login successful!');
-                    
-                    // Store admin authentication data
-                    localStorage.setItem('bloodconnect_admin', 'true');
-                    localStorage.setItem('admin_email', email);
-                    localStorage.setItem('admin_login_time', new Date().toISOString());
-                    
-                    debugLog('💾 Stored authentication data in localStorage');
-                    
-                    // Redirect to admin dashboard
-                    debugLog('🚀 Redirecting to admin dashboard...');
-                    window.location.href = 'admin-dashboard.html';
-                } else {
-                    throw new Error(data.message || 'Login failed');
-                }
-            } catch (error) {
-                debugLog(`❌ Login error: ${error.message}`);
-                throw error;
-            }
-        }
-
-        // Form submission handler
-        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-            
-            if (!email || !password) {
-                showError('Please enter both email and password');
+            // Check if already logged in
+            if (checkExistingAdminLogin()) {
                 return;
             }
             
-            hideError();
-            setLoading(true);
-            
-            try {
-                await handleAdminLogin(email, password);
-            } catch (error) {
-                showError(error.message || 'Login failed. Please try again.');
-                setLoading(false);
+            // Set up form submission handler
+            const adminLoginForm = document.getElementById('adminLoginForm');
+            if (adminLoginForm) {
+                adminLoginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('adminEmail').value;
+                    const password = document.getElementById('adminPassword').value;
+                    const rememberMe = true; // Default to remember me
+                    
+                    if (!email || !password) {
+                        const errorDiv = document.getElementById('errorMessage');
+                        errorDiv.textContent = 'Please enter both email and password';
+                        errorDiv.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Hide error message
+                    const errorDiv = document.getElementById('errorMessage');
+                    errorDiv.style.display = 'none';
+                    
+                    // Set loading state
+                    const loginBtn = document.getElementById('loginBtn');
+                    const loadingIcon = document.getElementById('loadingIcon');
+                    const loginIcon = document.getElementById('loginIcon');
+                    const loginText = document.getElementById('loginText');
+                    
+                    loginBtn.disabled = true;
+                    loadingIcon.classList.add('show');
+                    loginIcon.style.display = 'none';
+                    loginText.textContent = 'Logging in...';
+                    
+                    try {
+                        await processAdminLogin(email, password, rememberMe);
+                    } catch (error) {
+                        errorDiv.textContent = error.message || 'Login failed. Please try again.';
+                        errorDiv.style.display = 'block';
+                        
+                        loginBtn.disabled = false;
+                        loadingIcon.classList.remove('show');
+                        loginIcon.style.display = 'inline-block';
+                        loginText.textContent = 'Login to Dashboard';
+                    }
+                });
             }
         });
-
-        // Check existing authentication on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            debugLog('🚀 Admin login page loaded');
-            
-            // Small delay to ensure any redirects from dashboard complete first
-            setTimeout(() => {
-                checkExistingAuth();
-            }, 100);
-        });
-
-        console.log('✅ Admin login script loaded successfully');
     </script>
 </body>
 </html>
