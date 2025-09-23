@@ -694,7 +694,7 @@ async function loadRequests(searchTerm = '', statusFilter = '', page = 1, limit 
     const requestsCount = document.getElementById('requestsCount');
     
     if (requestsTableBody) {
-        requestsTableBody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner"></i> Loading requests...</td></tr>';
+        requestsTableBody.innerHTML = '<tr><td colspan="9" class="loading"><i class="fas fa-spinner"></i> Loading requests...</td></tr>';
     }
 
     try {
@@ -751,7 +751,7 @@ async function loadRequests(searchTerm = '', statusFilter = '', page = 1, limit 
         if (requestsTableBody) {
             requestsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="8" class="empty-state">
+                    <td colspan="9" class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
                         <p>Error loading requests: ${error.message}</p>
                     </td>
@@ -770,7 +770,7 @@ function displayRequests(requests, tableBody) {
     if (!requests || requests.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="8" class="empty-state">
+                <td colspan="9" class="empty-state">
                     <i class="fas fa-tint"></i>
                     <p>No blood requests found</p>
                 </td>
@@ -781,14 +781,15 @@ function displayRequests(requests, tableBody) {
     
     tableBody.innerHTML = requests.map(request => `
         <tr>
-            <td>${request.id || request._id}</td>
+            <td title="${request.id || request._id}">${(request.id || request._id || 'N/A').substring(0, 8)}...</td>
             <td>${request.patientName || request.requesterName || 'N/A'}</td>
             <td>${request.bloodGroup || 'N/A'}</td>
             <td>${request.unitsNeeded || request.units || '1'}</td>
+            <td>${request.contactNumber || request.phone || request.emergencyContact || 'N/A'}</td>
             <td><span class="status-badge status-${request.status || 'pending'}">${request.status || 'pending'}</span></td>
-            <td>${request.hospital || request.location || 'N/A'}</td>
+            <td>${request.hospital || request.hospitalName || request.location || 'N/A'}</td>
             <td><span class="urgency-badge urgency-${request.urgency || 'normal'}">${request.urgency || 'normal'}</span></td>
-            <td>${new Date(request.createdAt || request.date || Date.now()).toLocaleDateString()}</td>
+            <td title="${new Date(request.createdAt || request.date || Date.now()).toLocaleString()}">${new Date(request.createdAt || request.date || Date.now()).toLocaleDateString('en-GB').split('/').reverse().join('/')}</td>
         </tr>
     `).join('');
     

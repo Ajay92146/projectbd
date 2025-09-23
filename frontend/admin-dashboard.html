@@ -171,6 +171,16 @@
             box-shadow: var(--shadow-lg);
             border: 1px solid rgba(229, 62, 62, 0.1);
             margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+
+        /* Table Container */
+        #usersTableContainer,
+        #donationsTableContainer,
+        #requestsTableContainer {
+            overflow-x: auto;
+            margin: 0 -1.5rem;
+            padding: 0 1.5rem;
         }
 
         .section-header {
@@ -277,38 +287,40 @@
             border-collapse: collapse;
             margin-top: 1rem;
             table-layout: fixed;
+            min-width: 1200px;
         }
 
         .data-table th,
         .data-table td {
-            padding: 0.75rem 1rem;
+            padding: 0.75rem 0.5rem;
             text-align: left;
             border-bottom: 1px solid var(--gray-200);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 0.85rem;
         }
 
         .data-table th:nth-child(1), 
-        .data-table td:nth-child(1) { width: 12%; } /* ID */
+        .data-table td:nth-child(1) { width: 100px; } /* ID */
         .data-table th:nth-child(2), 
-        .data-table td:nth-child(2) { width: 15%; } /* Name */
+        .data-table td:nth-child(2) { width: 140px; } /* Name */
         .data-table th:nth-child(3), 
-        .data-table td:nth-child(3) { width: 18%; } /* Email */
+        .data-table td:nth-child(3) { width: 180px; } /* Email */
         .data-table th:nth-child(4), 
-        .data-table td:nth-child(4) { width: 12%; } /* Phone */
+        .data-table td:nth-child(4) { width: 110px; } /* Phone */
         .data-table th:nth-child(5), 
-        .data-table td:nth-child(5) { width: 8%; } /* Role */
+        .data-table td:nth-child(5) { width: 70px; } /* Role */
         .data-table th:nth-child(6), 
-        .data-table td:nth-child(6) { width: 8%; } /* Blood Group */
+        .data-table td:nth-child(6) { width: 80px; } /* Blood Group */
         .data-table th:nth-child(7), 
-        .data-table td:nth-child(7) { width: 10%; } /* City */
+        .data-table td:nth-child(7) { width: 100px; } /* City */
         .data-table th:nth-child(8), 
-        .data-table td:nth-child(8) { width: 7%; } /* Donations */
+        .data-table td:nth-child(8) { width: 80px; } /* Donations */
         .data-table th:nth-child(9), 
-        .data-table td:nth-child(9) { width: 7%; } /* Requests */
+        .data-table td:nth-child(9) { width: 80px; } /* Requests */
         .data-table th:nth-child(10), 
-        .data-table td:nth-child(10) { width: 10%; } /* Joined */
+        .data-table td:nth-child(10) { width: 90px; } /* Joined */
 
         .data-table th {
             background: var(--gray-50);
@@ -586,6 +598,7 @@
                             <th>Patient Name</th>
                             <th>Blood Group</th>
                             <th>Units Needed</th>
+                            <th>Contact</th>
                             <th>Status</th>
                             <th>Hospital</th>
                             <th>Urgency</th>
@@ -594,7 +607,7 @@
                     </thead>
                     <tbody id="requestsTableBody">
                         <tr>
-                            <td colspan="8" class="loading">
+                            <td colspan="9" class="loading">
                                 <i class="fas fa-spinner"></i>
                                 Loading requests...
                             </td>
