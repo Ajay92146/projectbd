@@ -36,6 +36,14 @@ class UrgentRequestsManager {
             applyFiltersBtn.addEventListener('click', () => this.applyFilters());
         }
 
+        // Submit request button in empty state
+        const submitRequestBtn = document.getElementById('submitRequestBtn');
+        if (submitRequestBtn) {
+            submitRequestBtn.addEventListener('click', () => {
+                window.location.href = 'request.html';
+            });
+        }
+
         // Enter key on filter inputs
         const filterInputs = document.querySelectorAll('.filter-input, .filter-select');
         filterInputs.forEach(input => {
@@ -44,6 +52,38 @@ class UrgentRequestsManager {
                     this.applyFilters();
                 }
             });
+        });
+
+        // Event delegation for dynamically created buttons
+        document.addEventListener('click', (e) => {
+            // Handle "I Can Help" buttons
+            if (e.target.classList.contains('help-btn') || e.target.closest('.help-btn')) {
+                const btn = e.target.classList.contains('help-btn') ? e.target : e.target.closest('.help-btn');
+                const requestId = btn.dataset.requestId;
+                const patientName = btn.dataset.patientName;
+                const bloodGroup = btn.dataset.bloodGroup;
+                this.helpWithRequest(requestId, patientName, bloodGroup);
+            }
+            
+            // Handle "Share" buttons
+            if (e.target.classList.contains('share-btn') || e.target.closest('.share-btn')) {
+                const btn = e.target.classList.contains('share-btn') ? e.target : e.target.closest('.share-btn');
+                const requestId = btn.dataset.requestId;
+                this.shareRequest(requestId);
+            }
+            
+            // Handle pagination buttons
+            if (e.target.classList.contains('pagination-btn') && !e.target.disabled) {
+                const page = parseInt(e.target.dataset.page);
+                if (page) {
+                    this.changePage(page);
+                }
+            }
+            
+            // Handle retry button in error state
+            if (e.target.classList.contains('retry-btn') || e.target.closest('.retry-btn')) {
+                this.loadInitialData();
+            }
         });
 
         // Auto-refresh every 5 minutes
@@ -299,10 +339,14 @@ class UrgentRequestsManager {
                 </div>
                 <div class="card-footer">
                     <div class="card-actions">
-                        <button class="btn btn-primary" onclick="urgentRequestsManager.helpWithRequest('${request._id}', '${request.patientName}', '${request.bloodGroup}')">
+                        <button class="btn btn-primary help-btn" 
+                                data-request-id="${request._id}" 
+                                data-patient-name="${request.patientName}" 
+                                data-blood-group="${request.bloodGroup}">
                             I Can Help
                         </button>
-                        <button class="btn btn-secondary" onclick="urgentRequestsManager.shareRequest('${request._id}')">
+                        <button class="btn btn-secondary share-btn" 
+                                data-request-id="${request._id}">
                             Share
                         </button>
                     </div>
@@ -368,10 +412,14 @@ class UrgentRequestsManager {
                 </div>
                 <div class="card-footer">
                     <div class="card-actions">
-                        <button class="btn btn-primary" onclick="urgentRequestsManager.helpWithRequest('${request._id}', '${request.patientName}', '${request.bloodGroup}')">
+                        <button class="btn btn-primary help-btn" 
+                                data-request-id="${request._id}" 
+                                data-patient-name="${request.patientName}" 
+                                data-blood-group="${request.bloodGroup}">
                             I Can Help
                         </button>
-                        <button class="btn btn-secondary" onclick="urgentRequestsManager.shareRequest('${request._id}')">
+                        <button class="btn btn-secondary share-btn" 
+                                data-request-id="${request._id}">
                             Share
                         </button>
                     </div>
@@ -453,7 +501,7 @@ class UrgentRequestsManager {
         // Previous button
         html += `
             <button class="pagination-btn" ${this.currentPage <= 1 ? 'disabled' : ''} 
-                    onclick="urgentRequestsManager.changePage(${this.currentPage - 1})">
+                    data-page="${this.currentPage - 1}">
                 Previous
             </button>
         `;
@@ -470,7 +518,7 @@ class UrgentRequestsManager {
         for (let i = startPage; i <= endPage; i++) {
             html += `
                 <button class="pagination-btn ${i === this.currentPage ? 'active' : ''}" 
-                        onclick="urgentRequestsManager.changePage(${i})">
+                        data-page="${i}">
                     ${i}
                 </button>
             `;
@@ -479,7 +527,7 @@ class UrgentRequestsManager {
         // Next button
         html += `
             <button class="pagination-btn" ${this.currentPage >= this.totalPages ? 'disabled' : ''} 
-                    onclick="urgentRequestsManager.changePage(${this.currentPage + 1})">
+                    data-page="${this.currentPage + 1}">
                 Next
             </button>
         `;
@@ -606,7 +654,7 @@ class UrgentRequestsManager {
                     <i class="fas fa-exclamation-triangle" style="color: var(--error-red);"></i>
                     <h3>Error Loading Requests</h3>
                     <p>${message}</p>
-                    <button class="btn btn-primary" onclick="urgentRequestsManager.loadInitialData()" style="margin-top: var(--spacing-4);">
+                    <button class="btn btn-primary retry-btn" style="margin-top: var(--spacing-4);">
                         <i class="fas fa-redo"></i>
                         Try Again
                     </button>
