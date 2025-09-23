@@ -598,6 +598,7 @@
 <script src="js/auth-state.js"></script>
 <script src="js/admin-dashboard.js"></script>
     <script>
+        <script>
         // Global variables for data storage
         let usersData = [];
         let donationsData = [];
@@ -608,60 +609,62 @@
             // Wait for external scripts to load before setting up event listeners
             setTimeout(() => {
                 initializeEventListeners();
-            }, 100);
+            }, 500); // Increased delay to ensure external scripts are loaded
         });
 
         function initializeEventListeners() {
             // Header buttons
             const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn && window.logout) {
+            if (logoutBtn && typeof window.logout === 'function') {
                 logoutBtn.addEventListener('click', window.logout);
+            } else {
+                console.warn('Logout button or function not found');
             }
             
             // Refresh buttons - directly call external functions
             const refreshUsersBtn = document.getElementById('refreshUsersBtn');
-            if (refreshUsersBtn && window.loadUsers) {
+            if (refreshUsersBtn && typeof window.loadUsers === 'function') {
                 refreshUsersBtn.addEventListener('click', () => window.loadUsers());
             }
             
             const refreshDonationsBtn = document.getElementById('refreshDonationsBtn');
-            if (refreshDonationsBtn && window.loadDonations) {
+            if (refreshDonationsBtn && typeof window.loadDonations === 'function') {
                 refreshDonationsBtn.addEventListener('click', () => window.loadDonations());
             }
             
             const refreshRequestsBtn = document.getElementById('refreshRequestsBtn');
-            if (refreshRequestsBtn && window.loadRequests) {
+            if (refreshRequestsBtn && typeof window.loadRequests === 'function') {
                 refreshRequestsBtn.addEventListener('click', () => window.loadRequests());
             }
             
             // Search and filter inputs
             const userSearch = document.getElementById('userSearch');
-            if (userSearch) {
+            if (userSearch && typeof filterUsers === 'function') {
                 userSearch.addEventListener('input', filterUsers);
             }
             
             const roleFilter = document.getElementById('roleFilter');
-            if (roleFilter) {
+            if (roleFilter && typeof filterUsers === 'function') {
                 roleFilter.addEventListener('change', filterUsers);
             }
             
             const donationSearch = document.getElementById('donationSearch');
-            if (donationSearch) {
+            if (donationSearch && typeof filterDonations === 'function') {
                 donationSearch.addEventListener('input', filterDonations);
             }
             
             const bloodTypeFilter = document.getElementById('bloodTypeFilter');
-            if (bloodTypeFilter) {
+            if (bloodTypeFilter && typeof filterDonations === 'function') {
                 bloodTypeFilter.addEventListener('change', filterDonations);
             }
             
             const requestSearch = document.getElementById('requestSearch');
-            if (requestSearch) {
+            if (requestSearch && typeof filterRequests === 'function') {
                 requestSearch.addEventListener('input', filterRequests);
             }
             
             const requestStatusFilter = document.getElementById('requestStatusFilter');
-            if (requestStatusFilter) {
+            if (requestStatusFilter && typeof filterRequests === 'function') {
                 requestStatusFilter.addEventListener('change', filterRequests);
             }
         }
@@ -681,7 +684,7 @@
                 });
                 
                 // Call external display function if available
-                if (window.displayUsers) {
+                if (typeof window.displayUsers === 'function') {
                     const tableBody = document.getElementById('usersTableBody');
                     window.displayUsers(filteredUsers, tableBody);
                 }
@@ -701,7 +704,7 @@
                 });
                 
                 // Call external display function if available
-                if (window.displayDonations) {
+                if (typeof window.displayDonations === 'function') {
                     const tableBody = document.getElementById('donationsTableBody');
                     window.displayDonations(filteredDonations, tableBody);
                 }
@@ -721,7 +724,7 @@
                 });
                 
                 // Call external display function if available
-                if (window.displayRequests) {
+                if (typeof window.displayRequests === 'function') {
                     const tableBody = document.getElementById('requestsTableBody');
                     window.displayRequests(filteredRequests, tableBody);
                 }
