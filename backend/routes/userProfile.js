@@ -162,18 +162,6 @@ router.get('/donations', [
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
-        // Check if database is connected
-        const mongoose = require('mongoose');
-        if (mongoose.connection.readyState !== 1) {
-            console.log('⚠️ Database not connected. Please connect your MongoDB database to see real data.');
-            return res.status(503).json({
-                success: false,
-                message: 'Database not connected. Please set up your MongoDB connection in the .env file to view your real donations.',
-                error: 'No database connection',
-                setup_required: true
-            });
-        }
-
         // Get user's email to match with donations
         const User = require('../models/User');
         const user = await User.findById(userId);
@@ -354,18 +342,6 @@ router.get('/requests', [
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
         const status = req.query.status;
-
-        // Check if database is connected
-        const mongoose = require('mongoose');
-        if (mongoose.connection.readyState !== 1) {
-            console.log('⚠️ Database not connected. Please connect your MongoDB database to see real data.');
-            return res.status(503).json({
-                success: false,
-                message: 'Database not connected. Please set up your MongoDB connection in the .env file to view your real blood requests.',
-                error: 'No database connection',
-                setup_required: true
-            });
-        }
 
         // Get user's email to match with requests
         const User = require('../models/User');
