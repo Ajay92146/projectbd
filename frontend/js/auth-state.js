@@ -327,16 +327,7 @@ class AuthStateManager {
                     <a class="dropdown-item" href="profile.html">
                         <i class="fas fa-user"></i> My Profile
                     </a>
-                    <a class="dropdown-item" href="profile.html#donations">
-                        <i class="fas fa-heart"></i> My Donations
-                    </a>
-                    <a class="dropdown-item" href="profile.html#requests">
-                        <i class="fas fa-hand-holding-medical"></i> My Requests
-                    </a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="profile.html#settings">
-                        <i class="fas fa-cog"></i> Settings
-                    </a>
                     <a class="dropdown-item" href="#" id="logoutDropdownItem">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>

@@ -24,14 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load user profile data
     loadProfileData();
 
-    // Initialize tab navigation
-    initializeTabNavigation();
-
     // Initialize profile functionality
     initializeProfileFunctionality();
-
-    // Load initial tab content
-    showTab('donations');
     
     console.log('✅ Profile page initialization complete');
 });
@@ -113,342 +107,6 @@ async function loadProfileData() {
     }
 }
 
-function initializeTabNavigation() {
-    console.log('📌 Initializing tab navigation...');
-    
-    // Get all tab buttons
-    const tabButtons = document.querySelectorAll('.tab-button');
-    console.log(`🔘 Found ${tabButtons.length} tab buttons`);
-    
-    // Add event listeners to tab buttons
-    tabButtons.forEach((button, index) => {
-        const tabId = button.getAttribute('data-tab');
-        console.log(`🔘 Button ${index + 1}: ${tabId}`);
-        
-        button.addEventListener('click', function() {
-            console.log(`💆 Tab button clicked: ${tabId}`);
-            showTab(tabId);
-        });
-    });
-    
-    console.log('✅ Tab navigation initialized');
-}
-
-function showTab(tabName) {
-    console.log(`🔄 Showing tab: ${tabName}`);
-    
-    // Hide all tab contents
-    const tabContents = document.querySelectorAll('.tab-content');
-    console.log(`📋 Found ${tabContents.length} tab content sections`);
-    tabContents.forEach(content => {
-        content.style.display = 'none';
-    });
-
-    // Remove active class from all buttons
-    const tabButtons = document.querySelectorAll('.tab-button');
-    tabButtons.forEach(button => {
-        button.classList.remove('active');
-    });
-
-    // Show selected tab and mark button as active
-    const selectedTab = document.getElementById(tabName);
-    console.log(`🎯 Selected tab element:`, selectedTab);
-    
-    if (selectedTab) {
-        selectedTab.style.display = 'block';
-        console.log(`✅ Tab '${tabName}' is now visible`);
-        
-        // Find and activate the corresponding button
-        const activeButton = Array.from(tabButtons).find(button => {
-            const buttonTab = button.getAttribute('data-tab');
-            return buttonTab === tabName;
-        });
-        
-        if (activeButton) {
-            activeButton.classList.add('active');
-            console.log(`✅ Button for '${tabName}' is now active`);
-        } else {
-            console.warn(`⚠️ No button found for tab '${tabName}'`);
-        }
-    } else {
-        console.error(`❌ Tab element '${tabName}' not found`);
-    }
-
-    // Load tab-specific content
-    switch (tabName) {
-        case 'donations':
-            loadDonations();
-            break;
-        case 'requests':
-            loadRequests();
-            break;
-        case 'settings':
-            // Settings form is already in HTML, no dynamic loading needed
-            break;
-        case 'changePassword':
-            // Change password form is already in HTML, no dynamic loading needed
-            break;
-    }
-}
-
-// Export showTab to global scope so it can be used by dropdown navigation
-window.showTab = showTab;
-
-async function loadDonations() {
-    console.log('🩸 Loading donations from backend...');
-    
-    const donationsContainer = document.getElementById('donations');
-    if (!donationsContainer) {
-        console.error('❌ donations container not found');
-        return;
-    }
-    
-    // Use shared utility for loading state
-    SharedUtils.UIUtils.showLoading('donations', 'Loading your donations...');
-    
-    try {
-        const token = SharedUtils.AuthUtils.getToken();
-        const response = await fetch('/api/profile/donations', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        console.log('🔄 Donations API response status:', response.status);
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                console.log('❌ Unauthorized, redirecting to login');
-                SharedUtils.AuthUtils.clearAuthData(false);
-                window.location.href = 'login.html';
-                return;
-            }
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        console.log('📦 Donations API full response:', result);
-        
-        if (result.success && result.data && result.data.donations) {
-            const donations = result.data.donations;
-            console.log('🩸 Found donations:', donations.length);
-            
-            if (donations.length > 0) {
-                displayDonations(donations);
-            } else {
-                showEmptyDonations();
-            }
-        } else {
-            console.log('⚠️ No donations data in response');
-            showEmptyDonations();
-        }
-    } catch (error) {
-        console.error('❌ Error loading donations:', error);
-        SharedUtils.UIUtils.showErrorState('donations', 'Error Loading Donations', 'Unable to load your donations. Please try again later.', 'loadDonations()');
-    }
-}
-
-async function loadRequests() {
-    console.log('🔍 Loading requests from backend...');
-    
-    const requestsContainer = document.getElementById('requests');
-    if (!requestsContainer) {
-        console.error('❌ requests container not found');
-        return;
-    }
-    
-    // Use shared utility for loading state
-    SharedUtils.UIUtils.showLoading('requests', 'Loading your blood requests...');
-    
-    try {
-        const token = SharedUtils.AuthUtils.getToken();
-        const response = await fetch('/api/profile/requests', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        console.log('🔄 Requests API response status:', response.status);
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                console.log('❌ Unauthorized, redirecting to login');
-                SharedUtils.AuthUtils.clearAuthData(false);
-                window.location.href = 'login.html';
-                return;
-            }
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        console.log('📦 Requests API full response:', result);
-        
-        if (result.success && result.data && result.data.requests) {
-            const requests = result.data.requests;
-            console.log('🔍 Found requests:', requests.length);
-            
-            if (requests.length > 0) {
-                displayRequests(requests);
-            } else {
-                showEmptyRequests();
-            }
-        } else {
-            console.log('⚠️ No requests data in response');
-            showEmptyRequests();
-        }
-    } catch (error) {
-        console.error('❌ Error loading requests:', error);
-        SharedUtils.UIUtils.showErrorState('requests', 'Error Loading Requests', 'Unable to load your blood requests. Please try again later.', 'loadRequests()');
-    }
-}
-
-function displayDonations(donations) {
-    const container = document.getElementById('donations');
-    console.log('🔄 Displaying donations:', donations);
-    
-    if (!container) {
-        console.error('❌ donations container not found');
-        return;
-    }
-    
-    if (donations.length === 0) {
-        showEmptyDonations();
-        return;
-    }
-
-    const html = donations.map(donation => {
-        // Handle both backend formats (mapped and original)
-        const donationDate = donation.donationDate || donation.dateOfDonation;
-        const bloodGroup = donation.bloodGroup;
-        const donorName = donation.donorName || donation.name || 'Unknown';
-        const city = donation.city || 'Unknown';
-        const state = donation.state || 'Unknown';
-        const status = donation.status || 'Completed';
-        const unitsCollected = donation.unitsCollected || 1;
-        const donationCenter = donation.donationCenter || {};
-        
-        return `
-            <div class="donation-item">
-                <div class="donation-header">
-                    <h4>Blood Donation</h4>
-                    <span class="status-badge ${status.toLowerCase()}">${status}</span>
-                </div>
-                <div class="donation-details">
-                    <p><strong>Date:</strong> ${donationDate ? new Date(donationDate).toLocaleDateString() : 'Not specified'}</p>
-                    <p><strong>Blood Group:</strong> ${bloodGroup || 'Not specified'}</p>
-                    <p><strong>Units:</strong> ${unitsCollected}</p>
-                    <p><strong>Donor:</strong> ${donorName}</p>
-                    <p><strong>Center:</strong> ${donationCenter.name || 'Blood Bank'}</p>
-                    <p><strong>Location:</strong> ${city}, ${state}</p>
-                    ${donation.contactNumber ? `<p><strong>Contact:</strong> ${donation.contactNumber}</p>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
-}
-
-function displayRequests(requests) {
-    const container = document.getElementById('requests');
-    console.log('🔄 Displaying requests:', requests);
-    
-    if (!container) {
-        console.error('❌ requests container not found');
-        return;
-    }
-    
-    if (requests.length === 0) {
-        showEmptyRequests();
-        return;
-    }
-
-    const html = requests.map(request => {
-        // Handle both UserRequest and Request model formats
-        const patientName = request.patientName || 'Patient';
-        const bloodGroup = request.bloodGroup || request.bloodType || 'Not specified';
-        const requiredUnits = request.requiredUnits || request.units || 1;
-        const fulfilledUnits = request.fulfilledUnits || 0;
-        const status = request.status || 'Pending';
-        const urgency = request.urgency || request.priority || 'Medium';
-        const hospitalName = request.hospitalName || request.hospital || 'Not specified';
-        const location = request.location || `${request.city || ''}, ${request.state || ''}`.trim() || 'Not specified';
-        const requestDate = request.createdAt || request.requestDate || new Date();
-        const requiredBy = request.requiredBy || request.requiredDate;
-        const contactNumber = request.contactNumber || request.contactPersonNumber || 'Not provided';
-        
-        // Calculate fulfillment percentage
-        const fulfillmentPercentage = requiredUnits > 0 ? Math.round((fulfilledUnits / requiredUnits) * 100) : 0;
-        
-        return `
-            <div class="request-item">
-                <div class="request-header">
-                    <h4>${patientName}</h4>
-                    <span class="status-badge ${status.toLowerCase().replace(' ', '-')}">${status}</span>
-                </div>
-                <div class="request-details">
-                    <p><strong>Blood Group:</strong> ${bloodGroup}</p>
-                    <p><strong>Required Units:</strong> ${requiredUnits}</p>
-                    <p><strong>Fulfilled:</strong> ${fulfilledUnits}/${requiredUnits} (${fulfillmentPercentage}%)</p>
-                    <p><strong>Urgency:</strong> ${urgency}</p>
-                    <p><strong>Hospital:</strong> ${hospitalName}</p>
-                    <p><strong>Location:</strong> ${location}</p>
-                    <p><strong>Request Date:</strong> ${new Date(requestDate).toLocaleDateString()}</p>
-                    ${requiredBy ? `<p><strong>Required By:</strong> ${new Date(requiredBy).toLocaleDateString()}</p>` : ''}
-                    ${contactNumber !== 'Not provided' ? `<p><strong>Contact:</strong> ${contactNumber}</p>` : ''}
-                    ${request.additionalNotes ? `<p><strong>Notes:</strong> ${request.additionalNotes}</p>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
-}
-
-function showEmptyDonations() {
-    const donationsContainer = document.getElementById('donations');
-    if (!donationsContainer) {
-        console.error('❌ donations container not found');
-        return;
-    }
-    
-    donationsContainer.innerHTML = `
-        <div class="empty-state">
-            <i class="fas fa-hand-holding-heart" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
-            <h3>No Donations Yet</h3>
-            <p>You haven't made any blood donations yet. Start saving lives today!</p>
-            <a href="donate.html" class="btn btn-primary" style="margin-top: 1rem;">
-                <i class="fas fa-hand-holding-heart"></i>
-                Donate Blood
-            </a>
-        </div>
-    `;
-}
-
-function showEmptyRequests() {
-    const requestsContainer = document.getElementById('requests');
-    if (!requestsContainer) {
-        console.error('❌ requests container not found');
-        return;
-    }
-    
-    requestsContainer.innerHTML = `
-        <div class="empty-state">
-            <i class="fas fa-search" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
-            <h3>No Blood Requests</h3>
-            <p>You haven't made any blood requests yet.</p>
-            <a href="request.html" class="btn btn-primary" style="margin-top: 1rem;">
-                <i class="fas fa-search"></i>
-                Request Blood
-            </a>
-        </div>
-    `;
-}
-
 function initializeProfileFunctionality() {
     // Edit profile functionality
     const editBtn = document.getElementById('editBtn');
@@ -492,20 +150,14 @@ function initializeProfileFunctionality() {
     }
 
     // Settings form submission - using saveProfile function for consistency
-    const settingsForm = document.getElementById('settingsForm');
-    if (settingsForm) {
-        settingsForm.addEventListener('submit', saveProfile);
-    }
-
-    // Change password form submission
-    const changePasswordForm = document.getElementById('changePasswordForm');
-    if (changePasswordForm) {
-        changePasswordForm.addEventListener('submit', changePassword);
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', saveProfile);
     }
 }
 
 function enableProfileEdit() {
-    const inputs = document.querySelectorAll('#settingsForm input');
+    const inputs = document.querySelectorAll('#profileForm input, #profileForm select');
     inputs.forEach(input => {
         input.disabled = false;
     });
@@ -582,7 +234,7 @@ async function saveProfile(event) {
 }
 
 function cancelProfileEdit() {
-    const inputs = document.querySelectorAll('#settingsForm input');
+    const inputs = document.querySelectorAll('#profileForm input, #profileForm select');
     inputs.forEach(input => {
         input.disabled = true;
     });
@@ -606,42 +258,4 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-// Removed duplicate saveSettings function - using saveProfile function instead for consistency
 
-async function changePassword(event) {
-    event.preventDefault();
-    
-    const currentPassword = document.getElementById('currentPassword').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-
-    if (newPassword !== confirmPassword) {
-        alert('New passwords do not match');
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/change-password', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                currentPassword,
-                newPassword
-            })
-        });
-
-        if (response.ok) {
-            alert('Password changed successfully!');
-            document.getElementById('changePasswordForm').reset();
-        } else {
-            const error = await response.json();
-            alert(error.message || 'Failed to change password');
-        }
-    } catch (error) {
-        console.error('Error changing password:', error);
-        alert('Error changing password');
-    }
-}
