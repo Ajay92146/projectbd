@@ -12,6 +12,18 @@ function debugLog(message) {
 function checkAdminAuthentication() {
     debugLog('🔍 Checking admin authentication...');
     
+    // Check if logout is in progress
+    const logoutInProgress = sessionStorage.getItem('admin_logout_in_progress');
+    if (logoutInProgress === 'true') {
+        debugLog('🚪 Logout in progress, redirecting to login');
+        setTimeout(() => {
+            if (!window.location.pathname.includes('admin-login.html')) {
+                window.location.href = 'admin-login.html';
+            }
+        }, 500);
+        return false;
+    }
+    
     // Check both localStorage and sessionStorage
     const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
     const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');

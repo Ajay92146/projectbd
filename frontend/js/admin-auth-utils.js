@@ -134,16 +134,20 @@ class AdminSessionManager {
             'admin_email',
             'admin_login_time',
             'admin_last_activity',
-            'admin_preferences'
+            'admin_preferences',
+            'admin_session'
         ];
         
         storages.forEach(storage => {
             keysToRemove.forEach(key => {
                 if (storage.getItem(key)) {
                     storage.removeItem(key);
+                    debugLog(`🗑️ Cleared ${key} from ${storage === localStorage ? 'localStorage' : 'sessionStorage'}`);
                 }
             });
         });
+        
+        debugLog('✅ All admin session data cleared');
     }
     
     // Check if user is authenticated
@@ -388,6 +392,9 @@ async function logoutAdmin() {
 // Client-side logout cleanup
 function performClientLogout() {
     try {
+        // Set logout flag to prevent redirect loops
+        sessionStorage.setItem('admin_logout_in_progress', 'true');
+        
         // Use shared utility for clearing admin auth data
         if (window.SharedUtils && window.SharedUtils.AuthUtils) {
             SharedUtils.AuthUtils.clearAuthData(true);
@@ -395,6 +402,21 @@ function performClientLogout() {
             // Fallback implementation using session manager
             sessionManager.clearSession();
         }
+        
+        // Additional cleanup to ensure all admin data is removed
+        const adminKeys = [
+            'bloodconnect_admin',
+            'admin_email', 
+            'admin_login_time',
+            'admin_session',
+            'admin_preferences',
+            'admin_last_activity'
+        ];
+        
+        adminKeys.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
+        });
         
         debugLog('✅ Admin logout completed successfully');
         
@@ -427,11 +449,15 @@ function performClientLogout() {
             if (document.body.contains(logoutMessage)) {
                 document.body.removeChild(logoutMessage);
             }
+            // Clear the logout flag before redirecting
+            sessionStorage.removeItem('admin_logout_in_progress');
             window.location.href = 'admin-login.html';
         }, 2000);
         
     } catch (error) {
         debugLog(`❌ Client logout error: ${error.message}`);
+        // Clear the logout flag even if there's an error
+        sessionStorage.removeItem('admin_logout_in_progress');
         window.location.href = 'admin-login.html';
     }
 }
