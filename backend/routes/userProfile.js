@@ -165,58 +165,12 @@ router.get('/donations', [
         // Check if database is connected
         const mongoose = require('mongoose');
         if (mongoose.connection.readyState !== 1) {
-            console.log('⚠️ Database not connected, returning test data for donations');
-            
-            // Return test donation data
-            const testDonations = [
-                {
-                    _id: 'test-donation-1',
-                    donationDate: '2024-01-15',
-                    bloodGroup: 'O+',
-                    unitsCollected: 1,
-                    status: 'Completed',
-                    donationCenter: {
-                        name: 'City Blood Bank',
-                        address: 'Central Hospital, Mumbai'
-                    },
-                    donorName: 'Test User',
-                    contactNumber: '9876543210',
-                    city: 'Mumbai',
-                    state: 'Maharashtra',
-                    createdAt: '2024-01-15T10:00:00Z'
-                },
-                {
-                    _id: 'test-donation-2',
-                    donationDate: '2023-12-10',
-                    bloodGroup: 'O+',
-                    unitsCollected: 1,
-                    status: 'Completed',
-                    donationCenter: {
-                        name: 'Community Blood Center',
-                        address: 'Health Center, Mumbai'
-                    },
-                    donorName: 'Test User',
-                    contactNumber: '9876543210',
-                    city: 'Mumbai',
-                    state: 'Maharashtra',
-                    createdAt: '2023-12-10T14:30:00Z'
-                }
-            ];
-            
-            return res.json({
-                success: true,
-                data: {
-                    donations: testDonations,
-                    pagination: {
-                        currentPage: page,
-                        totalPages: 1,
-                        totalDonations: testDonations.length,
-                        hasNext: false,
-                        hasPrev: false
-                    }
-                },
-                isDemoData: true,
-                message: 'Demo data - When you submit real donations, they will appear here in your profile.'
+            console.log('⚠️ Database not connected. Please connect your MongoDB database to see real data.');
+            return res.status(503).json({
+                success: false,
+                message: 'Database not connected. Please set up your MongoDB connection in the .env file to view your real donations.',
+                error: 'No database connection',
+                setup_required: true
             });
         }
 
@@ -404,60 +358,12 @@ router.get('/requests', [
         // Check if database is connected
         const mongoose = require('mongoose');
         if (mongoose.connection.readyState !== 1) {
-            console.log('⚠️ Database not connected, returning test data for requests');
-            
-            // Return test request data
-            const testRequests = [
-                {
-                    _id: 'test-request-1',
-                    patientName: 'John Smith',
-                    bloodGroup: 'O+',
-                    requiredUnits: 2,
-                    fulfilledUnits: 1,
-                    status: 'In Progress',
-                    urgency: 'High',
-                    hospitalName: 'City Hospital',
-                    location: 'Mumbai, Maharashtra',
-                    contactNumber: '9876543210',
-                    requiredBy: '2024-02-01T10:00:00Z',
-                    contactPersonName: 'Jane Smith',
-                    relationship: 'Spouse',
-                    additionalNotes: 'Surgery scheduled for next week',
-                    createdAt: '2024-01-20T09:00:00Z'
-                },
-                {
-                    _id: 'test-request-2',
-                    patientName: 'Mary Johnson',
-                    bloodGroup: 'A+',
-                    requiredUnits: 1,
-                    fulfilledUnits: 1,
-                    status: 'Fulfilled',
-                    urgency: 'Medium',
-                    hospitalName: 'General Hospital',
-                    location: 'Mumbai, Maharashtra',
-                    contactNumber: '9876543211',
-                    requiredBy: '2024-01-15T14:00:00Z',
-                    contactPersonName: 'Robert Johnson',
-                    relationship: 'Family',
-                    additionalNotes: 'Treatment completed successfully',
-                    createdAt: '2024-01-10T11:00:00Z'
-                }
-            ];
-            
-            return res.json({
-                success: true,
-                data: {
-                    requests: testRequests,
-                    pagination: {
-                        currentPage: page,
-                        totalPages: 1,
-                        totalRequests: testRequests.length,
-                        hasNext: false,
-                        hasPrev: false
-                    }
-                },
-                isDemoData: true,
-                message: 'Demo data - When you submit real blood requests, they will appear here in your profile.'
+            console.log('⚠️ Database not connected. Please connect your MongoDB database to see real data.');
+            return res.status(503).json({
+                success: false,
+                message: 'Database not connected. Please set up your MongoDB connection in the .env file to view your real blood requests.',
+                error: 'No database connection',
+                setup_required: true
             });
         }
 
