@@ -1097,54 +1097,137 @@
             </div>
 
             <div class="profile-content">
-                <!-- Simple Profile View -->
-                <div class="profile-section">
-                    <h2 class="section-title">
-                        <i class="fas fa-user"></i>
-                        My Profile
-                    </h2>
-                    <form id="profileForm">
-                        <div class="form-group">
-                            <label for="profileName">Full Name</label>
-                            <input type="text" id="profileName" class="form-input" disabled>
+                <!-- Tab Navigation -->
+                <div class="tab-navigation">
+                    <button class="tab-btn tab-button active" data-tab="donations" id="donationsTab">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        My Donations
+                    </button>
+                    <button class="tab-btn tab-button" data-tab="requests" id="requestsTab">
+                        <i class="fas fa-search"></i>
+                        My Requests
+                    </button>
+                    <button class="tab-btn tab-button" data-tab="settings" id="settingsTab">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </button>
+                    <button class="tab-btn tab-button" data-tab="changePassword" id="changePasswordTab">
+                        <i class="fas fa-key"></i>
+                        Change Password
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="tabContainer">
+                    <!-- My Donations Tab -->
+                    <div class="tab-content" id="donations" style="display: block;">
+                        <div class="profile-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-hand-holding-heart"></i>
+                                My Donations
+                            </h2>
+                            <div id="donationsContent">
+                                <!-- Donations will be loaded here -->
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="profileEmail">Email</label>
-                            <input type="email" id="profileEmail" class="form-input" disabled>
+                    </div>
+
+                    <!-- My Requests Tab -->
+                    <div class="tab-content" id="requests" style="display: none;">
+                        <div class="profile-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-search"></i>
+                                My Blood Requests
+                            </h2>
+                            <div id="requestsContent">
+                                <!-- Requests will be loaded here -->
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="profilePhone">Phone Number</label>
-                            <input type="tel" id="profilePhone" class="form-input" disabled>
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div class="tab-content" id="settings" style="display: none;">
+                        <div class="profile-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-cog"></i>
+                                Account Settings
+                            </h2>
+                            <form id="settingsForm">
+                                <div class="form-group">
+                                    <label for="profileName">Full Name</label>
+                                    <input type="text" id="profileName" class="form-input" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profileEmail">Email</label>
+                                    <input type="email" id="profileEmail" class="form-input" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profilePhone">Phone Number</label>
+                                    <input type="tel" id="profilePhone" class="form-input" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profileBloodType">Blood Type</label>
+                                    <select id="profileBloodType" class="form-input" disabled>
+                                        <option value="">Select Blood Type</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+                                <div class="actions">
+                                    <button type="button" id="editBtn" class="btn btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                        Edit Profile
+                                    </button>
+                                    <button type="button" id="saveBtn" class="btn btn-primary" style="display: none;">
+                                        <i class="fas fa-save"></i>
+                                        Save Changes
+                                    </button>
+                                    <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;">
+                                        <i class="fas fa-times"></i>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div class="form-group">
-                            <label for="profileBloodType">Blood Type</label>
-                            <select id="profileBloodType" class="form-input" disabled>
-                                <option value="">Select Blood Type</option>
-                                <option value="A+">A+</option>
-                                <option value="A-">A-</option>
-                                <option value="B+">B+</option>
-                                <option value="B-">B-</option>
-                                <option value="AB+">AB+</option>
-                                <option value="AB-">AB-</option>
-                                <option value="O+">O+</option>
-                                <option value="O-">O-</option>
-                            </select>
+                    </div>
+
+                    <!-- Change Password Tab -->
+                    <div class="tab-content" id="changePassword" style="display: none;">
+                        <div class="profile-section">
+                            <h2 class="section-title">
+                                <i class="fas fa-key"></i>
+                                Change Password
+                            </h2>
+                            <form id="changePasswordForm">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" class="form-input" placeholder="Enter your current password" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="newPassword">New Password</label>
+                                    <input type="password" id="newPassword" class="form-input" placeholder="Enter your new password" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="confirmPassword">Confirm New Password</label>
+                                    <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your new password" required>
+                                </div>
+
+                                <div class="actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        Change Password
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <div class="actions">
-                            <button type="button" id="editBtn" class="btn btn-primary">
-                                <i class="fas fa-edit"></i>
-                                Edit Profile
-                            </button>
-                            <button type="button" id="saveBtn" class="btn btn-primary" style="display: none;">
-                                <i class="fas fa-save"></i>
-                                Save Changes
-                            </button>
-                            <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;">
-                                <i class="fas fa-times"></i>
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1160,6 +1243,47 @@
     
     <!-- Profile Navigation Script -->
     <script>
+        // Tab switching function for profile page
+        window.switchToTab = function(tabName) {
+            console.log('🔄 Switching to tab:', tabName);
+            
+            // Use the profile.js showTab function if available
+            if (window.showTab && typeof window.showTab === 'function') {
+                console.log('✅ Using profile.js showTab function');
+                window.showTab(tabName);
+                return;
+            }
+            
+            // Fallback logic if profile.js not loaded
+            console.log('⚠️ profile.js showTab not available, using inline logic');
+            
+            // Hide all tab contents
+            const allTabContents = document.querySelectorAll('.tab-content');
+            allTabContents.forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from all tab buttons
+            const allTabButtons = document.querySelectorAll('.tab-button');
+            allTabButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show the selected tab content
+            const targetTab = document.getElementById(tabName);
+            if (targetTab) {
+                targetTab.style.display = 'block';
+                console.log('✅ Tab content shown:', tabName);
+            }
+            
+            // Activate the corresponding tab button
+            const targetButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+            if (targetButton) {
+                targetButton.classList.add('active');
+                console.log('✅ Tab button activated:', tabName);
+            }
+        };
+
         // Global logout function
         window.handleLogout = function(event) {
             if (event) {
@@ -1202,7 +1326,7 @@
             }
         };
         
-        // Initialize profile dropdown functionality
+        // Initialize profile functionality
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Profile page JavaScript initializing...');
             
@@ -1224,6 +1348,19 @@
                 });
             }
             
+            // Enhanced tab functionality
+            const tabButtons = document.querySelectorAll('.tab-button');
+            console.log('📋 Found tab buttons:', tabButtons.length);
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    console.log('🔎 Tab button clicked:', tabName);
+                    if (tabName) {
+                        window.switchToTab(tabName);
+                    }
+                });
+            });
+            
             // Handle logout buttons
             const logoutBtns = document.querySelectorAll('.logout-item, .logout-btn, [data-action="logout"], #logoutBtn');
             logoutBtns.forEach(btn => {
@@ -1232,6 +1369,23 @@
                     window.handleLogout(e);
                 });
             });
+            
+            // Handle URL parameters on page load
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            
+            if (tabParam) {
+                console.log('🔗 URL parameter found, switching to tab:', tabParam);
+                setTimeout(() => {
+                    window.switchToTab(tabParam);
+                }, 100);
+            } else {
+                // No URL parameter, ensure default tab (donations) is properly shown
+                console.log('🔗 No URL parameter, ensuring default tab is active');
+                setTimeout(() => {
+                    window.switchToTab('donations');
+                }, 100);
+            }
             
             console.log('✅ Profile page JavaScript initialized successfully');
         });
