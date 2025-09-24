@@ -214,7 +214,9 @@ router.get('/donations', [
                         hasNext: false,
                         hasPrev: false
                     }
-                }
+                },
+                isDemoData: true,
+                message: 'Demo data - When you submit real donations, they will appear here in your profile.'
             });
         }
 
@@ -453,7 +455,9 @@ router.get('/requests', [
                         hasNext: false,
                         hasPrev: false
                     }
-                }
+                },
+                isDemoData: true,
+                message: 'Demo data - When you submit real blood requests, they will appear here in your profile.'
             });
         }
 

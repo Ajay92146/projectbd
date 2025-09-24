@@ -266,6 +266,11 @@ async function loadDonations() {
             const donations = result.data.donations;
             console.log('🩸 Found donations:', donations.length);
             
+            // Show demo data notice if applicable
+            if (result.isDemoData) {
+                console.log('ℹ️ Demo data notice:', result.message);
+            }
+            
             if (donations.length > 0) {
                 displayDonations(donations);
             } else {
@@ -359,6 +364,11 @@ async function loadRequests() {
         if (result.success && result.data && result.data.requests) {
             const requests = result.data.requests;
             console.log('🔍 Found requests:', requests.length);
+            
+            // Show demo data notice if applicable
+            if (result.isDemoData) {
+                console.log('ℹ️ Demo data notice:', result.message);
+            }
             
             if (requests.length > 0) {
                 displayRequests(requests);
