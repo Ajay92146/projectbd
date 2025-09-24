@@ -55,9 +55,13 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
         // Get request statistics from Request collection - ONLY for this user
         const Request = require('../models/Request');
+        const mongoose = require('mongoose');
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        
         const requestQuery = {
             $and: [
-                { userId: userId }, // Primary security filter - MUST match userId
+                { userId: { $exists: true, $ne: null } }, // Must have userId
+                { userId: userObjectId }, // Must match authenticated user's ObjectId
                 { isActive: { $ne: false } }
             ]
         };
@@ -379,15 +383,20 @@ router.get('/requests', [
             });
         }
 
-        console.log('🔍 Looking for requests for userId:', userId);
+        console.log('🔍 Looking for requests for userId:', userObjectId.toString());
 
         // Build query for Request collection - SECURITY: ONLY use userId
         const Request = require('../models/Request');
+        const mongoose = require('mongoose');
+        
+        // Convert userId to ObjectId for strict matching
+        const userObjectId = new mongoose.Types.ObjectId(userId);
         
         // SECURITY: Primary and ONLY query - must match exact userId
         const requestQuery = {
             $and: [
-                { userId: userId }, // CRITICAL: Must match authenticated user's ID
+                { userId: { $exists: true, $ne: null } }, // CRITICAL: Must have userId field
+                { userId: userObjectId }, // CRITICAL: Must match authenticated user's ObjectId
                 { isActive: { $ne: false } }
             ]
         };
@@ -407,10 +416,12 @@ router.get('/requests', [
         console.log('📊 Found requests for authenticated user:', requests.length);
         
         // Security check: Verify all returned requests belong to the current user
-        const invalidRequests = requests.filter(request => request.userId.toString() !== userId.toString());
+        const invalidRequests = requests.filter(request => {
+            return !request.userId || request.userId.toString() !== userObjectId.toString();
+        });
         if (invalidRequests.length > 0) {
             console.error('😱 SECURITY ALERT: Found requests not belonging to current user!');
-            console.error('Expected userId:', userId);
+            console.error('Expected userId:', userObjectId.toString());
             console.error('Invalid requests:', invalidRequests.map(r => ({ 
                 id: r._id, 
                 userId: r.userId, 
@@ -418,7 +429,9 @@ router.get('/requests', [
             })));
             
             // Filter to only include current user's requests
-            requests = requests.filter(request => request.userId.toString() === userId.toString());
+            requests = requests.filter(request => {
+                return request.userId && request.userId.toString() === userObjectId.toString();
+            });
             console.log('🛡️ Filtered to secure requests:', requests.length);
         }
 
@@ -444,7 +457,7 @@ router.get('/requests', [
             success: responseData.success,
             requestsCount: requests.length,
             totalRequests,
-            userId: userId,
+            userId: userObjectId.toString(),
             securityVerified: true,
             sampleRequest: requests[0] ? {
                 id: requests[0]._id,
@@ -453,7 +466,7 @@ router.get('/requests', [
                 bloodGroup: requests[0].bloodGroup,
                 requiredUnits: requests[0].requiredUnits,
                 status: requests[0].status,
-                userIdMatches: requests[0].userId.toString() === userId.toString()
+                userIdMatches: requests[0].userId && requests[0].userId.toString() === userObjectId.toString()
             } : null
         });
 
@@ -571,6 +584,98 @@ router.put('/settings', [
         res.status(500).json({
             success: false,
             message: 'Error updating settings',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
+/**
+ * @route   PUT /api/profile/change-password
+ * @desc    Change user password
+ * @access  Private
+ */
+router.put('/change-password', [
+    authMiddleware,
+    body('currentPassword')
+        .notEmpty()
+        .withMessage('Current password is required'),
+    body('newPassword')
+        .isLength({ min: 6 })
+        .withMessage('New password must be at least 6 characters long')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)
+        .withMessage('New password must contain at least one uppercase letter, one lowercase letter, and one number'),
+    body('confirmPassword')
+        .custom((value, { req }) => {
+            if (value !== req.body.newPassword) {
+                throw new Error('Password confirmation does not match new password');
+            }
+            return true;
+        })
+], async (req, res) => {
+    try {
+        // Check for validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors: errors.array()
+            });
+        }
+
+        const userId = req.user.userId;
+        const { currentPassword, newPassword } = req.body;
+
+        // Get user from database
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Verify current password
+        const bcrypt = require('bcryptjs');
+        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isCurrentPasswordValid) {
+            return res.status(400).json({
+                success: false,
+                message: 'Current password is incorrect'
+            });
+        }
+
+        // Check if new password is different from current password
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        if (isSamePassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'New password must be different from current password'
+            });
+        }
+
+        // Hash new password
+        const saltRounds = 12;
+        const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update user password
+        await User.findByIdAndUpdate(userId, {
+            password: hashedNewPassword,
+            passwordChangedAt: new Date()
+        });
+
+        console.log(`🔐 Password changed successfully for user: ${user.email}`);
+
+        res.json({
+            success: true,
+            message: 'Password changed successfully'
+        });
+
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error changing password',
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }

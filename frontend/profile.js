@@ -714,15 +714,16 @@ async function changePassword(event) {
     }
 
     try {
-        const response = await fetch('/api/change-password', {
-            method: 'POST',
+        const response = await fetch('/api/profile/change-password', {
+            method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 currentPassword,
-                newPassword
+                newPassword,
+                confirmPassword
             })
         });
 
