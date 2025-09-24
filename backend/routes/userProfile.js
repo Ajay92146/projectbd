@@ -56,12 +56,11 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
         // Get request statistics from Request collection - ONLY for this user
         const Request = require('../models/Request');
         const mongoose = require('mongoose');
-        const userObjectId = new mongoose.Types.ObjectId(userId);
         
         const requestQuery = {
             $and: [
                 { userId: { $exists: true, $ne: null } }, // Must have userId
-                { userId: userObjectId }, // Must match authenticated user's ObjectId
+                { userId: new mongoose.Types.ObjectId(userId) }, // Must match authenticated user's ObjectId
                 { isActive: { $ne: false } }
             ]
         };
@@ -383,20 +382,17 @@ router.get('/requests', [
             });
         }
 
-        console.log('🔍 Looking for requests for userId:', userObjectId.toString());
-
         // Build query for Request collection - SECURITY: ONLY use userId
         const Request = require('../models/Request');
         const mongoose = require('mongoose');
-        
-        // Convert userId to ObjectId for strict matching
-        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        console.log('🔍 Looking for requests for userId:', userId);
         
         // SECURITY: Primary and ONLY query - must match exact userId
         const requestQuery = {
             $and: [
                 { userId: { $exists: true, $ne: null } }, // CRITICAL: Must have userId field
-                { userId: userObjectId }, // CRITICAL: Must match authenticated user's ObjectId
+                { userId: new mongoose.Types.ObjectId(userId) }, // CRITICAL: Must match authenticated user's ObjectId
                 { isActive: { $ne: false } }
             ]
         };
@@ -417,11 +413,11 @@ router.get('/requests', [
         
         // Security check: Verify all returned requests belong to the current user
         const invalidRequests = requests.filter(request => {
-            return !request.userId || request.userId.toString() !== userObjectId.toString();
+            return !request.userId || request.userId.toString() !== userId.toString();
         });
         if (invalidRequests.length > 0) {
             console.error('😱 SECURITY ALERT: Found requests not belonging to current user!');
-            console.error('Expected userId:', userObjectId.toString());
+            console.error('Expected userId:', userId);
             console.error('Invalid requests:', invalidRequests.map(r => ({ 
                 id: r._id, 
                 userId: r.userId, 
@@ -430,7 +426,7 @@ router.get('/requests', [
             
             // Filter to only include current user's requests
             requests = requests.filter(request => {
-                return request.userId && request.userId.toString() === userObjectId.toString();
+                return request.userId && request.userId.toString() === userId.toString();
             });
             console.log('🛡️ Filtered to secure requests:', requests.length);
         }
@@ -457,7 +453,7 @@ router.get('/requests', [
             success: responseData.success,
             requestsCount: requests.length,
             totalRequests,
-            userId: userObjectId.toString(),
+            userId: userId,
             securityVerified: true,
             sampleRequest: requests[0] ? {
                 id: requests[0]._id,
@@ -466,7 +462,7 @@ router.get('/requests', [
                 bloodGroup: requests[0].bloodGroup,
                 requiredUnits: requests[0].requiredUnits,
                 status: requests[0].status,
-                userIdMatches: requests[0].userId && requests[0].userId.toString() === userObjectId.toString()
+                userIdMatches: requests[0].userId && requests[0].userId.toString() === userId.toString()
             } : null
         });
 
