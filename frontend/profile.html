@@ -1061,24 +1061,24 @@
                                 <i class="fas fa-user"></i>
                                 <span>My Profile</span>
                             </a>
-                            <a href="#" class="dropdown-item" onclick="window.switchToTab('donations'); event.preventDefault();">
+                            <a href="#" class="dropdown-item" data-tab="donations" id="donationsDropdown">
                                 <i class="fas fa-hand-holding-heart"></i>
                                 <span>My Donations</span>
                             </a>
-                            <a href="#" class="dropdown-item" onclick="window.switchToTab('requests'); event.preventDefault();">
+                            <a href="#" class="dropdown-item" data-tab="requests" id="requestsDropdown">
                                 <i class="fas fa-search"></i>
                                 <span>My Requests</span>
                             </a>
-                            <a href="#" class="dropdown-item" onclick="window.switchToTab('settings'); event.preventDefault();">
+                            <a href="#" class="dropdown-item" data-tab="settings" id="settingsDropdown">
                                 <i class="fas fa-cog"></i>
                                 <span>Settings</span>
                             </a>
-                            <a href="#" class="dropdown-item" onclick="window.switchToTab('changePassword'); event.preventDefault();">
+                            <a href="#" class="dropdown-item" data-tab="changePassword" id="changePasswordDropdown">
                                 <i class="fas fa-key"></i>
                                 <span>Change Password</span>
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a href="#" class="dropdown-item logout-item" id="logoutBtn" onclick="window.handleLogout(event);">
+                            <a href="#" class="dropdown-item logout-item" id="logoutBtn">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span>Logout</span>
                             </a>
@@ -1301,6 +1301,26 @@
                 const newUrl = window.location.pathname + '?tab=' + tabName;
                 history.pushState({tab: tabName}, '', newUrl);
             }
+            
+            // Load tab-specific content
+            switch (tabName) {
+                case 'donations':
+                    if (typeof loadDonations === 'function') {
+                        loadDonations();
+                    }
+                    break;
+                case 'requests':
+                    if (typeof loadRequests === 'function') {
+                        loadRequests();
+                    }
+                    break;
+                case 'settings':
+                    console.log('⚙️ Settings tab loaded');
+                    break;
+                case 'changePassword':
+                    console.log('🔑 Change password tab loaded');
+                    break;
+            }
         };
         
         // Global logout function
@@ -1374,6 +1394,19 @@
                 button.addEventListener('click', function() {
                     const tabName = this.getAttribute('data-tab');
                     if (tabName) {
+                        window.switchToTab(tabName);
+                    }
+                });
+            });
+            
+            // Add event listeners for dropdown tab items
+            const dropdownTabItems = document.querySelectorAll('[data-tab]:not(.tab-button)');
+            dropdownTabItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const tabName = this.getAttribute('data-tab');
+                    if (tabName) {
+                        console.log('🔄 Dropdown tab clicked:', tabName);
                         window.switchToTab(tabName);
                     }
                 });
