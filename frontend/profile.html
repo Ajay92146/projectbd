@@ -499,6 +499,15 @@
         .tab-pane.active {
             display: block;
         }
+        
+        /* Ensure tab-content class works properly */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block !important;
+        }
 
         @keyframes fadeIn {
             from {
@@ -1258,10 +1267,11 @@
             const allTabContents = document.querySelectorAll('.tab-content');
             allTabContents.forEach(content => {
                 content.style.display = 'none';
+                content.classList.remove('active');
             });
             
-            // Remove active class from all tab buttons
-            const allTabButtons = document.querySelectorAll('.tab-btn');
+            // Remove active class from all tab buttons (both .tab-btn and .tab-button)
+            const allTabButtons = document.querySelectorAll('.tab-btn, .tab-button');
             allTabButtons.forEach(btn => {
                 btn.classList.remove('active');
             });
@@ -1270,13 +1280,14 @@
             const targetTab = document.getElementById(tabName);
             if (targetTab) {
                 targetTab.style.display = 'block';
+                targetTab.classList.add('active');
                 console.log('✅ Tab content shown:', tabName);
             } else {
                 console.error('❌ Tab not found:', tabName);
             }
             
-            // Activate the corresponding tab button
-            const targetButton = document.querySelector(`[data-tab="${tabName}"]`);
+            // Activate the corresponding tab button (specifically look for .tab-button class)
+            const targetButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
             if (targetButton) {
                 targetButton.classList.add('active');
                 console.log('✅ Tab button activated:', tabName);
@@ -1284,11 +1295,18 @@
                 console.error('❌ Tab button not found for:', tabName);
             }
             
-            // Update dropdown active state
+            // Update dropdown active state - mark the corresponding dropdown item as active
             const allDropdownItems = document.querySelectorAll('.dropdown-item');
             allDropdownItems.forEach(item => {
                 item.classList.remove('active');
             });
+            
+            // Set active state for the selected dropdown item
+            const targetDropdownItem = document.querySelector(`.dropdown-item[data-tab="${tabName}"]`);
+            if (targetDropdownItem) {
+                targetDropdownItem.classList.add('active');
+                console.log('✅ Dropdown item activated:', tabName);
+            }
             
             // Close the dropdown
             const profileDropdown = document.querySelector('.profile-dropdown');
@@ -1390,9 +1408,11 @@
             
             // Enhanced tab functionality
             const tabButtons = document.querySelectorAll('.tab-button');
+            console.log('📋 Found tab buttons:', tabButtons.length);
             tabButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const tabName = this.getAttribute('data-tab');
+                    console.log('🔎 Tab button clicked:', tabName);
                     if (tabName) {
                         window.switchToTab(tabName);
                     }
@@ -1401,9 +1421,13 @@
             
             // Add event listeners for dropdown tab items
             const dropdownTabItems = document.querySelectorAll('[data-tab]:not(.tab-button)');
-            dropdownTabItems.forEach(item => {
+            console.log('📋 Found dropdown tab items:', dropdownTabItems.length);
+            dropdownTabItems.forEach((item, index) => {
+                const tabName = item.getAttribute('data-tab');
+                console.log(`📋 Dropdown item ${index}:`, tabName, item);
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     const tabName = this.getAttribute('data-tab');
                     if (tabName) {
                         console.log('🔄 Dropdown tab clicked:', tabName);
@@ -1429,6 +1453,12 @@
                 console.log('🔗 URL parameter found, switching to tab:', tabParam);
                 setTimeout(() => {
                     window.switchToTab(tabParam);
+                }, 100);
+            } else {
+                // No URL parameter, ensure default tab (donations) is properly shown
+                console.log('🔗 No URL parameter, ensuring default tab is active');
+                setTimeout(() => {
+                    window.switchToTab('donations');
                 }, 100);
             }
             
