@@ -191,6 +191,9 @@ function showTab(tabName) {
     }
 }
 
+// Export showTab to global scope so it can be used by dropdown navigation
+window.showTab = showTab;
+
 async function loadDonations() {
     console.log('🩸 Loading donations from backend...');
     
