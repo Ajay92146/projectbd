@@ -18,6 +18,15 @@ function checkAdminAuthentication() {
         return false;
     }
     
+    // Check if logout was just completed - if so, redirect immediately
+    const logoutCompleted = sessionStorage.getItem('admin_logout_completed');
+    if (logoutCompleted === 'true') {
+        debugLog('🚪 Logout just completed, clearing flag and redirecting to login');
+        sessionStorage.removeItem('admin_logout_completed');
+        window.location.href = 'admin-login.html';
+        return false;
+    }
+    
     // Check if logout is in progress
     const logoutInProgress = sessionStorage.getItem('admin_logout_in_progress');
     if (logoutInProgress === 'true') {
@@ -48,8 +57,10 @@ function checkAdminAuthentication() {
         sessionStorage.removeItem('admin_email');
         sessionStorage.removeItem('admin_login_time');
         
-        // Redirect to login page
-        window.location.href = 'admin-login.html';
+        // Use a small delay to prevent rapid redirects
+        setTimeout(() => {
+            window.location.href = 'admin-login.html';
+        }, 100);
         return false;
     }
     
@@ -827,3 +838,59 @@ function displayRequests(requests, tableBody) {
 
 // Make loadRequests globally available
 window.loadRequests = loadRequests;
+
+// Logout function
+function logout() {
+    debugLog('🚪 Admin logout initiated');
+    
+    // Try to use the enhanced logout function if available
+    if (typeof logoutAdmin === 'function') {
+        logoutAdmin();
+    } else if (window.AdminAuthUtils && typeof window.AdminAuthUtils.logoutAdmin === 'function') {
+        window.AdminAuthUtils.logoutAdmin();
+    } else {
+        // Fallback simple logout
+        debugLog('🔄 Using fallback logout method');
+        
+        // Show confirmation
+        const confirmLogout = window.confirm('Are you sure you want to logout from the admin dashboard?');
+        if (!confirmLogout) {
+            return;
+        }
+        
+        // Clear admin data immediately
+        const adminKeys = [
+            'bloodconnect_admin',
+            'admin_email', 
+            'admin_login_time',
+            'admin_session',
+            'admin_preferences',
+            'admin_last_activity'
+        ];
+        
+        adminKeys.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
+        });
+        
+        // Set logout completed flag
+        sessionStorage.setItem('admin_logout_completed', 'true');
+        
+        // Redirect to login
+        setTimeout(() => {
+            sessionStorage.removeItem('admin_logout_completed');
+            window.location.href = 'admin-login.html';
+        }, 500);
+    }
+}
+
+// Make functions globally available
+window.loadStats = loadStats;
+window.loadUsers = loadUsers;
+window.loadDonations = loadDonations;
+window.loadRequests = loadRequests;
+window.showNotification = showNotification;
+window.logout = logout;
+window.displayUsers = displayUsers;
+window.displayDonations = displayDonations;
+window.displayRequests = displayRequests;
