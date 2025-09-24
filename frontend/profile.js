@@ -203,11 +203,34 @@ async function loadDonations() {
         return;
     }
     
-    // Use shared utility for loading state
-    SharedUtils.UIUtils.showLoading('donationsContent', 'Loading your donations...');
+    // Check authentication first - use fallback if SharedUtils not available
+    let token;
+    if (window.SharedUtils && window.SharedUtils.AuthUtils) {
+        token = SharedUtils.AuthUtils.getToken();
+    } else {
+        token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token');
+    }
+    
+    console.log('🔑 Token available:', !!token);
+    
+    if (!token) {
+        console.error('❌ No authentication token found');
+        if (window.SharedUtils && window.SharedUtils.UIUtils) {
+            SharedUtils.UIUtils.showErrorState('donationsContent', 'Authentication Required', 'Please log in to view your donations.');
+        } else {
+            donationsContainer.innerHTML = '<div class="text-center p-4"><p>Authentication Required</p><p>Please log in to view your donations.</p></div>';
+        }
+        return;
+    }
+    
+    // Show loading state
+    if (window.SharedUtils && window.SharedUtils.UIUtils) {
+        SharedUtils.UIUtils.showLoading('donationsContent', 'Loading your donations...');
+    } else {
+        donationsContainer.innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Loading your donations...</div>';
+    }
     
     try {
-        const token = SharedUtils.AuthUtils.getToken();
         const response = await fetch('/api/profile/donations', {
             method: 'GET',
             headers: {
@@ -217,14 +240,22 @@ async function loadDonations() {
         });
 
         console.log('🔄 Donations API response status:', response.status);
+        console.log('🔄 Donations API response headers:', response.headers);
 
         if (!response.ok) {
             if (response.status === 401) {
                 console.log('❌ Unauthorized, redirecting to login');
-                SharedUtils.AuthUtils.clearAuthData(false);
+                if (window.SharedUtils && window.SharedUtils.AuthUtils) {
+                    SharedUtils.AuthUtils.clearAuthData(false);
+                } else {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('bloodconnect_token');
+                }
                 window.location.href = 'login.html';
                 return;
             }
+            const errorText = await response.text();
+            console.error('❌ API Error Response:', errorText);
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
@@ -241,12 +272,19 @@ async function loadDonations() {
                 showEmptyDonations();
             }
         } else {
-            console.log('⚠️ No donations data in response');
+            console.log('⚠️ No donations data in response, showing empty state');
             showEmptyDonations();
         }
     } catch (error) {
         console.error('❌ Error loading donations:', error);
-        SharedUtils.UIUtils.showErrorState('donationsContent', 'Error Loading Donations', 'Unable to load your donations. Please try again later.', 'loadDonations()');
+        if (window.SharedUtils && window.SharedUtils.UIUtils) {
+            SharedUtils.UIUtils.showErrorState('donationsContent', 'Error Loading Donations', 'Unable to load your donations. Please try again later.', 'loadDonations()');
+        } else {
+            const donationsContainer = document.getElementById('donationsContent');
+            if (donationsContainer) {
+                donationsContainer.innerHTML = '<div class="text-center p-4"><p>Error Loading Donations</p><p>Unable to load your donations. Please try again later.</p><button class="btn btn-primary" onclick="loadDonations()">Retry</button></div>';
+            }
+        }
     }
 }
 
@@ -259,11 +297,34 @@ async function loadRequests() {
         return;
     }
     
-    // Use shared utility for loading state
-    SharedUtils.UIUtils.showLoading('requestsContent', 'Loading your blood requests...');
+    // Check authentication first - use fallback if SharedUtils not available
+    let token;
+    if (window.SharedUtils && window.SharedUtils.AuthUtils) {
+        token = SharedUtils.AuthUtils.getToken();
+    } else {
+        token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token');
+    }
+    
+    console.log('🔑 Token available:', !!token);
+    
+    if (!token) {
+        console.error('❌ No authentication token found');
+        if (window.SharedUtils && window.SharedUtils.UIUtils) {
+            SharedUtils.UIUtils.showErrorState('requestsContent', 'Authentication Required', 'Please log in to view your requests.');
+        } else {
+            requestsContainer.innerHTML = '<div class="text-center p-4"><p>Authentication Required</p><p>Please log in to view your requests.</p></div>';
+        }
+        return;
+    }
+    
+    // Show loading state
+    if (window.SharedUtils && window.SharedUtils.UIUtils) {
+        SharedUtils.UIUtils.showLoading('requestsContent', 'Loading your blood requests...');
+    } else {
+        requestsContainer.innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Loading your blood requests...</div>';
+    }
     
     try {
-        const token = SharedUtils.AuthUtils.getToken();
         const response = await fetch('/api/profile/requests', {
             method: 'GET',
             headers: {
@@ -273,14 +334,22 @@ async function loadRequests() {
         });
 
         console.log('🔄 Requests API response status:', response.status);
+        console.log('🔄 Requests API response headers:', response.headers);
 
         if (!response.ok) {
             if (response.status === 401) {
                 console.log('❌ Unauthorized, redirecting to login');
-                SharedUtils.AuthUtils.clearAuthData(false);
+                if (window.SharedUtils && window.SharedUtils.AuthUtils) {
+                    SharedUtils.AuthUtils.clearAuthData(false);
+                } else {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('bloodconnect_token');
+                }
                 window.location.href = 'login.html';
                 return;
             }
+            const errorText = await response.text();
+            console.error('❌ API Error Response:', errorText);
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
@@ -297,12 +366,19 @@ async function loadRequests() {
                 showEmptyRequests();
             }
         } else {
-            console.log('⚠️ No requests data in response');
+            console.log('⚠️ No requests data in response, showing empty state');
             showEmptyRequests();
         }
     } catch (error) {
         console.error('❌ Error loading requests:', error);
-        SharedUtils.UIUtils.showErrorState('requestsContent', 'Error Loading Requests', 'Unable to load your blood requests. Please try again later.', 'loadRequests()');
+        if (window.SharedUtils && window.SharedUtils.UIUtils) {
+            SharedUtils.UIUtils.showErrorState('requestsContent', 'Error Loading Requests', 'Unable to load your blood requests. Please try again later.', 'loadRequests()');
+        } else {
+            const requestsContainer = document.getElementById('requestsContent');
+            if (requestsContainer) {
+                requestsContainer.innerHTML = '<div class="text-center p-4"><p>Error Loading Requests</p><p>Unable to load your blood requests. Please try again later.</p><button class="btn btn-primary" onclick="loadRequests()">Retry</button></div>';
+            }
+        }
     }
 }
 
@@ -600,8 +676,17 @@ function toggleProfileDropdown() {
 }
 
 function logout() {
-    // Use shared utility for clearing auth data
-    SharedUtils.AuthUtils.clearAuthData(false);
+    // Use shared utility for clearing auth data if available
+    if (window.SharedUtils && window.SharedUtils.AuthUtils) {
+        SharedUtils.AuthUtils.clearAuthData(false);
+    } else {
+        // Fallback implementation
+        localStorage.removeItem('token');
+        localStorage.removeItem('bloodconnect_token');
+        localStorage.removeItem('bloodconnect_user');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('user');
+    }
     console.log('🔓 All authentication data cleared');
     window.location.href = 'login.html';
 }

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Profile API Test</h1>
+        <p>Test the profile API endpoints to debug data loading issues.</p>
+        
+        <div class="test-section">
+            <h3>Authentication Status</h3>
+            <button class="btn" onclick="checkAuth()">Check Authentication</button>
+            <button class="btn" onclick="clearAuth()">Clear Auth Data</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>API Tests</h3>
+            <button class="btn" onclick="testDonationsAPI()">Test Donations API</button>
+            <button class="btn" onclick="testRequestsAPI()">Test Requests API</button>
+            <button class="btn" onclick="testProfileAPI()">Test Profile API</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Manual Token Entry</h3>
+            <input type="text" id="manualToken" placeholder="Enter token manually" style="width: 300px; padding: 8px;">
+            <button class="btn" onclick="setManualToken()">Set Token</button>
+            <button class="btn" onclick="setDemoToken()">Use Demo Token</button>
+        </div>
+        
+        <div id="results" class="results">Results will appear here...</div>
+    </div>
+
+    <!-- Include shared utilities -->
+    <script src="js/shared-utils.js"></script>
+    
+    <script>
+        function log(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            resultsDiv.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        function checkAuth() {
+            clearResults();
+            log('🔍 Checking authentication status...', 'info');
+            
+            // Check tokens
+            const token = localStorage.getItem('token');
+            const bloodconnectToken = localStorage.getItem('bloodconnect_token');
+            const user = localStorage.getItem('bloodconnect_user');
+            
+            log(`Token: ${token ? 'Found (' + token.substring(0, 20) + '...)' : 'Not found'}`, token ? 'success' : 'error');
+            log(`BloodConnect Token: ${bloodconnectToken ? 'Found (' + bloodconnectToken.substring(0, 20) + '...)' : 'Not found'}`, bloodconnectToken ? 'success' : 'error');
+            log(`User Data: ${user ? 'Found' : 'Not found'}`, user ? 'success' : 'error');
+            
+            // Check SharedUtils
+            if (window.SharedUtils && window.SharedUtils.AuthUtils) {
+                const utilsToken = SharedUtils.AuthUtils.getToken();
+                log(`SharedUtils Token: ${utilsToken ? 'Found (' + utilsToken.substring(0, 20) + '...)' : 'Not found'}`, utilsToken ? 'success' : 'error');
+                log(`Is Authenticated: ${SharedUtils.AuthUtils.isAuthenticated()}`, SharedUtils.AuthUtils.isAuthenticated() ? 'success' : 'error');
+            } else {
+                log('SharedUtils not available', 'error');
+            }
+            
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    log(`User ID: ${userData.userId || 'Not found'}`, 'info');
+                    log(`User Email: ${userData.email || 'Not found'}`, 'info');
+                } catch (e) {
+                    log('Error parsing user data', 'error');
+                }
+            }
+        }
+        
+        function clearAuth() {
+            if (window.SharedUtils && window.SharedUtils.AuthUtils) {
+                SharedUtils.AuthUtils.clearAuthData(false);
+                log('✅ Auth data cleared', 'success');
+            } else {
+                localStorage.clear();
+                log('✅ localStorage cleared', 'success');
+            }
+        }
+        
+        function setManualToken() {
+            const token = document.getElementById('manualToken').value.trim();
+            if (token) {
+                localStorage.setItem('bloodconnect_token', token);
+                localStorage.setItem('token', token);
+                log('✅ Token set manually', 'success');
+                checkAuth();
+            } else {
+                log('❌ Please enter a token', 'error');
+            }
+        }
+        
+        function setDemoToken() {
+            // Set a demo token for testing
+            const demoToken = 'demo-token-for-testing-12345';
+            localStorage.setItem('bloodconnect_token', demoToken);
+            localStorage.setItem('token', demoToken);
+            log('✅ Demo token set for testing', 'success');
+            log('ℹ️ This is a demo token for API testing without real authentication', 'info');
+            checkAuth();
+        }
+        
+        async function testDonationsAPI() {
+            log('🩸 Testing Donations API...', 'info');
+            
+            const token = SharedUtils.AuthUtils.getToken();
+            if (!token) {
+                log('❌ No token available', 'error');
+                return;
+            }
+            
+            try {
+                log('📡 Making API call to /api/profile/donations', 'info');
+                const response = await fetch('/api/profile/donations', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`📊 Response Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                log(`📊 Response Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`, 'info');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`📦 Response Data: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Error Response: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testRequestsAPI() {
+            log('🔍 Testing Requests API...', 'info');
+            
+            const token = SharedUtils.AuthUtils.getToken();
+            if (!token) {
+                log('❌ No token available', 'error');
+                return;
+            }
+            
+            try {
+                log('📡 Making API call to /api/profile/requests', 'info');
+                const response = await fetch('/api/profile/requests', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`📊 Response Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                log(`📊 Response Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`, 'info');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`📦 Response Data: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Error Response: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testProfileAPI() {
+            log('👤 Testing Profile API...', 'info');
+            
+            const token = SharedUtils.AuthUtils.getToken();
+            if (!token) {
+                log('❌ No token available', 'error');
+                return;
+            }
+            
+            try {
+                log('📡 Making API call to /api/auth/profile', 'info');
+                const response = await fetch('/api/auth/profile', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`📊 Response Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`📦 Response Data: ${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ Error Response: ${errorText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-check auth on load
+        window.addEventListener('load', () => {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

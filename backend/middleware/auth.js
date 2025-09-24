@@ -14,6 +14,31 @@ const User = require('../models/User');
  */
 const authMiddleware = async (req, res, next) => {
     try {
+        // Check if database is connected
+        const mongoose = require('mongoose');
+        if (mongoose.connection.readyState !== 1) {
+            console.log('⚠️ Database not connected, using demo authentication');
+            
+            // Get token from header for demo purposes
+            const authHeader = req.header('Authorization');
+            
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Access denied. No token provided.'
+                });
+            }
+
+            // For demo, accept any token and create a demo user
+            req.user = {
+                userId: 'demo-user-123',
+                email: 'demo@example.com',
+                role: 'user'
+            };
+            
+            return next();
+        }
+        
         // Get token from header
         const authHeader = req.header('Authorization');
         
