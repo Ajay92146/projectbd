@@ -12,15 +12,18 @@ function debugLog(message) {
 function checkAdminAuthentication() {
     debugLog('🔍 Checking admin authentication...');
     
+    // Check if we're on the admin login page - if so, don't check authentication
+    if (window.location.pathname.includes('admin-login.html')) {
+        debugLog('📍 On admin login page, skipping auth check');
+        return false;
+    }
+    
     // Check if logout is in progress
     const logoutInProgress = sessionStorage.getItem('admin_logout_in_progress');
     if (logoutInProgress === 'true') {
         debugLog('🚪 Logout in progress, redirecting to login');
-        setTimeout(() => {
-            if (!window.location.pathname.includes('admin-login.html')) {
-                window.location.href = 'admin-login.html';
-            }
-        }, 500);
+        sessionStorage.removeItem('admin_logout_in_progress');
+        window.location.href = 'admin-login.html';
         return false;
     }
     
@@ -34,21 +37,19 @@ function checkAdminAuthentication() {
     debugLog(`🕒 Admin login time: ${adminLoginTime}`);
     debugLog(`🌐 Current URL: ${window.location.href}`);
     
-    // Check if we're already on the login page to prevent redirect loops
-    if (window.location.pathname.includes('admin-login.html')) {
-        debugLog('Already on login page, skipping redirect');
-        return false;
-    }
-    
     // Check if admin is authenticated
     if (adminStatus !== 'true' || !adminEmail || !adminLoginTime) {
         debugLog('❌ Not authenticated as admin, redirecting to login...');
-        // Add delay to ensure any ongoing operations complete and prevent loops
-        setTimeout(() => {
-            if (!window.location.pathname.includes('admin-login.html')) {
-                window.location.href = 'admin-login.html';
-            }
-        }, 500);
+        // Clear any partial admin data
+        localStorage.removeItem('bloodconnect_admin');
+        localStorage.removeItem('admin_email');
+        localStorage.removeItem('admin_login_time');
+        sessionStorage.removeItem('bloodconnect_admin');
+        sessionStorage.removeItem('admin_email');
+        sessionStorage.removeItem('admin_login_time');
+        
+        // Redirect to login page
+        window.location.href = 'admin-login.html';
         return false;
     }
     
@@ -74,9 +75,7 @@ function checkAdminAuthentication() {
             sessionStorage.removeItem('admin_login_time');
             
             setTimeout(() => {
-                if (!window.location.pathname.includes('admin-login.html')) {
-                    window.location.href = 'admin-login.html';
-                }
+                window.location.href = 'admin-login.html';
             }, 2000);
             return false;
         }
@@ -140,6 +139,13 @@ async function loadStats() {
     } catch (error) {
         debugLog(`Error loading stats: ${error.message}`);
         console.error('Error loading stats:', error);
+        
+        // Check if this is an authentication error
+        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+            debugLog('❌ Authentication error detected, redirecting to login');
+            window.location.href = 'admin-login.html';
+            return;
+        }
         
         const totalUsers = document.getElementById('totalUsers');
         const totalDonations = document.getElementById('totalDonations');

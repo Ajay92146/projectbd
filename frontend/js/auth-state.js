@@ -125,16 +125,23 @@ class AuthStateManager {
      * Clear authentication data
      */
     clearAuthData() {
+        // Only clear USER authentication data, NOT admin data
         localStorage.removeItem('bloodconnect_token');
         localStorage.removeItem('bloodconnect_user');
         localStorage.removeItem('bloodconnect_demo_user');
         localStorage.removeItem('bloodconnect_remember');
         localStorage.removeItem('bloodconnect_redirect');
 
+        // DO NOT clear admin data during user logout:
+        // - bloodconnect_admin
+        // - admin_email  
+        // - admin_login_time
+        // This was the bug causing admin dashboard errors
+
         // Update navigation immediately
         this.updateNavigation();
 
-        console.log('🔓 Authentication data cleared');
+        console.log('🔓 User authentication data cleared (admin data preserved)');
     }
 
     /**

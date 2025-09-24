@@ -392,18 +392,9 @@ async function logoutAdmin() {
 // Client-side logout cleanup
 function performClientLogout() {
     try {
-        // Set logout flag to prevent redirect loops
-        sessionStorage.setItem('admin_logout_in_progress', 'true');
+        debugLog('🧹 Starting admin logout cleanup...');
         
-        // Use shared utility for clearing admin auth data
-        if (window.SharedUtils && window.SharedUtils.AuthUtils) {
-            SharedUtils.AuthUtils.clearAuthData(true);
-        } else {
-            // Fallback implementation using session manager
-            sessionManager.clearSession();
-        }
-        
-        // Additional cleanup to ensure all admin data is removed
+        // Clear all admin-related data
         const adminKeys = [
             'bloodconnect_admin',
             'admin_email', 
@@ -416,7 +407,13 @@ function performClientLogout() {
         adminKeys.forEach(key => {
             localStorage.removeItem(key);
             sessionStorage.removeItem(key);
+            debugLog(`🗑️ Cleared ${key}`);
         });
+        
+        // Clear any session manager data if available
+        if (window.AdminAuthUtils && window.AdminAuthUtils.sessionManager) {
+            window.AdminAuthUtils.sessionManager.clearSession();
+        }
         
         debugLog('✅ Admin logout completed successfully');
         
@@ -449,28 +446,54 @@ function performClientLogout() {
             if (document.body.contains(logoutMessage)) {
                 document.body.removeChild(logoutMessage);
             }
-            // Clear the logout flag before redirecting
-            sessionStorage.removeItem('admin_logout_in_progress');
+            
+            // Final redirect to admin login
             window.location.href = 'admin-login.html';
-        }, 2000);
+        }, 1500);
         
     } catch (error) {
         debugLog(`❌ Client logout error: ${error.message}`);
-        // Clear the logout flag even if there's an error
-        sessionStorage.removeItem('admin_logout_in_progress');
+        // Force redirect even if there's an error
         window.location.href = 'admin-login.html';
     }
 }
 
-// Check if already logged in
+// Check if already logged in (only for admin login page)
 function checkExistingAdminLogin() {
+    // Only check on admin login page
+    if (!window.location.pathname.includes('admin-login.html')) {
+        return false;
+    }
+    
     // Check both localStorage and sessionStorage
     const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
-    if (adminStatus === 'true') {
-        debugLog('Already logged in as admin, redirecting to dashboard');
-        window.location.href = 'admin-dashboard.html';
-        return true;
+    const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+    const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
+    
+    // Validate that all required admin data exists and is valid
+    if (adminStatus === 'true' && adminEmail && adminLoginTime) {
+        // Check if session is still valid (30 minutes)
+        const loginTime = new Date(adminLoginTime);
+        const currentTime = new Date();
+        const timeDiff = currentTime - loginTime;
+        const minutesDiff = timeDiff / (1000 * 60);
+        
+        if (minutesDiff <= 30) {
+            debugLog('Valid admin session found, redirecting to dashboard');
+            window.location.href = 'admin-dashboard.html';
+            return true;
+        } else {
+            debugLog('Admin session expired, clearing data');
+            // Clear expired session
+            localStorage.removeItem('bloodconnect_admin');
+            localStorage.removeItem('admin_email');
+            localStorage.removeItem('admin_login_time');
+            sessionStorage.removeItem('bloodconnect_admin');
+            sessionStorage.removeItem('admin_email');
+            sessionStorage.removeItem('admin_login_time');
+        }
     }
+    
     return false;
 }
 
