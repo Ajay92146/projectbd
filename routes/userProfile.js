@@ -30,12 +30,15 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             });
         }
 
-
-
-        // Get donation statistics from Donor collection
+        // Get donation statistics from Donor collection - FIXED QUERY
         const Donor = require('../models/Donor');
         const donationStats = await Donor.aggregate([
-            { $match: { email: user.email, isActive: { $ne: false } } },
+            { 
+                $match: { 
+                    userId: userId,  // PRIMARY FILTER: Only current user's donations
+                    isActive: { $ne: false } 
+                } 
+            },
             {
                 $group: {
                     _id: null,
@@ -47,20 +50,15 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             }
         ]);
 
-        // Get request statistics from Request collection
+        // Get request statistics from Request collection - FIXED QUERY
         const Request = require('../models/Request');
-        const requestQuery = user.phoneNumber ?
-            { contactNumber: user.phoneNumber, isActive: { $ne: false } } :
-            {
-                $or: [
-                    { contactPersonName: new RegExp(user.firstName, 'i') },
-                    { contactPersonName: new RegExp(user.lastName, 'i') }
-                ],
-                isActive: { $ne: false }
-            };
-
         const requestStats = await Request.aggregate([
-            { $match: requestQuery },
+            { 
+                $match: { 
+                    userId: userId,  // PRIMARY FILTER: Only current user's requests
+                    isActive: { $ne: false } 
+                } 
+            },
             {
                 $group: {
                     _id: null,
@@ -76,22 +74,25 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             }
         ]);
 
-        // Get recent donations (last 5)
+        // Get recent donations (last 5) - FIXED QUERY
         const recentDonations = await Donor.find({
-            email: user.email,
+            userId: userId,  // Only current user's donations
             isActive: { $ne: false }
         })
             .sort({ applicationDate: -1, dateOfDonation: -1 })
             .limit(5);
 
-        // Get recent requests (last 5)
-        const recentRequests = await Request.find(requestQuery)
+        // Get recent requests (last 5) - FIXED QUERY
+        const recentRequests = await Request.find({
+            userId: userId,  // Only current user's requests
+            isActive: { $ne: false }
+        })
             .sort({ createdAt: -1 })
             .limit(5);
 
         // Get upcoming eligible donation date
         const lastDonation = await Donor.findOne({
-            email: user.email,
+            userId: userId,  // Only current user's donations
             isActive: { $ne: false }
         }).sort({ dateOfDonation: -1 });
 
@@ -173,20 +174,14 @@ router.get('/donations', [
             });
         }
 
-        // Get donations from Donor collection by matching email AND userId if available
+        // FIXED: Get donations from Donor collection using userId as primary filter
         const Donor = require('../models/Donor');
-        console.log('🔍 Looking for donations with email:', user.email, 'and userId:', userId);
+        console.log('🔍 Looking for donations with userId:', userId);
 
-        // Build query to ensure we're only getting the current user's donations
         const donorQuery = {
-            email: user.email,
+            userId: userId,  // PRIMARY FILTER: Only current user's donations
             isActive: { $ne: false }
         };
-        
-        // Add userId to query if the field exists in the Donor model
-        if (Donor.schema.paths.userId) {
-            donorQuery.userId = userId;
-        }
         
         console.log('🔍 Using donor query:', JSON.stringify(donorQuery));
         
@@ -230,8 +225,8 @@ router.get('/donations', [
                 name: donation.donationCenter || 'Blood Bank',
                 address: donation.address || donation.city + ', ' + donation.state
             },
-            donorName: donation.name,
-            contactNumber: donation.contactNumber,
+            donorName: donation.name || `${donation.firstName} ${donation.lastName}`,
+            contactNumber: donation.contactNumber || donation.phoneNumber,
             city: donation.city,
             state: donation.state,
             createdAt: donation.applicationDate || donation.createdAt
@@ -361,56 +356,58 @@ router.get('/requests', [
             });
         }
 
-        console.log('🔍 Looking for requests for user:', user.email, 'userId:', userId);
-
-        // Build query for Request collection with proper user identification
+        // FIXED: Build query to get only current user's requests
         const Request = require('../models/Request');
-        
-        // Primary query: Look for requests with exact userId match (most secure)
-        // CRITICAL FIX: Force string comparison for userId to ensure exact matches
-        const userIdStr = userId.toString();
-        
-        // Strict query that only returns the current user's requests
-        const requestQuery = {
-            isActive: { $ne: false },
-            $or: [
-                { userId: mongoose.Types.ObjectId(userId) },  // Try as ObjectId
-                { userId: userIdStr },                        // Try as string
-                { userEmail: user.email }                     // Fallback to email
-            ]
+        console.log('🔍 Looking for requests with userId:', userId);
+
+        let requestQuery = {
+            userId: userId,  // PRIMARY FILTER: Only current user's requests
+            isActive: { $ne: false }
         };
 
         if (status) {
             requestQuery.status = status;
         }
 
-        console.log('🔍 Enhanced request query:', JSON.stringify(requestQuery, null, 2));
+        console.log('🔍 Using request query:', JSON.stringify(requestQuery));
 
-        // Get requests from Request table with pagination
-        let requests = await Request.find(requestQuery)
+        const requests = await Request.find(requestQuery)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
-            
-        // CRITICAL FIX: Double-check each request to ensure it belongs to the current user
-        // This is a final safety check to prevent any data leakage
-        requests = requests.filter(request => {
-            const requestUserId = request.userId ? request.userId.toString() : null;
-            const requestEmail = request.userEmail || null;
-            return requestUserId === userIdStr || requestEmail === user.email;
+
+        console.log('📊 Found requests:', requests.length);
+
+        // Get total count
+        const totalRequests = await Request.countDocuments(requestQuery);
+
+        // Also get UserRequest records if they exist
+        const UserRequest = require('../models/UserRequest');
+        const userRequests = await UserRequest.find({
+            userId: userId,
+            isActive: { $ne: false },
+            ...(status && { status })
+        })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        // Combine and deduplicate requests
+        const allRequests = [...requests, ...userRequests];
+        const uniqueRequests = allRequests.filter((request, index, self) => 
+            index === self.findIndex(r => r._id.toString() === request._id.toString())
+        );
+
+        console.log('📤 Sending requests response:', {
+            success: true,
+            requestsCount: uniqueRequests.length,
+            totalRequests
         });
-            
-        // Log the found requests for debugging
-        console.log('📊 Found requests after strict filtering:', requests.length, 'for userId:', userId);
 
-        // Get total count from Request table
-        let totalRequests = await Request.countDocuments(requestQuery);
-
-        // Prepare the response
-        const responseData = {
+        res.json({
             success: true,
             data: {
-                requests,
+                requests: uniqueRequests,
                 pagination: {
                     currentPage: page,
                     totalPages: Math.ceil(totalRequests / limit),
@@ -419,29 +416,7 @@ router.get('/requests', [
                     hasPrev: page > 1
                 }
             }
-        };
-
-        console.log('📤 Sending requests response:', {
-            success: responseData.success,
-            requestsCount: requests.length,
-            totalRequests,
-            sampleRequest: requests[0] ? {
-                id: requests[0]._id,
-                patientName: requests[0].patientName,
-                bloodGroup: requests[0].bloodGroup,
-                requiredUnits: requests[0].requiredUnits,
-                status: requests[0].status
-            } : null
         });
-
-        // Add cache-busting headers
-        res.set({
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-        });
-
-        res.json(responseData);
 
     } catch (error) {
         console.error('Error fetching requests:', error);
@@ -454,57 +429,52 @@ router.get('/requests', [
 });
 
 /**
- * @route   GET /api/profile/settings
- * @desc    Get user settings
+ * @route   POST /api/profile/requests
+ * @desc    Add a new blood request
  * @access  Private
  */
-router.get('/settings', authMiddleware, async (req, res) => {
-    try {
-        const userId = req.user.userId;
-        
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        res.json({
-            success: true,
-            data: {
-                notifications: user.notifications,
-                profileVisibility: user.profileVisibility,
-                accountInfo: {
-                    email: user.email,
-                    isVerified: user.isVerified,
-                    lastLogin: user.lastLogin,
-                    memberSince: user.createdAt
-                }
-            }
-        });
-
-    } catch (error) {
-        console.error('Error fetching settings:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching settings',
-            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-        });
-    }
-});
-
-/**
- * @route   PUT /api/profile/settings
- * @desc    Update user settings
- * @access  Private
- */
-router.put('/settings', [
+router.post('/requests', [
     authMiddleware,
-    body('notifications.email').optional().isBoolean(),
-    body('notifications.sms').optional().isBoolean(),
-    body('notifications.push').optional().isBoolean(),
-    body('profileVisibility').optional().isIn(['public', 'private', 'donors-only'])
+    body('patientName')
+        .trim()
+        .isLength({ min: 2, max: 100 })
+        .withMessage('Patient name must be between 2 and 100 characters'),
+    body('patientAge')
+        .isInt({ min: 1, max: 120 })
+        .withMessage('Patient age must be between 1 and 120'),
+    body('patientGender')
+        .isIn(['Male', 'Female', 'Other'])
+        .withMessage('Invalid gender'),
+    body('relationship')
+        .isIn(['Self', 'Parent', 'Child', 'Spouse', 'Sibling', 'Relative', 'Friend', 'Other'])
+        .withMessage('Invalid relationship'),
+    body('bloodGroup')
+        .isIn(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
+        .withMessage('Invalid blood group'),
+    body('requiredUnits')
+        .isInt({ min: 1, max: 10 })
+        .withMessage('Required units must be between 1 and 10'),
+    body('urgency')
+        .isIn(['Low', 'Medium', 'High', 'Critical'])
+        .withMessage('Invalid urgency level'),
+    body('hospitalName')
+        .trim()
+        .isLength({ min: 2, max: 200 })
+        .withMessage('Hospital name must be between 2 and 200 characters'),
+    body('hospitalAddress')
+        .trim()
+        .isLength({ min: 5, max: 500 })
+        .withMessage('Hospital address must be between 5 and 500 characters'),
+    body('contactNumber')
+        .matches(/^[6-9]\d{9}$/)
+        .withMessage('Please enter a valid 10-digit Indian mobile number'),
+    body('requiredBy')
+        .isISO8601()
+        .withMessage('Please provide a valid required by date'),
+    body('additionalNotes')
+        .optional()
+        .isLength({ max: 1000 })
+        .withMessage('Additional notes cannot exceed 1000 characters')
 ], async (req, res) => {
     try {
         // Check for validation errors
@@ -518,36 +488,28 @@ router.put('/settings', [
         }
 
         const userId = req.user.userId;
-        const updateData = req.body;
-
-        // Update user settings
-        const updatedUser = await User.findByIdAndUpdate(
+        const requestData = {
             userId,
-            updateData,
-            { new: true, runValidators: true }
-        );
+            ...req.body
+        };
 
-        if (!updatedUser) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
+        // Create new request record
+        const newRequest = new UserRequest(requestData);
+        const savedRequest = await newRequest.save();
 
-        res.json({
+        res.status(201).json({
             success: true,
-            message: 'Settings updated successfully',
+            message: 'Blood request added successfully',
             data: {
-                notifications: updatedUser.notifications,
-                profileVisibility: updatedUser.profileVisibility
+                request: savedRequest
             }
         });
 
     } catch (error) {
-        console.error('Error updating settings:', error);
+        console.error('Error adding blood request:', error);
         res.status(500).json({
             success: false,
-            message: 'Error updating settings',
+            message: 'Error adding blood request',
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
