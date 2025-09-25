@@ -176,6 +176,7 @@ router.get('/donations', [
         const Donor = require('../models/Donor');
         console.log('🔍 Looking for donations with email:', user.email);
 
+        // Ensure we're only getting the current user's donations by using their email
         const donations = await Donor.find({
             email: user.email,
             isActive: { $ne: false } // Include documents where isActive is not false
@@ -360,7 +361,7 @@ router.get('/requests', [
         
         // Primary query: Look for requests with exact userId match (most secure)
         const requestQuery = {
-            userId: userId,
+            userId: userId, // Ensure we're only getting the current user's requests
             isActive: { $ne: false }
         };
 
