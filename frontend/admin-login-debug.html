@@ -338,6 +338,32 @@
             addLog(`Current URL: ${window.location.href}`);
             addLog(`User Agent: ${navigator.userAgent}`);
             
+            // Detect logout completion flag to prevent redirect loops and show confirmation
+            try {
+                const logoutCompleted = sessionStorage.getItem('admin_logout_completed');
+                if (logoutCompleted === 'true') {
+                    addLog('🚪 Detected admin logout completion flag. Staying on login page and clearing flag.');
+                    // Clear any leftover admin data just in case
+                    localStorage.removeItem('bloodconnect_admin');
+                    localStorage.removeItem('admin_email');
+                    localStorage.removeItem('admin_login_time');
+                    sessionStorage.removeItem('bloodconnect_admin');
+                    sessionStorage.removeItem('admin_email');
+                    sessionStorage.removeItem('admin_login_time');
+                    // Clear the flag so subsequent loads behave normally
+                    sessionStorage.removeItem('admin_logout_completed');
+                    
+                    // Show a visible confirmation in the status area
+                    const statusDiv = document.getElementById('storageStatus');
+                    if (statusDiv) {
+                        statusDiv.className = 'status success';
+                        statusDiv.textContent = '✅ You have been logged out successfully. Please login again.';
+                    }
+                }
+            } catch (e) {
+                addLog(`⚠️ Error handling logout flag: ${e.message}`);
+            }
+            
             checkStorage();
             
             // Form submission
