@@ -174,21 +174,37 @@ router.get('/donations', [
             });
         }
 
-        // FIXED: Get donations from Donor collection using userId as primary filter
+        // CRITICAL FIX: Get donations from Donor collection with enhanced filtering
         const Donor = require('../models/Donor');
         console.log('🔍 Looking for donations with userId:', userId);
+        console.log('🔍 User email:', user.email);
 
+        // Create a comprehensive query to ensure we only get this user's donations
+        // Handle both ObjectId and string representations of userId
         const donorQuery = {
-            userId: userId,  // PRIMARY FILTER: Only current user's donations
+            $or: [
+                { userId: mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId },
+                { userId: userId.toString() },
+                { email: user.email },
+                { donorEmail: user.email }
+            ],
             isActive: { $ne: false }
         };
         
         console.log('🔍 Using donor query:', JSON.stringify(donorQuery));
         
-        const donations = await Donor.find(donorQuery)
+        // Get all donations that might match
+        let donations = await Donor.find(donorQuery)
             .sort({ applicationDate: -1, dateOfDonation: -1 })
             .skip(skip)
             .limit(limit);
+            
+        // SAFETY CHECK: Double-check each donation belongs to this user
+        donations = donations.filter(donation => {
+            return (donation.userId && donation.userId.toString() === userId.toString()) || 
+                   donation.email === user.email || 
+                   donation.donorEmail === user.email;
+        });
 
         console.log('📊 Found donations:', donations.length);
 
@@ -356,12 +372,19 @@ router.get('/requests', [
             });
         }
 
-        // FIXED: Build query to get only current user's requests
+        // CRITICAL FIX: Build query to get only current user's requests
         const Request = require('../models/Request');
         console.log('🔍 Looking for requests with userId:', userId);
+        console.log('🔍 User email:', user.email);
 
+        // Create a more comprehensive query to ensure we only get this user's requests
+        // Handle both ObjectId and string representations of userId
         let requestQuery = {
-            userId: userId,  // PRIMARY FILTER: Only current user's requests
+            $or: [
+                { userId: mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId },
+                { userId: userId.toString() },
+                { userEmail: user.email }
+            ],
             isActive: { $ne: false }
         };
 
@@ -371,10 +394,18 @@ router.get('/requests', [
 
         console.log('🔍 Using request query:', JSON.stringify(requestQuery));
 
-        const requests = await Request.find(requestQuery)
+        // Get all requests that might match
+        let requests = await Request.find(requestQuery)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+            
+        // SAFETY CHECK: Double-check each request belongs to this user
+        requests = requests.filter(request => {
+            return request.userId && 
+                  (request.userId.toString() === userId.toString() || 
+                   request.userEmail === user.email);
+        });
 
         console.log('📊 Found requests:', requests.length);
 

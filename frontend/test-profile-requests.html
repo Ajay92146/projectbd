@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Profile Requests</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .request-card {
+            border-left: 4px solid #dc3545;
+        }
+        .donation-card {
+            border-left: 4px solid #198754;
+        }
+        .status-badge {
+            float: right;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        #userId {
+            font-weight: bold;
+        }
+        #userEmail {
+            font-weight: bold;
+        }
+        .debug-info {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Profile Request Filter Test</h1>
+        
+        <div class="test-section">
+            <h2>User Information</h2>
+            <p>User ID: <span id="userId">Loading...</span></p>
+            <p>Email: <span id="userEmail">Loading...</span></p>
+            <button id="refreshBtn" class="btn btn-primary mb-3">Refresh Data</button>
+        </div>
+
+        <div class="test-section">
+            <h2>My Blood Requests</h2>
+            <div id="requestsContainer">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>My Donations</h2>
+            <div id="donationsContainer">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Debug Information</h2>
+            <div class="debug-info" id="debugInfo">
+                No debug information available yet.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html?redirect=test-profile-requests.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Load user information
+        async function loadUserInfo() {
+            if (!checkAuth()) return;
+            
+            try {
+                const response = await fetch('/api/auth/user', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load user info');
+                }
+                
+                const data = await response.json();
+                document.getElementById('userId').textContent = data.user.userId || 'Not available';
+                document.getElementById('userEmail').textContent = data.user.email || 'Not available';
+                
+                // Add to debug info
+                addDebugInfo('User Info', data);
+                
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                document.getElementById('userId').textContent = 'Error loading user info';
+                document.getElementById('userEmail').textContent = 'Error loading user info';
+                addDebugInfo('Error', error.message);
+            }
+        }
+
+        // Load user's blood requests
+        async function loadRequests() {
+            if (!checkAuth()) return;
+            
+            const requestsContainer = document.getElementById('requestsContainer');
+            requestsContainer.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            
+            try {
+                const response = await fetch('/api/profile/requests', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load requests');
+                }
+                
+                const data = await response.json();
+                addDebugInfo('Requests Response', data);
+                
+                if (data.requests && data.requests.length > 0) {
+                    requestsContainer.innerHTML = '';
+                    data.requests.forEach(request => {
+                        requestsContainer.innerHTML += `
+                            <div class="card request-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">${request.patientName || 'Unknown Patient'}
+                                        <span class="badge bg-${getStatusColor(request.status)} status-badge">${request.status || 'Unknown'}</span>
+                                    </h5>
+                                    <p class="card-text">Blood Group: ${request.bloodGroup || 'Unknown'}</p>
+                                    <p class="card-text">Required Units: ${request.requiredUnits || '0'}</p>
+                                    <p class="card-text">Hospital: ${request.hospitalName || 'Unknown'}</p>
+                                    <p class="card-text">Location: ${request.location || 'Unknown'}</p>
+                                    <p class="card-text">Request Date: ${formatDate(request.requestDate)}</p>
+                                    <p class="card-text"><small class="text-muted">Request ID: ${request._id}</small></p>
+                                    <p class="card-text"><small class="text-muted">User ID: ${request.userId}</small></p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    requestsContainer.innerHTML = '<div class="alert alert-info">No blood requests found.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                requestsContainer.innerHTML = `<div class="alert alert-danger">Error loading requests: ${error.message}</div>`;
+                addDebugInfo('Error', error.message);
+            }
+        }
+
+        // Load user's donations
+        async function loadDonations() {
+            if (!checkAuth()) return;
+            
+            const donationsContainer = document.getElementById('donationsContainer');
+            donationsContainer.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            
+            try {
+                const response = await fetch('/api/profile/donations', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load donations');
+                }
+                
+                const data = await response.json();
+                addDebugInfo('Donations Response', data);
+                
+                if (data.donations && data.donations.length > 0) {
+                    donationsContainer.innerHTML = '';
+                    data.donations.forEach(donation => {
+                        donationsContainer.innerHTML += `
+                            <div class="card donation-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Donation at ${donation.hospitalName || 'Unknown Hospital'}</h5>
+                                    <p class="card-text">Blood Group: ${donation.bloodGroup || 'Unknown'}</p>
+                                    <p class="card-text">Donation Date: ${formatDate(donation.dateOfDonation)}</p>
+                                    <p class="card-text">Location: ${donation.donationLocation || 'Unknown'}</p>
+                                    <p class="card-text"><small class="text-muted">Donation ID: ${donation._id}</small></p>
+                                    <p class="card-text"><small class="text-muted">User ID: ${donation.userId}</small></p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    donationsContainer.innerHTML = '<div class="alert alert-info">No donations found.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading donations:', error);
+                donationsContainer.innerHTML = `<div class="alert alert-danger">Error loading donations: ${error.message}</div>`;
+                addDebugInfo('Error', error.message);
+            }
+        }
+
+        // Helper function to format dates
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        // Helper function to get status color
+        function getStatusColor(status) {
+            switch (status) {
+                case 'Pending': return 'warning';
+                case 'In Progress': return 'info';
+                case 'Fulfilled': return 'success';
+                case 'Cancelled': return 'danger';
+                case 'Expired': return 'secondary';
+                default: return 'primary';
+            }
+        }
+
+        // Add debug information
+        function addDebugInfo(title, data) {
+            const debugInfo = document.getElementById('debugInfo');
+            const debugEntry = document.createElement('div');
+            debugEntry.innerHTML = `<h5>${title}</h5><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            debugInfo.innerHTML = '';
+            debugInfo.appendChild(debugEntry);
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
+            loadRequests();
+            loadDonations();
+            
+            // Add refresh button handler
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                loadUserInfo();
+                loadRequests();
+                loadDonations();
+            });
+        });
+    </script>
+</body>
+</html>
