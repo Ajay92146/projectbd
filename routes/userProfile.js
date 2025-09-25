@@ -30,23 +30,9 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             });
         }
 
-<<<<<<< HEAD
-
-
         // Get donation statistics from UserDonation collection scoped to current user
         const donationStats = await UserDonation.aggregate([
             { $match: { userId: user._id } },
-=======
-        // Get donation statistics from Donor collection - FIXED QUERY
-        const Donor = require('../models/Donor');
-        const donationStats = await Donor.aggregate([
-            { 
-                $match: { 
-                    userId: userId,  // PRIMARY FILTER: Only current user's donations
-                    isActive: { $ne: false } 
-                } 
-            },
->>>>>>> b9f57cd09dc937d1fe1f3322945a6d701c03f519
             {
                 $group: {
                     _id: null,
@@ -58,19 +44,12 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             }
         ]);
 
-<<<<<<< HEAD
         // Get request statistics strictly for current user (by userId)
         const Request = require('../models/Request');
-        const requestQuery = { userId: user._id, isActive: { $ne: false } };
-
-=======
-        // Get request statistics from Request collection - FIXED QUERY
-        const Request = require('../models/Request');
->>>>>>> b9f57cd09dc937d1fe1f3322945a6d701c03f519
         const requestStats = await Request.aggregate([
             { 
                 $match: { 
-                    userId: userId,  // PRIMARY FILTER: Only current user's requests
+                    userId: userId,
                     isActive: { $ne: false } 
                 } 
             },
@@ -89,23 +68,15 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             }
         ]);
 
-<<<<<<< HEAD
         // Get recent donations (last 5) from UserDonation
         const recentDonations = await UserDonation.find({
             userId: user._id
-=======
-        // Get recent donations (last 5) - FIXED QUERY
-        const recentDonations = await Donor.find({
-            userId: userId,  // Only current user's donations
-            isActive: { $ne: false }
->>>>>>> b9f57cd09dc937d1fe1f3322945a6d701c03f519
         })
             .sort({ donationDate: -1, createdAt: -1 })
             .limit(5);
 
-<<<<<<< HEAD
         // Get recent requests (last 5) belonging to current user
-        const recentRequests = await Request.find(requestQuery)
+        const recentRequests = await Request.find({ userId: userId, isActive: { $ne: false } })
             .sort({ createdAt: -1 })
             .limit(5);
 
@@ -113,21 +84,6 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
         const lastDonation = await UserDonation.findOne({
             userId: user._id
         }).sort({ donationDate: -1, createdAt: -1 });
-=======
-        // Get recent requests (last 5) - FIXED QUERY
-        const recentRequests = await Request.find({
-            userId: userId,  // Only current user's requests
-            isActive: { $ne: false }
-        })
-            .sort({ createdAt: -1 })
-            .limit(5);
-
-        // Get upcoming eligible donation date
-        const lastDonation = await Donor.findOne({
-            userId: userId,  // Only current user's donations
-            isActive: { $ne: false }
-        }).sort({ dateOfDonation: -1 });
->>>>>>> b9f57cd09dc937d1fe1f3322945a6d701c03f519
 
         let nextEligibleDate = null;
         if (lastDonation && (lastDonation.donationDate || lastDonation.dateOfDonation)) {
@@ -198,67 +154,18 @@ router.get('/donations', [
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
-<<<<<<< HEAD
         // Look up donations strictly in UserDonation by userId
         const donations = await UserDonation.find({
             userId: userId
         })
             .sort({ donationDate: -1, createdAt: -1 })
-=======
-        // Get user's email to match with donations
-        const User = require('../models/User');
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        // CRITICAL FIX: Get donations from Donor collection with enhanced filtering
-        const Donor = require('../models/Donor');
-        console.log('🔍 Looking for donations with userId:', userId);
-        console.log('🔍 User email:', user.email);
-
-        // Create a comprehensive query to ensure we only get this user's donations
-        // Handle both ObjectId and string representations of userId
-        const donorQuery = {
-            $or: [
-                { userId: mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId },
-                { userId: userId.toString() },
-                { email: user.email },
-                { donorEmail: user.email }
-            ],
-            isActive: { $ne: false }
-        };
-        
-        console.log('🔍 Using donor query:', JSON.stringify(donorQuery));
-        
-        // Get all donations that might match
-        let donations = await Donor.find(donorQuery)
-            .sort({ applicationDate: -1, dateOfDonation: -1 })
->>>>>>> b9f57cd09dc937d1fe1f3322945a6d701c03f519
             .skip(skip)
             .limit(limit);
-            
-        // SAFETY CHECK: Double-check each donation belongs to this user
-        donations = donations.filter(donation => {
-            return (donation.userId && donation.userId.toString() === userId.toString()) || 
-                   donation.email === user.email || 
-                   donation.donorEmail === user.email;
-        });
 
-<<<<<<< HEAD
         // Get total count
         const totalDonations = await UserDonation.countDocuments({
             userId: userId
         });
-=======
-        console.log('📊 Found donations:', donations.length);
-
-        // Get total count with the same query
-        const totalDonations = await Donor.countDocuments(donorQuery);
->>>>>>> b9f57cd09dc937d1fe1f3322945a6d701c03f519
 
         console.log('📤 Sending donations response:', {
             success: true,
@@ -284,7 +191,6 @@ router.get('/donations', [
             _id: donation._id,
             donationDate: donation.donationDate || donation.dateOfDonation,
             bloodGroup: donation.bloodGroup,
-<<<<<<< HEAD
             unitsCollected: donation.unitsCollected || 1,
             status: donation.status || 'Recorded',
             donationCenter: donation.donationCenter ? {
@@ -293,16 +199,6 @@ router.get('/donations', [
             } : undefined,
             donorName: undefined,
             contactNumber: undefined,
-=======
-            unitsCollected: 1, // Default to 1 unit as Donor model doesn't have this field
-            status: donation.isActive === false ? 'Cancelled' : 'Completed',
-            donationCenter: {
-                name: donation.donationCenter || 'Blood Bank',
-                address: donation.address || donation.city + ', ' + donation.state
-            },
-            donorName: donation.name || `${donation.firstName} ${donation.lastName}`,
-            contactNumber: donation.contactNumber || donation.phoneNumber,
->>>>>>> b9f57cd09dc937d1fe1f3322945a6d701c03f519
             city: donation.city,
             state: donation.state,
             createdAt: donation.createdAt
@@ -432,19 +328,10 @@ router.get('/requests', [
             });
         }
 
-        // CRITICAL FIX: Build query to get only current user's requests
+        // Build query to get only current user's requests by userId
         const Request = require('../models/Request');
-        console.log('🔍 Looking for requests with userId:', userId);
-        console.log('🔍 User email:', user.email);
-
-        // Create a more comprehensive query to ensure we only get this user's requests
-        // Handle both ObjectId and string representations of userId
         let requestQuery = {
-            $or: [
-                { userId: mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId },
-                { userId: userId.toString() },
-                { userEmail: user.email }
-            ],
+            userId: userId,
             isActive: { $ne: false }
         };
 
@@ -452,20 +339,11 @@ router.get('/requests', [
             requestQuery.status = status;
         }
 
-        console.log('🔍 Using request query:', JSON.stringify(requestQuery));
-
-        // Get all requests that might match
+        // Get requests that match exactly this user
         let requests = await Request.find(requestQuery)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
-            
-        // SAFETY CHECK: Double-check each request belongs to this user
-        requests = requests.filter(request => {
-            return request.userId && 
-                  (request.userId.toString() === userId.toString() || 
-                   request.userEmail === user.email);
-        });
 
         console.log('📊 Found requests:', requests.length);
 
@@ -474,6 +352,7 @@ router.get('/requests', [
 
         // Also get UserRequest records if they exist
         const UserRequest = require('../models/UserRequest');
+        // Optionally also include UserRequest documents for the same user
         const userRequests = await UserRequest.find({
             userId: userId,
             isActive: { $ne: false },
@@ -483,11 +362,15 @@ router.get('/requests', [
             .skip(skip)
             .limit(limit);
 
-        // Combine and deduplicate requests
-        const allRequests = [...requests, ...userRequests];
-        const uniqueRequests = allRequests.filter((request, index, self) => 
-            index === self.findIndex(r => r._id.toString() === request._id.toString())
-        );
+        // Merge both sources and dedupe by _id
+        const combined = [...requests, ...userRequests];
+        const seen = new Set();
+        const uniqueRequests = combined.filter(r => {
+            const id = r._id.toString();
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+        });
 
         console.log('📤 Sending requests response:', {
             success: true,
