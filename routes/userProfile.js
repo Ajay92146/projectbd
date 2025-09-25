@@ -93,6 +93,8 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             nextEligibleDate = nextDate;
         }
 
+        // Prevent caching of sensitive user dashboard
+        res.set({ 'Cache-Control': 'no-store' });
         res.json({
             success: true,
             data: {
@@ -179,12 +181,10 @@ router.get('/donations', [
             } : null
         });
 
-        // Add cache-busting headers
-        res.set({
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-        });
+        // Prevent caching of sensitive user donations
+        res.set({ 'Cache-Control': 'no-store' });
+        // Prevent caching of sensitive user requests
+        res.set({ 'Cache-Control': 'no-store' });
 
         // Map UserDonation model fields to frontend expected format
         const mappedDonations = donations.map(donation => ({
