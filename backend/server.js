@@ -147,11 +147,15 @@ console.log('✅ API routes loaded successfully');
 
 // Serve static files from frontend directory (AFTER API routes)
 app.use(express.static(path.join(__dirname, '../frontend'), {
-    setHeaders: (res, path) => {
-        if (path.endsWith('.js')) {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.js')) {
             res.setHeader('Content-Type', 'application/javascript');
-        } else if (path.endsWith('.css')) {
+        } else if (filePath.endsWith('.css')) {
             res.setHeader('Content-Type', 'text/css');
+        }
+        // Force fresh loads for profile assets to avoid serving stale cached files
+        if (filePath.endsWith('/profile.html') || filePath.endsWith('/profile.js')) {
+            res.setHeader('Cache-Control', 'no-store');
         }
     }
 }));
@@ -182,6 +186,7 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/profile', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
     res.sendFile(path.join(__dirname, '../frontend/profile.html'));
 });
 
