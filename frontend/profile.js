@@ -714,7 +714,7 @@ async function changePassword(event) {
     }
 
     try {
-        const response = await fetch('/api/profile/change-password', {
+        const response = await fetch('/api/auth/change-password', {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
