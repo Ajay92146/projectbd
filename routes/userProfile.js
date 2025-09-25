@@ -31,32 +31,23 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
 
 
-        // Get donation statistics from Donor collection
-        const Donor = require('../models/Donor');
-        const donationStats = await Donor.aggregate([
-            { $match: { email: user.email, isActive: { $ne: false } } },
+        // Get donation statistics from UserDonation collection scoped to current user
+        const donationStats = await UserDonation.aggregate([
+            { $match: { userId: user._id } },
             {
                 $group: {
                     _id: null,
                     totalDonations: { $sum: 1 },
-                    totalUnits: { $sum: 1 }, // Assuming 1 unit per donation
-                    lastDonation: { $max: '$dateOfDonation' },
+                    totalUnits: { $sum: { $ifNull: ['$unitsCollected', 1] } },
+                    lastDonation: { $max: '$donationDate' },
                     bloodGroups: { $addToSet: '$bloodGroup' }
                 }
             }
         ]);
 
-        // Get request statistics from Request collection
+        // Get request statistics strictly for current user (by userId)
         const Request = require('../models/Request');
-        const requestQuery = user.phoneNumber ?
-            { contactNumber: user.phoneNumber, isActive: { $ne: false } } :
-            {
-                $or: [
-                    { contactPersonName: new RegExp(user.firstName, 'i') },
-                    { contactPersonName: new RegExp(user.lastName, 'i') }
-                ],
-                isActive: { $ne: false }
-            };
+        const requestQuery = { userId: user._id, isActive: { $ne: false } };
 
         const requestStats = await Request.aggregate([
             { $match: requestQuery },
@@ -75,28 +66,27 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             }
         ]);
 
-        // Get recent donations (last 5)
-        const recentDonations = await Donor.find({
-            email: user.email,
-            isActive: { $ne: false }
+        // Get recent donations (last 5) from UserDonation
+        const recentDonations = await UserDonation.find({
+            userId: user._id
         })
-            .sort({ applicationDate: -1, dateOfDonation: -1 })
+            .sort({ donationDate: -1, createdAt: -1 })
             .limit(5);
 
-        // Get recent requests (last 5)
+        // Get recent requests (last 5) belonging to current user
         const recentRequests = await Request.find(requestQuery)
             .sort({ createdAt: -1 })
             .limit(5);
 
-        // Get upcoming eligible donation date
-        const lastDonation = await Donor.findOne({
-            email: user.email,
-            isActive: { $ne: false }
-        }).sort({ dateOfDonation: -1 });
+        // Get upcoming eligible donation date from UserDonation
+        const lastDonation = await UserDonation.findOne({
+            userId: user._id
+        }).sort({ donationDate: -1, createdAt: -1 });
 
         let nextEligibleDate = null;
-        if (lastDonation && lastDonation.dateOfDonation) {
-            const nextDate = new Date(lastDonation.dateOfDonation);
+        if (lastDonation && (lastDonation.donationDate || lastDonation.dateOfDonation)) {
+            const lastDonationDate = lastDonation.donationDate || lastDonation.dateOfDonation;
+            const nextDate = new Date(lastDonationDate);
             nextDate.setMonth(nextDate.getMonth() + 3); // 3 months gap
             nextEligibleDate = nextDate;
         }
@@ -162,34 +152,17 @@ router.get('/donations', [
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
-        // Get user's email to match with donations
-        const User = require('../models/User');
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        // Get donations from Donor collection by matching email
-        const Donor = require('../models/Donor');
-        console.log('🔍 Looking for donations with email:', user.email);
-
-        const donations = await Donor.find({
-            email: user.email,
-            isActive: { $ne: false } // Include documents where isActive is not false
+        // Look up donations strictly in UserDonation by userId
+        const donations = await UserDonation.find({
+            userId: userId
         })
-            .sort({ applicationDate: -1, dateOfDonation: -1 })
+            .sort({ donationDate: -1, createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        console.log('📊 Found donations:', donations.length);
-
         // Get total count
-        const totalDonations = await Donor.countDocuments({
-            email: user.email,
-            isActive: { $ne: false }
+        const totalDonations = await UserDonation.countDocuments({
+            userId: userId
         });
 
         console.log('📤 Sending donations response:', {
@@ -211,22 +184,22 @@ router.get('/donations', [
             'Expires': '0'
         });
 
-        // Map Donor model fields to frontend expected format
+        // Map UserDonation model fields to frontend expected format
         const mappedDonations = donations.map(donation => ({
             _id: donation._id,
-            donationDate: donation.dateOfDonation,
+            donationDate: donation.donationDate || donation.dateOfDonation,
             bloodGroup: donation.bloodGroup,
-            unitsCollected: 1, // Default to 1 unit as Donor model doesn't have this field
-            status: donation.isActive === false ? 'Cancelled' : 'Completed',
-            donationCenter: {
-                name: donation.donationCenter || 'Blood Bank',
-                address: donation.address || donation.city + ', ' + donation.state
-            },
-            donorName: donation.name,
-            contactNumber: donation.contactNumber,
+            unitsCollected: donation.unitsCollected || 1,
+            status: donation.status || 'Recorded',
+            donationCenter: donation.donationCenter ? {
+                name: donation.donationCenter.name,
+                address: donation.donationCenter.address
+            } : undefined,
+            donorName: undefined,
+            contactNumber: undefined,
             city: donation.city,
             state: donation.state,
-            createdAt: donation.applicationDate || donation.createdAt
+            createdAt: donation.createdAt
         }));
 
         res.json({

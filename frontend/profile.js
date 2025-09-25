@@ -430,7 +430,7 @@ function displayDonations(donations) {
                     <p><strong>Donor:</strong> ${donorName}</p>
                     <p><strong>Center:</strong> ${donationCenter.name || 'Blood Bank'}</p>
                     <p><strong>Location:</strong> ${city}, ${state}</p>
-                    ${donation.contactNumber ? `<p><strong>Contact:</strong> ${donation.contactNumber}</p>` : ''}
+                    
                 </div>
             </div>
         `;
@@ -485,7 +485,7 @@ function displayRequests(requests) {
                     <p><strong>Location:</strong> ${location}</p>
                     <p><strong>Request Date:</strong> ${new Date(requestDate).toLocaleDateString()}</p>
                     ${requiredBy ? `<p><strong>Required By:</strong> ${new Date(requiredBy).toLocaleDateString()}</p>` : ''}
-                    ${contactNumber !== 'Not provided' ? `<p><strong>Contact:</strong> ${contactNumber}</p>` : ''}
+                    
                     ${request.additionalNotes ? `<p><strong>Notes:</strong> ${request.additionalNotes}</p>` : ''}
                 </div>
             </div>
