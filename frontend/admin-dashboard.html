@@ -176,8 +176,6 @@
             box-shadow: var(--shadow-lg);
             margin-bottom: 2rem;
             border: 1px solid rgba(229, 62, 62, 0.1);
-<<<<<<< HEAD
-=======
             margin-bottom: 1.5rem;
             overflow-x: auto;
         }
@@ -189,7 +187,7 @@
             overflow-x: auto;
             margin: 0 -1.5rem;
             padding: 0 1.5rem;
->>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
+        }
         }
 
         .section-header {
@@ -345,7 +343,6 @@
             z-index: 1001;
         }
 
-<<<<<<< HEAD
         .notification.show {
             transform: translateX(0);
         }
@@ -355,7 +352,8 @@
             color: var(--gray-600);
             font-size: 0.875rem;
             margin-top: 0.5rem;
-=======
+        }
+
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -512,7 +510,6 @@
             font-size: 3rem;
             margin-bottom: 1rem;
             color: var(--gray-300);
->>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
         }
     </style>
 </head>
@@ -598,7 +595,7 @@
             </div>
 
             <div class="table-container">
-                <table>
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -645,7 +642,7 @@
             </div>
 
             <div class="table-container">
-                <table>
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>Donor</th>
@@ -688,36 +685,26 @@
             </div>
 
             <div class="table-container">
-                <table>
+                <table class="data-table">
                     <thead>
                         <tr>
-<<<<<<< HEAD
-                            <th>Requester</th>
-                            <th>Blood Type</th>
-                            <th>Units</th>
-=======
                             <th>ID</th>
                             <th>Patient Name</th>
                             <th>Blood Group</th>
                             <th>Units Needed</th>
                             <th>Contact Number</th>
->>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
                             <th>Status</th>
                             <th>Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="requestsTableBody">
-<<<<<<< HEAD
-                        <!-- Request data will be loaded here -->
-=======
                         <tr>
                             <td colspan="9" class="loading">
                                 <i class="fas fa-spinner"></i>
                                 Loading requests...
                             </td>
                         </tr>
->>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
                     </tbody>
                 </table>
             </div>
@@ -736,17 +723,7 @@
     <script src="js/auth-state.js"></script>
     <script src="js/admin-dashboard.js"></script>
     <script>
-        
-        // Define updateNavigation function if it doesn't exist
-        if (typeof window.updateNavigation !== 'function') {
-            window.updateNavigation = function() {
-                console.log('Navigation update placeholder');
-                // This is a placeholder function that will be overridden by auth-state.js if loaded
-            };
-        }
-        
         // Initialize dashboard when DOM is loaded
-=======
     <!-- Load scripts in the correct order -->
     <script>
         // Define updateNavigation function globally before any scripts load
@@ -849,12 +826,10 @@
 
         function showNotification(message, type = 'info') {
             const notification = document.getElementById('notification');
+            if (!notification) return;
             notification.textContent = message;
-            notification.className = 'notification show ${type}';
-            
-            setTimeout(() => {
-                notification.classList.remove('show');s
-            }, 3000);
+            notification.className = `notification show ${type}`;
+            setTimeout(() => { notification.classList.remove('show'); }, 3000);
         }
 
         // Add event listeners to view buttons
@@ -899,17 +874,14 @@
             
             displayRequests(filteredRequests);
         }
-<<<<<<< HEAD
-
         // View functions
         function viewRequest(requestId) {
             const request = requestsData.find(r => r.id === requestId);
             if (request) {
-                alert('Request Details:\n\nRequester: ${request.requesterName}\nBlood Type: ${request.bloodType}\nUnits: ${request.units}\nStatus: ${request.status}\nDate: ${request.date}\nLocation: ${request.location}\nReason: ${request.reason}');
+                alert(`Request Details:\n\nRequester: ${request.requesterName}\nBlood Type: ${request.bloodType}\nUnits: ${request.units}\nStatus: ${request.status}\nDate: ${request.date}\nLocation: ${request.location}\nReason: ${request.reason || ''}`);
             }
         }
-=======
->>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
     </script>
+    <div class="notification" id="notification"></div>
 </body>
 </html>
