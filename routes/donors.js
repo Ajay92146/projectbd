@@ -394,23 +394,7 @@ router.post('/apply', [
         .withMessage('Weight must be between 50 and 200 kg'),
     body('emergencyContact')
         .matches(/^[6-9]\d{9}$/)
-        .withMessage('Please enter a valid emergency contact number'),
-    body('preferredDate')
-        .isISO8601()
-        .toDate()
-        .withMessage('Please enter a valid preferred donation date'),
-    body('preferredTime')
-        .isIn(['morning', 'afternoon', 'evening'])
-        .withMessage('Preferred time must be morning, afternoon, or evening'),
-    body('healthConsent')
-        .isBoolean()
-        .withMessage('Health consent is required'),
-    body('dataConsent')
-        .isBoolean()
-        .withMessage('Data consent is required'),
-    body('contactConsent')
-        .isBoolean()
-        .withMessage('Contact consent is required')
+        .withMessage('Please enter a valid 10-digit emergency contact number')
 ], async (req, res) => {
     try {
         // Check for validation errors
@@ -435,92 +419,72 @@ router.post('/apply', [
             address,
             bloodGroup,
             weight,
-            medicalHistory,
-            lastDonation,
-            emergencyContact,
-            preferredDate,
-            preferredTime,
-            availability,
-            healthConsent,
-            dataConsent,
-            contactConsent
+            emergencyContact
         } = req.body;
 
-        // Check if application already exists with same email
-        const existingApplication = await Donor.findOne({ email });
-        if (existingApplication) {
+        // Check if a donor with the same email already exists
+        const existingDonor = await Donor.findOne({ email });
+        if (existingDonor) {
             return res.status(409).json({
                 success: false,
-                message: 'An application with this email already exists'
+                message: 'A donor with this email already exists'
             });
         }
 
         // Calculate age from date of birth
-        const today = new Date();
-        const birthDate = new Date(dateOfBirth);
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
+        const age = Math.floor((new Date() - new Date(dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000));
 
-        // Check age eligibility
-        if (age < 18 || age > 65) {
-            return res.status(400).json({
-                success: false,
-                message: 'Age must be between 18 and 65 years for blood donation'
-            });
-        }
-
-        // Create new donor application
-        const newApplication = new Donor({
+        // FIXED: Create new donor with userId for proper user linking
+        const newDonor = new Donor({
+            // Map form fields to donor model
             name: `${firstName} ${lastName}`,
+            firstName,
+            lastName,
             age,
-            gender: gender.charAt(0).toUpperCase() + gender.slice(1),
-            bloodGroup,
-            contactNumber: phoneNumber,
+            dateOfBirth,
+            gender,
             email,
+            phoneNumber,
+            contactNumber: phoneNumber, // Map phoneNumber to contactNumber if needed
             city,
             state,
-            dateOfDonation: preferredDate,
-            // Additional fields for application
             address,
+            bloodGroup,
             weight,
-            medicalHistory: medicalHistory || '',
-            lastDonation: lastDonation || null,
             emergencyContact,
-            preferredTime,
-            availability: availability || '',
-            consents: {
-                health: healthConsent,
-                data: dataConsent,
-                contact: contactConsent
-            },
-            applicationStatus: 'pending',
-            applicationDate: new Date()
+            applicationDate: new Date(),
+            registrationDate: new Date(),
+            isActive: true,
+            isAvailable: true,
+            // CRITICAL FIX: Add userId to link donation to user
+            userId: req.user?.userId || null,
+            userEmail: req.user?.email || email
         });
 
-        // Save application to database
-        const savedApplication = await newApplication.save();
+        // Save donor application to database
+        const savedDonor = await newDonor.save();
 
-        // If user is authenticated, also create a UserDonation record
+        // If user is authenticated, also create a UserDonation record for tracking
         if (req.user && req.user.userId) {
             try {
                 const UserDonation = require('../models/UserDonation');
-
+                
                 const userDonation = new UserDonation({
                     userId: req.user.userId,
-                    donationDate: preferredDate,
+                    donationDate: new Date(),
                     bloodGroup: bloodGroup,
                     unitsCollected: 1, // Default to 1 unit
+                    status: 'Pending', // Application submitted, not yet donated
                     donationCenter: {
-                        name: 'Blood Connect Center',
-                        address: `${city}, ${state}`,
-                        contactNumber: '1800-BLOOD-1'
+                        name: 'Blood Bank',
+                        address: address,
+                        city: city,
+                        state: state
                     },
-                    status: 'Scheduled', // Will be updated when donation is completed
-                    applicationId: savedApplication._id, // Link to the application
-                    notes: `Application submitted on ${new Date().toLocaleDateString()}`
+                    donorName: `${firstName} ${lastName}`,
+                    contactNumber: phoneNumber,
+                    notes: `Donor application submitted on ${new Date().toLocaleDateString()}`,
+                    isActive: true
                 });
 
                 await userDonation.save();
@@ -532,28 +496,158 @@ router.post('/apply', [
         }
 
         // Remove sensitive information from response
-        const applicationResponse = savedApplication.toObject();
-        delete applicationResponse.contactNumber;
-        delete applicationResponse.email;
-        delete applicationResponse.emergencyContact;
+        const donorResponse = savedDonor.toObject();
+        delete donorResponse.contactNumber;
+        delete donorResponse.phoneNumber;
+        delete donorResponse.email;
+        delete donorResponse.emergencyContact;
 
         res.status(201).json({
             success: true,
-            message: req.user ?
-                'Donor application submitted successfully! You can track your donation in your profile.' :
-                'Donor application submitted successfully! You will be contacted within 2-3 business days.',
+            message: req.user ? 
+                'Donor application submitted successfully! You can track your donation in your profile.' : 
+                'Donor application submitted successfully',
             data: {
-                application: applicationResponse,
-                applicationId: savedApplication._id,
+                donor: donorResponse,
                 userLinked: !!req.user
             }
         });
 
     } catch (error) {
         console.error('Error submitting donor application:', error);
+        
+        // Handle duplicate key error
+        if (error.code === 11000) {
+            return res.status(409).json({
+                success: false,
+                message: 'A donor with this email already exists'
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: 'Error submitting donor application',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/donors/:id
+ * @desc    Get donor details by ID
+ * @access  Public
+ */
+router.get('/:id', async (req, res) => {
+    try {
+        const donorId = req.params.id;
+
+        // Validate ObjectId format
+        if (!donorId.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid donor ID format'
+            });
+        }
+
+        // Find donor by ID (exclude sensitive information)
+        const donor = await Donor.findById(donorId)
+            .select('-contactNumber -email -emergencyContact');
+
+        if (!donor) {
+            return res.status(404).json({
+                success: false,
+                message: 'Donor not found'
+            });
+        }
+
+        // Check if donor is active
+        if (!donor.isActive) {
+            return res.status(404).json({
+                success: false,
+                message: 'Donor not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Donor details retrieved successfully',
+            data: {
+                donor
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching donor details:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching donor details',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
+/**
+ * @route   PUT /api/donors/:id/availability
+ * @desc    Update donor availability status
+ * @access  Private (donor only)
+ */
+router.put('/:id/availability', [
+    body('isAvailable')
+        .isBoolean()
+        .withMessage('Availability status must be boolean')
+], async (req, res) => {
+    try {
+        // Check for validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors: errors.array()
+            });
+        }
+
+        const donorId = req.params.id;
+        const { isAvailable } = req.body;
+
+        // Validate ObjectId format
+        if (!donorId.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid donor ID format'
+            });
+        }
+
+        // Update donor availability
+        const updatedDonor = await Donor.findByIdAndUpdate(
+            donorId,
+            { 
+                isAvailable,
+                updatedAt: new Date()
+            },
+            { new: true }
+        ).select('-contactNumber -email -emergencyContact');
+
+        if (!updatedDonor) {
+            return res.status(404).json({
+                success: false,
+                message: 'Donor not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: `Donor availability updated to ${isAvailable ? 'available' : 'unavailable'}`,
+            data: {
+                donor: updatedDonor
+            }
+        });
+
+    } catch (error) {
+        console.error('Error updating donor availability:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating donor availability',
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }

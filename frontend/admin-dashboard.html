@@ -98,15 +98,26 @@
             transform: translateY(-2px);
         }
 
-        .main-content {
-            margin-top: 100px;
-            padding: 1.5rem;
+        .admin-main {
             max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto;
+            padding: 6rem 1.5rem 2rem;
         }
 
-        .stats-grid {
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
@@ -114,8 +125,7 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            background: var(--white);
             border-radius: 1rem;
             padding: 1.5rem;
             box-shadow: var(--shadow-lg);
@@ -130,46 +140,44 @@
 
         .stat-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 1rem;
         }
 
+        .stat-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
         .stat-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            width: 40px;
+            height: 40px;
+            background: var(--accent-red);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--primary-red);
             font-size: 1.2rem;
-            color: var(--white);
         }
 
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--gray-600);
-            font-weight: 500;
-            margin-top: 0.5rem;
-        }
-
-        .dashboard-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+        .data-section {
+            background: var(--white);
             border-radius: 1rem;
             padding: 1.5rem;
             box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
             border: 1px solid rgba(229, 62, 62, 0.1);
+<<<<<<< HEAD
+=======
             margin-bottom: 1.5rem;
             overflow-x: auto;
         }
@@ -181,6 +189,7 @@
             overflow-x: auto;
             margin: 0 -1.5rem;
             padding: 0 1.5rem;
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
         }
 
         .section-header {
@@ -188,100 +197,165 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--gray-100);
         }
 
         .section-title {
             font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--gray-900);
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .refresh-btn {
+            background: var(--gray-100);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .section-title i {
+        .refresh-btn:hover {
+            background: var(--gray-200);
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-family: inherit;
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-family: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--gray-50);
+            color: var(--gray-700);
+            font-weight: 600;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            color: var(--gray-800);
+        }
+
+        tr:hover {
+            background: var(--gray-50);
+        }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-pending {
+            background: #feebc8;
+            color: #744210;
+        }
+
+        .status-inactive {
+            background: #fed7d7;
+            color: #822727;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
             color: var(--primary-red);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
         }
 
-        .data-count {
-            font-size: 0.9rem;
-            color: var(--gray-600);
-            font-weight: 400;
-            margin-left: 0.5rem;
+        .action-btn:hover {
+            color: var(--primary-red-dark);
+            transform: scale(1.1);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
         }
 
         .btn {
             padding: 0.5rem 1rem;
             border: none;
             border-radius: 0.5rem;
-            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            background: var(--primary-red);
             color: var(--white);
-            box-shadow: 0 10px 25px -5px rgba(229, 62, 62, 0.4);
         }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn:hover {
             transform: translateY(-2px);
         }
 
-        .search-filter {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 300px;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            padding-left: 2.5rem;
-            border: 2px solid var(--gray-200);
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-red);
-            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-400);
-        }
-
-        .filter-select {
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--gray-200);
-            border-radius: 0.5rem;
+        .notification {
+            position: fixed;
+            top: 5rem;
+            right: 1.5rem;
             background: var(--white);
-            font-size: 0.9rem;
-            min-width: 150px;
+            border-left: 4px solid var(--primary-red);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1001;
         }
 
+<<<<<<< HEAD
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .last-updated {
+            text-align: right;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+=======
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -330,19 +404,25 @@
             text-overflow: unset;
             overflow: visible;
             width: 120px;
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
         }
 
-        .data-table th {
-            background: var(--gray-50);
-            font-weight: 600;
-            color: var(--gray-700);
-            font-size: 0.9rem;
-        }
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
 
-        .data-table tr:hover {
-            background: var(--gray-50);
-        }
+            .search-filter {
+                flex-direction: column;
+            }
 
+<<<<<<< HEAD
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+=======
         .status-badge {
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
@@ -432,149 +512,126 @@
             font-size: 3rem;
             margin-bottom: 1rem;
             color: var(--gray-300);
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
         }
     </style>
 </head>
 <body>
-    <!-- Admin Header -->
     <header class="admin-header">
         <div class="header-container">
             <a href="#" class="admin-logo">
                 <i class="fas fa-heart"></i>
                 <span>BloodConnect Admin</span>
             </a>
-            <div>
-                <button class="logout-btn" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </button>
-            </div>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Statistics Grid -->
-        <div class="stats-grid">
+    <main class="admin-main">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Admin Dashboard</h1>
+            <p class="last-updated">Last updated: <span id="lastUpdated">Just now</span></p>
+        </div>
+
+        <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-header">
+                    <h3 class="stat-title">Total Users</h3>
                     <div class="stat-icon">
                         <i class="fas fa-users"></i>
                     </div>
                 </div>
-                <div class="stat-number" id="totalUsers">-</div>
-                <div class="stat-label">Total Users</div>
+                <p class="stat-value" id="totalUsers">0</p>
             </div>
-            
+
             <div class="stat-card">
                 <div class="stat-header">
+                    <h3 class="stat-title">Total Donations</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="totalDonations">0</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Total Requests</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="totalRequests">0</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Blood Units Available</h3>
                     <div class="stat-icon">
                         <i class="fas fa-tint"></i>
                     </div>
                 </div>
-                <div class="stat-number" id="totalDonations">-</div>
-                <div class="stat-label">Total Donations</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-hand-holding-medical"></i>
-                    </div>
-                </div>
-                <div class="stat-number" id="totalRequests">-</div>
-                <div class="stat-label">Blood Requests</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-vial"></i>
-                    </div>
-                </div>
-                <div class="stat-number" id="totalBloodUnits">-</div>
-                <div class="stat-label">Blood Units</div>
+                <p class="stat-value" id="totalBloodUnits">0</p>
             </div>
         </div>
 
-        <!-- Users Management Section -->
-        <div class="dashboard-section">
+        <div class="data-section">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-users"></i>
-                    Users Management
-                    <span class="data-count" id="usersCount">(0 total)</span>
-                </h2>
-                <button class="btn btn-primary" id="refreshUsersBtn">
+                <h2 class="section-title">Users</h2>
+                <button id="refreshUsersBtn" class="refresh-btn">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
             </div>
-            
-            <!-- Search and Filter -->
+
             <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Search users..." id="userSearch">
-                </div>
-                <select class="filter-select" id="roleFilter">
+                <input type="text" id="userSearch" class="search-input" placeholder="Search users...">
+                <select id="roleFilter" class="filter-select">
                     <option value="">All Roles</option>
                     <option value="donor">Donor</option>
                     <option value="recipient">Recipient</option>
-                    <option value="admin">Admin</option>
+                    <option value="both">Both</option>
                 </select>
             </div>
-            
-            <!-- Users Table -->
-            <div id="usersTableContainer">
-                <table class="data-table">
+
+            <div class="table-container">
+                <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Phone</th>
+                            <th>Blood Type</th>
                             <th>Role</th>
-                            <th>Blood Group</th>
-                            <th>City</th>
-                            <th>Donations</th>
-                            <th>Requests</th>
-                            <th>Joined</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="usersTableBody">
-                        <tr>
-                            <td colspan="10" class="loading">
-                                <i class="fas fa-spinner"></i>
-                                Loading users...
-                            </td>
-                        </tr>
+                        <!-- User data will be loaded here -->
                     </tbody>
                 </table>
             </div>
+
+            <div id="usersPagination" class="pagination">
+                <!-- Pagination will be added here -->
+            </div>
         </div>
 
-        <!-- Blood Donations Section -->
-        <div class="dashboard-section">
+        <div class="data-section">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-tint"></i>
-                    Blood Donations
-                    <span class="data-count" id="donationsCount">(0 total)</span>
-                </h2>
-                <button class="btn btn-primary" id="refreshDonationsBtn">
+                <h2 class="section-title">Donations</h2>
+                <button id="refreshDonationsBtn" class="refresh-btn">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
             </div>
-            
-            <!-- Search and Filter -->
+
             <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Search donations..." id="donationSearch">
-                </div>
-                <select class="filter-select" id="bloodTypeFilter">
+                <input type="text" id="donationSearch" class="search-input" placeholder="Search donations...">
+                <select id="bloodTypeFilter" class="filter-select">
                     <option value="">All Blood Types</option>
                     <option value="A+">A+</option>
                     <option value="A-">A-</option>
@@ -586,92 +643,110 @@
                     <option value="O-">O-</option>
                 </select>
             </div>
-            
-            <!-- Donations Table -->
-            <div id="donationsTableContainer">
-                <table class="data-table">
+
+            <div class="table-container">
+                <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Donor Name</th>
-                            <th>Email</th>
-                            <th>Blood Group</th>
-                            <th>City</th>
-                            <th>Contact</th>
-                            <th>Status</th>
+                            <th>Donor</th>
+                            <th>Blood Type</th>
+                            <th>Units</th>
                             <th>Date</th>
+                            <th>Location</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="donationsTableBody">
-                        <tr>
-                            <td colspan="8" class="loading">
-                                <i class="fas fa-spinner"></i>
-                                Loading donations...
-                            </td>
-                        </tr>
+                        <!-- Donation data will be loaded here -->
                     </tbody>
                 </table>
             </div>
+
+            <div id="donationsPagination" class="pagination">
+                <!-- Pagination will be added here -->
+            </div>
         </div>
 
-        <!-- Blood Requests Section -->
-        <div class="dashboard-section">
+        <div class="data-section">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-hand-holding-medical"></i>
-                    Blood Requests
-                    <span class="data-count" id="requestsCount">(0 total)</span>
-                </h2>
-                <button class="btn btn-primary" id="refreshRequestsBtn">
+                <h2 class="section-title">Requests</h2>
+                <button id="refreshRequestsBtn" class="refresh-btn">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
             </div>
-            
-            <!-- Search and Filter -->
+
             <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Search requests..." id="requestSearch">
-                </div>
-                <select class="filter-select" id="requestStatusFilter">
-                    <option value="">All Status</option>
+                <input type="text" id="requestSearch" class="search-input" placeholder="Search requests...">
+                <select id="requestStatusFilter" class="filter-select">
+                    <option value="">All Statuses</option>
                     <option value="pending">Pending</option>
                     <option value="fulfilled">Fulfilled</option>
+                    <option value="urgent">Urgent</option>
                     <option value="expired">Expired</option>
                 </select>
             </div>
-            
-            <!-- Requests Table -->
-            <div id="requestsTableContainer">
-                <table class="data-table">
+
+            <div class="table-container">
+                <table>
                     <thead>
                         <tr>
+<<<<<<< HEAD
+                            <th>Requester</th>
+                            <th>Blood Type</th>
+                            <th>Units</th>
+=======
                             <th>ID</th>
                             <th>Patient Name</th>
                             <th>Blood Group</th>
                             <th>Units Needed</th>
                             <th>Contact Number</th>
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
                             <th>Status</th>
-                            <th>Hospital</th>
-                            <th>Urgency</th>
                             <th>Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="requestsTableBody">
+<<<<<<< HEAD
+                        <!-- Request data will be loaded here -->
+=======
                         <tr>
                             <td colspan="9" class="loading">
                                 <i class="fas fa-spinner"></i>
                                 Loading requests...
                             </td>
                         </tr>
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
                     </tbody>
                 </table>
             </div>
+
+            <div id="requestsPagination" class="pagination">
+                <!-- Pagination will be added here -->
+            </div>
         </div>
-        
     </main>
 
+<<<<<<< HEAD
+    <div class="notification" id="notification"></div>
+
+    <script src="js/admin-auth-utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+    <script>
+        
+        // Define updateNavigation function if it doesn't exist
+        if (typeof window.updateNavigation !== 'function') {
+            window.updateNavigation = function() {
+                console.log('Navigation update placeholder');
+                // This is a placeholder function that will be overridden by auth-state.js if loaded
+            };
+        }
+        
+        // Initialize dashboard when DOM is loaded
+=======
     <!-- Load scripts in the correct order -->
     <script>
         // Define updateNavigation function globally before any scripts load
@@ -696,131 +771,145 @@
         let requestsData = [];
 
         // Event listeners setup
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
         document.addEventListener('DOMContentLoaded', function() {
-            // Wait for external scripts to load before setting up event listeners
-            setTimeout(() => {
-                initializeEventListeners();
-            }, 500); // Increased delay to ensure external scripts are loaded
+            // Initialize event listeners
+            initializeEventListeners();
+            
+            // Initialize dashboard
+            initializeDashboard();
         });
 
         function initializeEventListeners() {
             // Header buttons
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn && typeof window.logout === 'function') {
-                logoutBtn.addEventListener('click', window.logout);
-            } else {
-                console.warn('Logout button or function not found');
-            }
+            document.getElementById('logoutBtn').addEventListener('click', logout);
             
-            // Refresh buttons - directly call external functions
-            const refreshUsersBtn = document.getElementById('refreshUsersBtn');
-            if (refreshUsersBtn && typeof window.loadUsers === 'function') {
-                refreshUsersBtn.addEventListener('click', () => window.loadUsers());
-            }
-            
-            const refreshDonationsBtn = document.getElementById('refreshDonationsBtn');
-            if (refreshDonationsBtn && typeof window.loadDonations === 'function') {
-                refreshDonationsBtn.addEventListener('click', () => window.loadDonations());
-            }
-            
-            const refreshRequestsBtn = document.getElementById('refreshRequestsBtn');
-            if (refreshRequestsBtn && typeof window.loadRequests === 'function') {
-                refreshRequestsBtn.addEventListener('click', () => window.loadRequests());
-            }
+            // Refresh buttons
+            document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
+            document.getElementById('refreshDonationsBtn').addEventListener('click', loadDonations);
+            document.getElementById('refreshRequestsBtn').addEventListener('click', loadRequests);
             
             // Search and filter inputs
-            const userSearch = document.getElementById('userSearch');
-            if (userSearch && typeof filterUsers === 'function') {
-                userSearch.addEventListener('input', filterUsers);
-            }
+            document.getElementById('userSearch').addEventListener('input', filterUsers);
+            document.getElementById('roleFilter').addEventListener('change', filterUsers);
             
-            const roleFilter = document.getElementById('roleFilter');
-            if (roleFilter && typeof filterUsers === 'function') {
-                roleFilter.addEventListener('change', filterUsers);
-            }
+            document.getElementById('donationSearch').addEventListener('input', filterDonations);
+            document.getElementById('bloodTypeFilter').addEventListener('change', filterDonations);
             
-            const donationSearch = document.getElementById('donationSearch');
-            if (donationSearch && typeof filterDonations === 'function') {
-                donationSearch.addEventListener('input', filterDonations);
-            }
-            
-            const bloodTypeFilter = document.getElementById('bloodTypeFilter');
-            if (bloodTypeFilter && typeof filterDonations === 'function') {
-                bloodTypeFilter.addEventListener('change', filterDonations);
-            }
-            
-            const requestSearch = document.getElementById('requestSearch');
-            if (requestSearch && typeof filterRequests === 'function') {
-                requestSearch.addEventListener('input', filterRequests);
-            }
-            
-            const requestStatusFilter = document.getElementById('requestStatusFilter');
-            if (requestStatusFilter && typeof filterRequests === 'function') {
-                requestStatusFilter.addEventListener('change', filterRequests);
+            document.getElementById('requestSearch').addEventListener('input', filterRequests);
+            document.getElementById('requestStatusFilter').addEventListener('change', filterRequests);
+        }
+
+        // Dashboard functions
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                console.log('Logging out...');
+                localStorage.removeItem('bloodconnect_admin');
+                localStorage.removeItem('admin_email');
+                localStorage.removeItem('admin_login_time');
+                window.location.href = 'admin-login.html';
             }
         }
 
-        // Filter functions for search/filter functionality
-        function filterUsers() {
-            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-            const roleFilter = document.getElementById('roleFilter').value;
+        function initializeDashboard() {
+            // Check if user is authenticated
+            const adminStatus = localStorage.getItem('bloodconnect_admin');
+            if (adminStatus !== 'true') {
+                alert('You must be logged in as admin to access this page.');
+                window.location.href = 'admin-login.html';
+                return;
+            }
             
-            if (window.usersData && Array.isArray(window.usersData)) {
-                let filteredUsers = window.usersData.filter(user => {
-                    const matchesSearch = (user.firstName + ' ' + user.lastName).toLowerCase().includes(searchTerm) || 
-                                        user.email.toLowerCase().includes(searchTerm);
-                    const matchesRole = roleFilter === '' || user.role === roleFilter;
-                    
-                    return matchesSearch && matchesRole;
+            // Load dashboard data
+            loadStats();
+            loadUsers();
+            loadDonations();
+            loadRequests();
+            
+            // Update last updated time
+            updateLastUpdatedTime();
+            
+            // Set up auto-refresh
+            setInterval(() => {
+                loadStats();
+                updateLastUpdatedTime();
+            }, 60000); // Refresh every minute
+        }
+
+        function loadStatistics() {
+            // Call the loadStats function from admin-dashboard.js
+            loadStats();
+        }
+
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('lastUpdated').textContent = timeString;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification show ${type}';
+            
+            setTimeout(() => {
+                notification.classList.remove('show');s
+            }, 3000);
+        }
+
+        // Add event listeners to view buttons
+        function addViewEventListeners() {
+            document.querySelectorAll('.view-user-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    viewUser(userId);
                 });
-                
-                // Call external display function if available
-                if (typeof window.displayUsers === 'function') {
-                    const tableBody = document.getElementById('usersTableBody');
-                    window.displayUsers(filteredUsers, tableBody);
-                }
-            }
-        }
-
-        function filterDonations() {
-            const searchTerm = document.getElementById('donationSearch').value.toLowerCase();
-            const bloodTypeFilter = document.getElementById('bloodTypeFilter').value;
+            });
             
-            if (window.donationsData && Array.isArray(window.donationsData)) {
-                let filteredDonations = window.donationsData.filter(donation => {
-                    const matchesSearch = donation.name.toLowerCase().includes(searchTerm);
-                    const matchesBloodType = bloodTypeFilter === '' || donation.bloodGroup === bloodTypeFilter;
-                    
-                    return matchesSearch && matchesBloodType;
+            document.querySelectorAll('.view-donation-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const donationId = this.getAttribute('data-id');
+                    viewDonation(donationId);
                 });
-                
-                // Call external display function if available
-                if (typeof window.displayDonations === 'function') {
-                    const tableBody = document.getElementById('donationsTableBody');
-                    window.displayDonations(filteredDonations, tableBody);
-                }
-            }
+            });
+            
+            document.querySelectorAll('.view-request-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const requestId = this.getAttribute('data-id');
+                    viewRequest(requestId);
+                });
+            });
         }
 
+        // Filter functions
         function filterRequests() {
             const searchTerm = document.getElementById('requestSearch').value.toLowerCase();
             const statusFilter = document.getElementById('requestStatusFilter').value;
             
-            if (window.requestsData && Array.isArray(window.requestsData)) {
-                let filteredRequests = window.requestsData.filter(request => {
-                    const matchesSearch = (request.patientName || request.requesterName || '').toLowerCase().includes(searchTerm);
-                    const matchesStatus = statusFilter === '' || request.status === statusFilter;
+            const filteredRequests = requestsData.filter(request => {
+                const matchesSearch = 
+                    request.requesterName.toLowerCase().includes(searchTerm) ||
+                    request.bloodType.toLowerCase().includes(searchTerm) ||
+                    request.location.toLowerCase().includes(searchTerm);
                     
-                    return matchesSearch && matchesStatus;
-                });
+                const matchesStatus = statusFilter === '' || request.status === statusFilter;
                 
-                // Call external display function if available
-                if (typeof window.displayRequests === 'function') {
-                    const tableBody = document.getElementById('requestsTableBody');
-                    window.displayRequests(filteredRequests, tableBody);
-                }
+                return matchesSearch && matchesStatus;
+            });
+            
+            displayRequests(filteredRequests);
+        }
+<<<<<<< HEAD
+
+        // View functions
+        function viewRequest(requestId) {
+            const request = requestsData.find(r => r.id === requestId);
+            if (request) {
+                alert('Request Details:\n\nRequester: ${request.requesterName}\nBlood Type: ${request.bloodType}\nUnits: ${request.units}\nStatus: ${request.status}\nDate: ${request.date}\nLocation: ${request.location}\nReason: ${request.reason}');
             }
         }
+=======
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
     </script>
 </body>
 </html>
