@@ -12,6 +12,30 @@ function debugLog(message) {
 function checkAdminAuthentication() {
     debugLog('🔍 Checking admin authentication...');
     
+    // Check if we're on the admin login page - if so, don't check authentication
+    if (window.location.pathname.includes('admin-login.html')) {
+        debugLog('📍 On admin login page, skipping auth check');
+        return false;
+    }
+    
+    // Check if logout was just completed - if so, redirect immediately
+    const logoutCompleted = sessionStorage.getItem('admin_logout_completed');
+    if (logoutCompleted === 'true') {
+        debugLog('🚪 Logout just completed, clearing flag and redirecting to login');
+        sessionStorage.removeItem('admin_logout_completed');
+        window.location.href = 'admin-login.html';
+        return false;
+    }
+    
+    // Check if logout is in progress
+    const logoutInProgress = sessionStorage.getItem('admin_logout_in_progress');
+    if (logoutInProgress === 'true') {
+        debugLog('🚪 Logout in progress, redirecting to login');
+        sessionStorage.removeItem('admin_logout_in_progress');
+        window.location.href = 'admin-login.html';
+        return false;
+    }
+    
     // Check both localStorage and sessionStorage
     const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
     const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
@@ -22,21 +46,21 @@ function checkAdminAuthentication() {
     debugLog(`🕒 Admin login time: ${adminLoginTime}`);
     debugLog(`🌐 Current URL: ${window.location.href}`);
     
-    // Check if we're already on the login page to prevent redirect loops
-    if (window.location.pathname.includes('admin-login.html')) {
-        debugLog('Already on login page, skipping redirect');
-        return false;
-    }
-    
     // Check if admin is authenticated
     if (adminStatus !== 'true' || !adminEmail || !adminLoginTime) {
         debugLog('❌ Not authenticated as admin, redirecting to login...');
-        // Add delay to ensure any ongoing operations complete and prevent loops
+        // Clear any partial admin data
+        localStorage.removeItem('bloodconnect_admin');
+        localStorage.removeItem('admin_email');
+        localStorage.removeItem('admin_login_time');
+        sessionStorage.removeItem('bloodconnect_admin');
+        sessionStorage.removeItem('admin_email');
+        sessionStorage.removeItem('admin_login_time');
+        
+        // Use a small delay to prevent rapid redirects
         setTimeout(() => {
-            if (!window.location.pathname.includes('admin-login.html')) {
-                window.location.href = 'admin-login.html';
-            }
-        }, 500);
+            window.location.href = 'admin-login.html';
+        }, 100);
         return false;
     }
     
@@ -62,9 +86,7 @@ function checkAdminAuthentication() {
             sessionStorage.removeItem('admin_login_time');
             
             setTimeout(() => {
-                if (!window.location.pathname.includes('admin-login.html')) {
-                    window.location.href = 'admin-login.html';
-                }
+                window.location.href = 'admin-login.html';
             }, 2000);
             return false;
         }
@@ -128,6 +150,13 @@ async function loadStats() {
     } catch (error) {
         debugLog(`Error loading stats: ${error.message}`);
         console.error('Error loading stats:', error);
+        
+        // Check if this is an authentication error
+        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+            debugLog('❌ Authentication error detected, redirecting to login');
+            window.location.href = 'admin-login.html';
+            return;
+        }
         
         const totalUsers = document.getElementById('totalUsers');
         const totalDonations = document.getElementById('totalDonations');
@@ -431,7 +460,7 @@ function displayUsers(users, tableBody) {
     
     tableBody.innerHTML = users.map(user => `
         <tr>
-            <td>${user._id || user.id || 'N/A'}</td>
+            <td title="${user._id || user.id || 'N/A'}">${(user._id || user.id || 'N/A').substring(0, 8)}...</td>
             <td>${user.firstName || ''} ${user.lastName || ''}</td>
             <td>${user.email || 'N/A'}</td>
             <td>${user.phoneNumber || user.phone || 'N/A'}</td>
@@ -440,7 +469,7 @@ function displayUsers(users, tableBody) {
             <td>${user.city || 'N/A'}</td>
             <td>${user.donationsCount || 0}</td>
             <td>${user.requestsCount || 0}</td>
-            <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+            <td title="${new Date(user.createdAt).toLocaleString()}">${new Date(user.createdAt).toLocaleDateString('en-GB').split('/').reverse().join('/')}</td>
         </tr>
     `).join('');
 }
@@ -694,7 +723,7 @@ async function loadRequests(searchTerm = '', statusFilter = '', page = 1, limit 
     const requestsCount = document.getElementById('requestsCount');
     
     if (requestsTableBody) {
-        requestsTableBody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner"></i> Loading requests...</td></tr>';
+        requestsTableBody.innerHTML = '<tr><td colspan="9" class="loading"><i class="fas fa-spinner"></i> Loading requests...</td></tr>';
     }
 
     try {
@@ -751,7 +780,7 @@ async function loadRequests(searchTerm = '', statusFilter = '', page = 1, limit 
         if (requestsTableBody) {
             requestsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="8" class="empty-state">
+                    <td colspan="9" class="empty-state">
                         <i class="fas fa-exclamation-triangle"></i>
                         <p>Error loading requests: ${error.message}</p>
                     </td>
@@ -770,7 +799,7 @@ function displayRequests(requests, tableBody) {
     if (!requests || requests.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="8" class="empty-state">
+                <td colspan="9" class="empty-state">
                     <i class="fas fa-tint"></i>
                     <p>No blood requests found</p>
                 </td>
@@ -781,14 +810,15 @@ function displayRequests(requests, tableBody) {
     
     tableBody.innerHTML = requests.map(request => `
         <tr>
-            <td>${request.id || request._id}</td>
+            <td title="${request._id || request.id}">${(request._id || request.id || 'N/A').substring(0, 8)}...</td>
             <td>${request.patientName || request.requesterName || 'N/A'}</td>
             <td>${request.bloodGroup || 'N/A'}</td>
-            <td>${request.unitsNeeded || request.units || '1'}</td>
-            <td><span class="status-badge status-${request.status || 'pending'}">${request.status || 'pending'}</span></td>
-            <td>${request.hospital || request.location || 'N/A'}</td>
-            <td><span class="urgency-badge urgency-${request.urgency || 'normal'}">${request.urgency || 'normal'}</span></td>
-            <td>${new Date(request.createdAt || request.date || Date.now()).toLocaleDateString()}</td>
+            <td>${request.requiredUnits || request.unitsNeeded || request.units || '1'}</td>
+            <td>${request.contactNumber || request.phone || request.emergencyContact || 'N/A'}</td>
+            <td><span class="status-badge status-${(request.status || 'pending').toLowerCase()}">${request.status || 'Pending'}</span></td>
+            <td>${request.hospitalName || request.hospital || request.location || 'N/A'}</td>
+            <td><span class="urgency-badge urgency-${(request.urgency || 'normal').toLowerCase()}">${request.urgency || 'Medium'}</span></td>
+            <td title="${new Date(request.createdAt || request.requestDate || request.date || Date.now()).toLocaleString()}">${new Date(request.createdAt || request.requestDate || request.date || Date.now()).toLocaleDateString('en-GB').split('/').reverse().join('/')}</td>
         </tr>
     `).join('');
     
@@ -808,3 +838,59 @@ function displayRequests(requests, tableBody) {
 
 // Make loadRequests globally available
 window.loadRequests = loadRequests;
+
+// Logout function
+function logout() {
+    debugLog('🚪 Admin logout initiated');
+    
+    // Try to use the enhanced logout function if available
+    if (typeof logoutAdmin === 'function') {
+        logoutAdmin();
+    } else if (window.AdminAuthUtils && typeof window.AdminAuthUtils.logoutAdmin === 'function') {
+        window.AdminAuthUtils.logoutAdmin();
+    } else {
+        // Fallback simple logout
+        debugLog('🔄 Using fallback logout method');
+        
+        // Show confirmation
+        const confirmLogout = window.confirm('Are you sure you want to logout from the admin dashboard?');
+        if (!confirmLogout) {
+            return;
+        }
+        
+        // Clear admin data immediately
+        const adminKeys = [
+            'bloodconnect_admin',
+            'admin_email', 
+            'admin_login_time',
+            'admin_session',
+            'admin_preferences',
+            'admin_last_activity'
+        ];
+        
+        adminKeys.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
+        });
+        
+        // Set logout completed flag
+        sessionStorage.setItem('admin_logout_completed', 'true');
+        
+        // Redirect to login
+        setTimeout(() => {
+            sessionStorage.removeItem('admin_logout_completed');
+            window.location.href = 'admin-login.html';
+        }, 500);
+    }
+}
+
+// Make functions globally available
+window.loadStats = loadStats;
+window.loadUsers = loadUsers;
+window.loadDonations = loadDonations;
+window.loadRequests = loadRequests;
+window.showNotification = showNotification;
+window.logout = logout;
+window.displayUsers = displayUsers;
+window.displayDonations = displayDonations;
+window.displayRequests = displayRequests;

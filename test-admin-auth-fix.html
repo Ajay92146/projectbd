@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Authentication Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .test-result.success {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .test-result.error {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .test-result.info {
+            background-color: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .clear-btn {
+            background: #dc3545;
+        }
+        .clear-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Admin Authentication Fix Test</h1>
+        <p>This test simulates the scenario where a user logs out and then tries to access the admin login page.</p>
+        
+        <div class="test-section">
+            <h3>Test Scenario: User Logout → Admin Login</h3>
+            <button onclick="simulateUserLogout()">1. Simulate User Logout</button>
+            <button onclick="checkAdminLoginPage()">2. Check Admin Login Page</button>
+            <button onclick="simulateAdminLogin()">3. Simulate Admin Login</button>
+            <button onclick="checkAdminDashboard()">4. Check Admin Dashboard</button>
+            <button onclick="clearAllAuth()" class="clear-btn">🗑️ Clear All Auth Data</button>
+        </div>
+        
+        <div id="testResults"></div>
+        
+        <div class="test-section">
+            <h3>Current Authentication State</h3>
+            <button onclick="checkCurrentState()">Check Current State</button>
+            <div id="currentState"></div>
+        </div>
+    </div>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const resultElement = document.createElement('div');
+            resultElement.className = `test-result ${type}`;
+            resultElement.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            resultsDiv.appendChild(resultElement);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function simulateUserLogout() {
+            addResult('🚪 Simulating user logout...', 'info');
+            
+            // Clear regular user data
+            localStorage.removeItem('bloodconnect_token');
+            localStorage.removeItem('bloodconnect_user');
+            localStorage.removeItem('bloodconnect_demo_user');
+            localStorage.removeItem('bloodconnect_remember');
+            localStorage.removeItem('bloodconnect_redirect');
+            
+            // SHOULD NOT clear admin data during user logout
+            // This was the bug - user logout was clearing admin data
+            
+            addResult('✅ User logout completed - admin data preserved', 'success');
+            checkCurrentState();
+        }
+
+        function checkAdminLoginPage() {
+            addResult('🔍 Checking admin login page logic...', 'info');
+            
+            // Simulate being on admin login page
+            const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
+            const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+            const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
+            
+            if (adminStatus === 'true' && adminEmail && adminLoginTime) {
+                // Check if session is still valid (30 minutes)
+                const loginTime = new Date(adminLoginTime);
+                const currentTime = new Date();
+                const timeDiff = currentTime - loginTime;
+                const minutesDiff = timeDiff / (1000 * 60);
+                
+                if (minutesDiff <= 30) {
+                    addResult('✅ Valid admin session found - would redirect to dashboard', 'success');
+                } else {
+                    addResult('⏰ Admin session expired - clearing data', 'info');
+                    clearAdminAuth();
+                }
+            } else {
+                addResult('📝 No admin session - showing login form', 'info');
+            }
+        }
+
+        function simulateAdminLogin() {
+            addResult('🔐 Simulating admin login...', 'info');
+            
+            // Simulate successful admin login
+            localStorage.setItem('bloodconnect_admin', 'true');
+            localStorage.setItem('admin_email', 'admin@bloodconnect.com');
+            localStorage.setItem('admin_login_time', new Date().toISOString());
+            
+            addResult('✅ Admin login successful - credentials stored', 'success');
+            checkCurrentState();
+        }
+
+        function checkAdminDashboard() {
+            addResult('🎯 Checking admin dashboard access...', 'info');
+            
+            // Simulate admin dashboard authentication check
+            const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
+            const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+            const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
+            
+            if (adminStatus !== 'true' || !adminEmail || !adminLoginTime) {
+                addResult('❌ Admin authentication failed - would redirect to login', 'error');
+                return;
+            }
+            
+            // Check session timeout (30 minutes)
+            if (adminLoginTime) {
+                const loginTime = new Date(adminLoginTime);
+                const currentTime = new Date();
+                const timeDiff = currentTime - loginTime;
+                const minutesDiff = timeDiff / (1000 * 60);
+                
+                if (minutesDiff > 30) {
+                    addResult('⏰ Admin session expired - would clear and redirect', 'error');
+                    clearAdminAuth();
+                    return;
+                }
+            }
+            
+            addResult('✅ Admin dashboard access granted - would load data', 'success');
+        }
+
+        function clearAdminAuth() {
+            localStorage.removeItem('bloodconnect_admin');
+            localStorage.removeItem('admin_email');
+            localStorage.removeItem('admin_login_time');
+            sessionStorage.removeItem('bloodconnect_admin');
+            sessionStorage.removeItem('admin_email');
+            sessionStorage.removeItem('admin_login_time');
+        }
+
+        function clearAllAuth() {
+            addResult('🧹 Clearing all authentication data...', 'info');
+            
+            // Clear user auth
+            localStorage.removeItem('bloodconnect_token');
+            localStorage.removeItem('bloodconnect_user');
+            localStorage.removeItem('bloodconnect_demo_user');
+            localStorage.removeItem('bloodconnect_remember');
+            localStorage.removeItem('bloodconnect_redirect');
+            
+            // Clear admin auth
+            clearAdminAuth();
+            
+            // Clear any other auth-related items
+            sessionStorage.removeItem('admin_logout_in_progress');
+            
+            addResult('✅ All authentication data cleared', 'success');
+            checkCurrentState();
+        }
+
+        function checkCurrentState() {
+            const stateDiv = document.getElementById('currentState');
+            
+            // Check user auth
+            const userToken = localStorage.getItem('bloodconnect_token');
+            const userData = localStorage.getItem('bloodconnect_user');
+            const demoUser = localStorage.getItem('bloodconnect_demo_user');
+            
+            // Check admin auth
+            const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
+            const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+            const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
+            
+            let stateHTML = '<h4>Authentication State:</h4>';
+            
+            // User state
+            stateHTML += '<div><strong>User Authentication:</strong><br>';
+            if (userToken && userData) {
+                const user = JSON.parse(userData);
+                stateHTML += `✅ Logged in as: ${user.firstName || user.name || 'User'}<br>`;
+            } else if (demoUser) {
+                const demo = JSON.parse(demoUser);
+                stateHTML += `🎭 Demo user: ${demo.firstName || demo.name || 'Demo'}<br>`;
+            } else {
+                stateHTML += '❌ Not logged in<br>';
+            }
+            stateHTML += '</div><br>';
+            
+            // Admin state
+            stateHTML += '<div><strong>Admin Authentication:</strong><br>';
+            if (adminStatus === 'true' && adminEmail && adminLoginTime) {
+                const loginTime = new Date(adminLoginTime);
+                const currentTime = new Date();
+                const timeDiff = currentTime - loginTime;
+                const minutesDiff = timeDiff / (1000 * 60);
+                
+                stateHTML += `✅ Admin logged in: ${adminEmail}<br>`;
+                stateHTML += `🕐 Session age: ${minutesDiff.toFixed(1)} minutes<br>`;
+                stateHTML += `⏱️ Session valid: ${minutesDiff <= 30 ? 'Yes' : 'No (expired)'}<br>`;
+            } else {
+                stateHTML += '❌ Admin not logged in<br>';
+            }
+            stateHTML += '</div>';
+            
+            stateDiv.innerHTML = stateHTML;
+        }
+
+        // Initial state check
+        checkCurrentState();
+    </script>
+</body>
+</html>

@@ -198,6 +198,19 @@ async function processAdminLogin(email, password, rememberMe) {
 
 // Check if already logged in
 function checkExistingAdminLogin() {
+    debugLog('🔍 Checking existing admin login...');
+    
+    // Check if logout is in progress - if so, don't redirect
+    const logoutInProgress = sessionStorage.getItem('admin_logout_in_progress');
+    if (logoutInProgress === 'true') {
+        debugLog('🚪 Logout in progress, skipping auto-redirect');
+        // Clear the logout flag if it's been too long (cleanup)
+        setTimeout(() => {
+            sessionStorage.removeItem('admin_logout_in_progress');
+        }, 5000);
+        return false;
+    }
+    
     // Check both localStorage and sessionStorage
     const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
     const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');

@@ -134,16 +134,20 @@ class AdminSessionManager {
             'admin_email',
             'admin_login_time',
             'admin_last_activity',
-            'admin_preferences'
+            'admin_preferences',
+            'admin_session'
         ];
         
         storages.forEach(storage => {
             keysToRemove.forEach(key => {
                 if (storage.getItem(key)) {
                     storage.removeItem(key);
+                    debugLog(`🗑️ Cleared ${key} from ${storage === localStorage ? 'localStorage' : 'sessionStorage'}`);
                 }
             });
         });
+        
+        debugLog('✅ All admin session data cleared');
     }
     
     // Check if user is authenticated
@@ -364,22 +368,71 @@ async function logAdminActivity(action, details) {
 async function logoutAdmin() {
     debugLog('🚪 Logout button clicked');
     
-    // Log activity before logout
-    logAdminActivity('logout', 'Admin logged out');
-    
     // Create a more reliable confirmation dialog
     const confirmLogout = window.confirm('Are you sure you want to logout from the admin dashboard?');
     
     if (confirmLogout) {
         debugLog('📝 User confirmed logout, proceeding...');
         
-        // Call server-side logout endpoint first (for logging)
-        logoutFromServer().then(() => {
-            performClientLogout();
-        }).catch((error) => {
-            debugLog(`⚠️ Server logout failed: ${error.message}, proceeding with client logout`);
-            performClientLogout();
+        // Immediately clear all admin data to prevent redirect loops
+        const adminKeys = [
+            'bloodconnect_admin',
+            'admin_email', 
+            'admin_login_time',
+            'admin_session',
+            'admin_preferences',
+            'admin_last_activity'
+        ];
+        
+        adminKeys.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
+            debugLog(`🗑️ Cleared ${key}`);
         });
+        
+        // Set a temporary flag to prevent automatic redirect
+        sessionStorage.setItem('admin_logout_completed', 'true');
+        
+        // Call server-side logout endpoint (for logging)
+        try {
+            await logoutFromServer();
+        } catch (error) {
+            debugLog(`⚠️ Server logout failed: ${error.message}`);
+        }
+        
+        // Show logout success message
+        const logoutMessage = document.createElement('div');
+        logoutMessage.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 2px solid #e53e3e;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 10000;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+        `;
+        logoutMessage.innerHTML = `
+            <i class="fas fa-check-circle" style="color: #e53e3e; font-size: 2rem; margin-bottom: 10px;"></i>
+            <div style="color: #333; font-weight: 600;">Logout Successful!</div>
+            <div style="color: #666; font-size: 0.9rem; margin-top: 5px;">Redirecting to login page...</div>
+        `;
+        document.body.appendChild(logoutMessage);
+        
+        // Redirect after delay
+        setTimeout(() => {
+            if (document.body.contains(logoutMessage)) {
+                document.body.removeChild(logoutMessage);
+            }
+            // Clear the logout flag and redirect
+            sessionStorage.removeItem('admin_logout_completed');
+            window.location.href = 'admin-login.html';
+        }, 1500);
+        
     } else {
         debugLog('❌ User cancelled logout');
     }
@@ -388,12 +441,27 @@ async function logoutAdmin() {
 // Client-side logout cleanup
 function performClientLogout() {
     try {
-        // Use shared utility for clearing admin auth data
-        if (window.SharedUtils && window.SharedUtils.AuthUtils) {
-            SharedUtils.AuthUtils.clearAuthData(true);
-        } else {
-            // Fallback implementation using session manager
-            sessionManager.clearSession();
+        debugLog('🧹 Starting admin logout cleanup...');
+        
+        // Clear all admin-related data
+        const adminKeys = [
+            'bloodconnect_admin',
+            'admin_email', 
+            'admin_login_time',
+            'admin_session',
+            'admin_preferences',
+            'admin_last_activity'
+        ];
+        
+        adminKeys.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
+            debugLog(`🗑️ Cleared ${key}`);
+        });
+        
+        // Clear any session manager data if available
+        if (window.AdminAuthUtils && window.AdminAuthUtils.sessionManager) {
+            window.AdminAuthUtils.sessionManager.clearSession();
         }
         
         debugLog('✅ Admin logout completed successfully');
@@ -427,24 +495,63 @@ function performClientLogout() {
             if (document.body.contains(logoutMessage)) {
                 document.body.removeChild(logoutMessage);
             }
+            
+            // Final redirect to admin login
             window.location.href = 'admin-login.html';
-        }, 2000);
+        }, 1500);
         
     } catch (error) {
         debugLog(`❌ Client logout error: ${error.message}`);
+        // Force redirect even if there's an error
         window.location.href = 'admin-login.html';
     }
 }
 
-// Check if already logged in
+// Check if already logged in (only for admin login page)
 function checkExistingAdminLogin() {
+    // Only check on admin login page
+    if (!window.location.pathname.includes('admin-login.html')) {
+        return false;
+    }
+    
+    // Check if logout was just completed - if so, don't auto-redirect
+    const logoutCompleted = sessionStorage.getItem('admin_logout_completed');
+    if (logoutCompleted === 'true') {
+        debugLog('Logout just completed, clearing flag and staying on login page');
+        sessionStorage.removeItem('admin_logout_completed');
+        return false;
+    }
+    
     // Check both localStorage and sessionStorage
     const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
-    if (adminStatus === 'true') {
-        debugLog('Already logged in as admin, redirecting to dashboard');
-        window.location.href = 'admin-dashboard.html';
-        return true;
+    const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+    const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
+    
+    // Validate that all required admin data exists and is valid
+    if (adminStatus === 'true' && adminEmail && adminLoginTime) {
+        // Check if session is still valid (30 minutes)
+        const loginTime = new Date(adminLoginTime);
+        const currentTime = new Date();
+        const timeDiff = currentTime - loginTime;
+        const minutesDiff = timeDiff / (1000 * 60);
+        
+        if (minutesDiff <= 30) {
+            debugLog('Valid admin session found, redirecting to dashboard');
+            window.location.href = 'admin-dashboard.html';
+            return true;
+        } else {
+            debugLog('Admin session expired, clearing data');
+            // Clear expired session
+            localStorage.removeItem('bloodconnect_admin');
+            localStorage.removeItem('admin_email');
+            localStorage.removeItem('admin_login_time');
+            sessionStorage.removeItem('bloodconnect_admin');
+            sessionStorage.removeItem('admin_email');
+            sessionStorage.removeItem('admin_login_time');
+        }
     }
+    
+    debugLog('No valid admin session, staying on login page');
     return false;
 }
 
@@ -458,7 +565,6 @@ window.AdminAuthUtils = {
     logoutFromServer,
     logAdminActivity,
     logoutAdmin,
-    performClientLogout,
     checkExistingAdminLogin,
     sessionManager
 };

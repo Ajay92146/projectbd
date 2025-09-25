@@ -120,7 +120,7 @@ class BloodDonationPage {
                 const missingFields = requiredFields.filter(f => !applicationData[f]);
                 if (missingFields.length > 0) throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
                 const apiUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api/donors/apply`;
-                const token = localStorage.getItem('authToken');
+                const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token') || localStorage.getItem('authToken');
                 const headers = { 'Content-Type': 'application/json' };
                 if (token) headers['Authorization'] = `Bearer ${token}`;
                 const response = await fetch(apiUrl, { method: 'POST', headers, body: JSON.stringify(applicationData) });

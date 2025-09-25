@@ -54,14 +54,18 @@ const AuthUtils = {
                 'admin_last_activity'
             ];
             
-            adminKeys.forEach(key => {
-                if (localStorage.getItem(key)) {
-                    localStorage.removeItem(key);
-                }
+            // Clear from both localStorage and sessionStorage
+            const storages = [localStorage, sessionStorage];
+            storages.forEach(storage => {
+                adminKeys.forEach(key => {
+                    if (storage.getItem(key)) {
+                        storage.removeItem(key);
+                        debugLog(`Cleared ${key} from ${storage === localStorage ? 'localStorage' : 'sessionStorage'}`, 'AuthUtils');
+                    }
+                });
             });
             
-            // Clear sessionStorage as well
-            sessionStorage.clear();
+            debugLog('All admin authentication data cleared', 'AuthUtils');
         } else {
             // Clear user-specific data
             const userKeys = [
@@ -75,8 +79,11 @@ const AuthUtils = {
             userKeys.forEach(key => {
                 if (localStorage.getItem(key)) {
                     localStorage.removeItem(key);
+                    debugLog(`Cleared ${key} from localStorage`, 'AuthUtils');
                 }
             });
+            
+            debugLog('All user authentication data cleared', 'AuthUtils');
         }
     },
     

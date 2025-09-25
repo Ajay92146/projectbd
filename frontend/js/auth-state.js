@@ -125,16 +125,23 @@ class AuthStateManager {
      * Clear authentication data
      */
     clearAuthData() {
+        // Only clear USER authentication data, NOT admin data
         localStorage.removeItem('bloodconnect_token');
         localStorage.removeItem('bloodconnect_user');
         localStorage.removeItem('bloodconnect_demo_user');
         localStorage.removeItem('bloodconnect_remember');
         localStorage.removeItem('bloodconnect_redirect');
 
+        // DO NOT clear admin data during user logout:
+        // - bloodconnect_admin
+        // - admin_email  
+        // - admin_login_time
+        // This was the bug causing admin dashboard errors
+
         // Update navigation immediately
         this.updateNavigation();
 
-        console.log('🔓 Authentication data cleared');
+        console.log('🔓 User authentication data cleared (admin data preserved)');
     }
 
     /**
@@ -327,17 +334,8 @@ class AuthStateManager {
                     <a class="dropdown-item" href="profile.html">
                         <i class="fas fa-user"></i> My Profile
                     </a>
-                    <a class="dropdown-item" href="profile.html#donations">
-                        <i class="fas fa-heart"></i> My Donations
-                    </a>
-                    <a class="dropdown-item" href="profile.html#requests">
-                        <i class="fas fa-hand-holding-medical"></i> My Requests
-                    </a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="profile.html#settings">
-                        <i class="fas fa-cog"></i> Settings
-                    </a>
-                    <a class="dropdown-item" href="#" onclick="authStateManager.logout()">
+                    <a class="dropdown-item" href="#" id="logoutDropdownItem">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                 </div>
@@ -359,6 +357,7 @@ class AuthStateManager {
         setTimeout(() => {
             const dropdownToggle = document.querySelector('#userDropdown');
             const dropdownMenu = document.querySelector('.user-dropdown .dropdown-menu');
+            const logoutDropdownItem = document.querySelector('#logoutDropdownItem');
 
             if (dropdownToggle && dropdownMenu) {
                 // Toggle dropdown on click
@@ -393,6 +392,16 @@ class AuthStateManager {
                         dropdownToggle.setAttribute('aria-expanded', 'false');
                         dropdownToggle.focus();
                     }
+                });
+            }
+            
+            // Add logout event listener
+            if (logoutDropdownItem) {
+                logoutDropdownItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🚪 Logout clicked from dropdown');
+                    this.logout();
                 });
             }
         }, 100);

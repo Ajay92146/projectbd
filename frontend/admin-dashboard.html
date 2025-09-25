@@ -176,6 +176,20 @@
             box-shadow: var(--shadow-lg);
             margin-bottom: 2rem;
             border: 1px solid rgba(229, 62, 62, 0.1);
+<<<<<<< HEAD
+=======
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+
+        /* Table Container */
+        #usersTableContainer,
+        #donationsTableContainer,
+        #requestsTableContainer {
+            overflow-x: auto;
+            margin: 0 -1.5rem;
+            padding: 0 1.5rem;
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
         }
 
         .section-header {
@@ -331,6 +345,7 @@
             z-index: 1001;
         }
 
+<<<<<<< HEAD
         .notification.show {
             transform: translateX(0);
         }
@@ -340,6 +355,56 @@
             color: var(--gray-600);
             font-size: 0.875rem;
             margin-top: 0.5rem;
+=======
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            table-layout: auto;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+
+        /* User Management Table - optimized column widths */
+        #usersTableContainer .data-table th:nth-child(1),
+        #usersTableContainer .data-table td:nth-child(1) { width: 8%; max-width: 120px; } /* ID */
+        #usersTableContainer .data-table th:nth-child(2),
+        #usersTableContainer .data-table td:nth-child(2) { width: 15%; } /* Name */
+        #usersTableContainer .data-table th:nth-child(3),
+        #usersTableContainer .data-table td:nth-child(3) { width: 20%; } /* Email */
+        #usersTableContainer .data-table th:nth-child(4),
+        #usersTableContainer .data-table td:nth-child(4) { width: 12%; } /* Phone */
+        #usersTableContainer .data-table th:nth-child(5),
+        #usersTableContainer .data-table td:nth-child(5) { width: 8%; } /* Role */
+        #usersTableContainer .data-table th:nth-child(6),
+        #usersTableContainer .data-table td:nth-child(6) { width: 10%; } /* Blood Group */
+        #usersTableContainer .data-table th:nth-child(7),
+        #usersTableContainer .data-table td:nth-child(7) { width: 10%; } /* City */
+        #usersTableContainer .data-table th:nth-child(8),
+        #usersTableContainer .data-table td:nth-child(8) { width: 8%; } /* Donations */
+        #usersTableContainer .data-table th:nth-child(9),
+        #usersTableContainer .data-table td:nth-child(9) { width: 9%; } /* Requests */
+        #usersTableContainer .data-table th:nth-child(10),
+        #usersTableContainer .data-table td:nth-child(10) { width: 10%; } /* Joined */
+
+        /* Requests Table - specific contact column handling */
+        #requestsTableContainer .data-table th:nth-child(5),
+        #requestsTableContainer .data-table td:nth-child(5) {
+            white-space: normal;
+            word-wrap: break-word;
+            text-overflow: unset;
+            overflow: visible;
+            width: 120px;
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
         }
 
         @media (max-width: 768px) {
@@ -351,11 +416,103 @@
                 flex-direction: column;
             }
 
+<<<<<<< HEAD
             .dashboard-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1rem;
             }
+=======
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-fulfilled {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-expired {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .urgency-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .urgency-low {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .urgency-medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .urgency-high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .urgency-critical {
+            background: #7f1d1d;
+            color: #ffffff;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            color: var(--gray-500);
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+            margin-right: 0.75rem;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-300);
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
         }
     </style>
 </head>
@@ -534,16 +691,33 @@
                 <table>
                     <thead>
                         <tr>
+<<<<<<< HEAD
                             <th>Requester</th>
                             <th>Blood Type</th>
                             <th>Units</th>
+=======
+                            <th>ID</th>
+                            <th>Patient Name</th>
+                            <th>Blood Group</th>
+                            <th>Units Needed</th>
+                            <th>Contact Number</th>
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
                             <th>Status</th>
                             <th>Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="requestsTableBody">
+<<<<<<< HEAD
                         <!-- Request data will be loaded here -->
+=======
+                        <tr>
+                            <td colspan="9" class="loading">
+                                <i class="fas fa-spinner"></i>
+                                Loading requests...
+                            </td>
+                        </tr>
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
                     </tbody>
                 </table>
             </div>
@@ -554,6 +728,7 @@
         </div>
     </main>
 
+<<<<<<< HEAD
     <div class="notification" id="notification"></div>
 
     <script src="js/admin-auth-utils.js"></script>
@@ -571,6 +746,32 @@
         }
         
         // Initialize dashboard when DOM is loaded
+=======
+    <!-- Load scripts in the correct order -->
+    <script>
+        // Define updateNavigation function globally before any scripts load
+        window.updateNavigation = function() {
+            console.log('Navigation update placeholder');
+            // This is a placeholder function that will be overridden by auth-state.js if loaded
+            if (window.authStateManager) {
+                window.authStateManager.updateNavigation();
+            }
+        };
+    </script>
+
+    <script src="js/api.js"></script>
+    <script src="js/admin-auth-utils.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+    
+    <script>
+        // Global variables for data storage
+        let usersData = [];
+        let donationsData = [];
+        let requestsData = [];
+
+        // Event listeners setup
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize event listeners
             initializeEventListeners();
@@ -698,6 +899,7 @@
             
             displayRequests(filteredRequests);
         }
+<<<<<<< HEAD
 
         // View functions
         function viewRequest(requestId) {
@@ -706,6 +908,8 @@
                 alert('Request Details:\n\nRequester: ${request.requesterName}\nBlood Type: ${request.bloodType}\nUnits: ${request.units}\nStatus: ${request.status}\nDate: ${request.date}\nLocation: ${request.location}\nReason: ${request.reason}');
             }
         }
+=======
+>>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
     </script>
 </body>
 </html>

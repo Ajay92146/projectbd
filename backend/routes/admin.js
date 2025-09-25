@@ -1191,6 +1191,116 @@ router.get('/dashboard-stats', adminAuthMiddleware, async (req, res) => {
     }
 });
 
+/**
+ * @route   DELETE /api/admin/cleanup-test-data
+ * @desc    Remove all test/demo data from database
+ * @access  Admin only
+ */
+router.delete('/cleanup-test-data', adminAuthMiddleware, async (req, res) => {
+    try {
+        logger.info('Admin initiating test data cleanup');
+        
+        // Remove test users
+        const testUserResult = await User.deleteMany({
+            $or: [
+                { email: { $regex: /test/i } },
+                { email: { $regex: /demo/i } },
+                { firstName: { $regex: /test/i } },
+                { firstName: { $regex: /demo/i } },
+                { lastName: { $regex: /test/i } },
+                { lastName: { $regex: /demo/i } }
+            ]
+        });
+        
+        // Remove test donors
+        const testDonorResult = await Donor.deleteMany({
+            $or: [
+                { name: { $regex: /test/i } },
+                { name: { $regex: /demo/i } },
+                { email: { $regex: /test/i } },
+                { email: { $regex: /demo/i } }
+            ]
+        });
+        
+        // Remove test user donations
+        const testUserDonationResult = await UserDonation.deleteMany({
+            $or: [
+                { name: { $regex: /test/i } },
+                { name: { $regex: /demo/i } },
+                { email: { $regex: /test/i } },
+                { email: { $regex: /demo/i } }
+            ]
+        });
+        
+        // Remove test requests
+        const testRequestResult = await Request.deleteMany({
+            $or: [
+                { patientName: { $regex: /test/i } },
+                { patientName: { $regex: /demo/i } },
+                { requesterName: { $regex: /test/i } },
+                { requesterName: { $regex: /demo/i } },
+                { hospitalName: { $regex: /test/i } },
+                { hospitalName: { $regex: /demo/i } },
+                { hospital: { $regex: /test/i } },
+                { hospital: { $regex: /demo/i } },
+                { location: { $regex: /test/i } },
+                { location: { $regex: /demo/i } }
+            ]
+        });
+        
+        // Remove test user requests
+        const testUserRequestResult = await UserRequest.deleteMany({
+            $or: [
+                { patientName: { $regex: /test/i } },
+                { patientName: { $regex: /demo/i } },
+                { requesterName: { $regex: /test/i } },
+                { requesterName: { $regex: /demo/i } },
+                { hospitalName: { $regex: /test/i } },
+                { hospitalName: { $regex: /demo/i } },
+                { hospital: { $regex: /test/i } },
+                { hospital: { $regex: /demo/i } },
+                { location: { $regex: /test/i } },
+                { location: { $regex: /demo/i } }
+            ]
+        });
+        
+        const totalRemoved = testUserResult.deletedCount + 
+                           testDonorResult.deletedCount + 
+                           testUserDonationResult.deletedCount + 
+                           testRequestResult.deletedCount + 
+                           testUserRequestResult.deletedCount;
+        
+        logger.info('Test data cleanup completed', {
+            testUsers: testUserResult.deletedCount,
+            testDonors: testDonorResult.deletedCount,
+            testUserDonations: testUserDonationResult.deletedCount,
+            testRequests: testRequestResult.deletedCount,
+            testUserRequests: testUserRequestResult.deletedCount,
+            totalRemoved
+        });
+        
+        res.json({
+            success: true,
+            message: 'Test data cleanup completed successfully',
+            data: {
+                testUsersRemoved: testUserResult.deletedCount,
+                testDonorsRemoved: testDonorResult.deletedCount,
+                testUserDonationsRemoved: testUserDonationResult.deletedCount,
+                testRequestsRemoved: testRequestResult.deletedCount,
+                testUserRequestsRemoved: testUserRequestResult.deletedCount,
+                totalRemoved
+            }
+        });
+    } catch (error) {
+        logger.error('Error during test data cleanup:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to cleanup test data',
+            error: error.message
+        });
+    }
+});
+
 // Health check endpoint
 router.get('/health', (req, res) => {
     res.json({

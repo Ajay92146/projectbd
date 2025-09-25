@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Logout Loop Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-step {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .test-step.success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .test-step.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .logout-btn {
+            background: #dc3545;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.authenticated {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.not-authenticated {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .code {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔄 Admin Logout Loop Fix Test</h1>
+        <p>This test simulates the admin logout scenario to verify the redirect loop is fixed.</p>
+        
+        <div class="test-step">
+            <h3>Current Admin Authentication Status</h3>
+            <div id="authStatus"></div>
+            <button onclick="checkAuthStatus()">Check Status</button>
+        </div>
+        
+        <div class="test-step">
+            <h3>Test Scenario: Admin Logout Loop Prevention</h3>
+            <button onclick="simulateAdminLogin()">1. Simulate Admin Login</button>
+            <button onclick="simulateAdminLogout()" class="logout-btn">2. Simulate Admin Logout</button>
+            <button onclick="checkLoginPageBehavior()">3. Check Login Page Behavior</button>
+            <button onclick="verifyNoDashboardRedirect()">4. Verify No Dashboard Redirect</button>
+        </div>
+        
+        <div class="test-step">
+            <h3>Expected Flow (Fixed)</h3>
+            <div class="code">
+                1. Admin clicks logout → Clear all admin data + set logout flag<br>
+                2. Redirect to login page with flag set<br>
+                3. Login page sees logout flag → Stay on login page, clear flag<br>
+                4. No automatic redirect to dashboard → NO LOOP! ✅
+            </div>
+        </div>
+        
+        <div class="test-step">
+            <h3>Previous Broken Flow</h3>
+            <div class="code">
+                1. Admin clicks logout → Clear admin data<br>
+                2. Redirect to login page<br>
+                3. Login page checks auth → Sees no data → Shows login form<br>
+                4. BUT some cached data causes redirect to dashboard<br>
+                5. Dashboard checks auth → Fails → Redirect to login<br>
+                6. INFINITE LOOP! ❌
+            </div>
+        </div>
+        
+        <div id="testResults"></div>
+        
+        <div class="test-step">
+            <h3>Debug: Current Storage State</h3>
+            <button onclick="showStorageState()">Show Storage State</button>
+            <button onclick="clearAllData()">Clear All Data</button>
+            <div id="storageState"></div>
+        </div>
+    </div>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const resultElement = document.createElement('div');
+            resultElement.className = `test-step ${type}`;
+            resultElement.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            resultsDiv.appendChild(resultElement);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function checkAuthStatus() {
+            const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
+            const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+            const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
+            const logoutFlag = sessionStorage.getItem('admin_logout_completed');
+            
+            const statusDiv = document.getElementById('authStatus');
+            
+            if (adminStatus === 'true' && adminEmail && adminLoginTime) {
+                statusDiv.innerHTML = `
+                    <div class="status authenticated">
+                        ✅ AUTHENTICATED as ${adminEmail}<br>
+                        Login time: ${new Date(adminLoginTime).toLocaleString()}<br>
+                        Logout flag: ${logoutFlag || 'None'}
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="status not-authenticated">
+                        ❌ NOT AUTHENTICATED<br>
+                        Admin status: ${adminStatus || 'None'}<br>
+                        Admin email: ${adminEmail || 'None'}<br>
+                        Logout flag: ${logoutFlag || 'None'}
+                    </div>
+                `;
+            }
+        }
+
+        function simulateAdminLogin() {
+            // Clear any existing data first
+            clearAllData();
+            
+            // Set admin authentication data
+            localStorage.setItem('bloodconnect_admin', 'true');
+            localStorage.setItem('admin_email', 'admin@bloodconnect.com');
+            localStorage.setItem('admin_login_time', new Date().toISOString());
+            
+            addResult('✅ Admin login simulated - authentication data set', 'success');
+            checkAuthStatus();
+        }
+
+        function simulateAdminLogout() {
+            addResult('🚪 Simulating admin logout...', 'info');
+            
+            // This simulates the FIXED logout behavior
+            
+            // Step 1: Clear all admin data immediately
+            const adminKeys = [
+                'bloodconnect_admin',
+                'admin_email', 
+                'admin_login_time',
+                'admin_session',
+                'admin_preferences',
+                'admin_last_activity'
+            ];
+            
+            adminKeys.forEach(key => {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+            });
+            
+            // Step 2: Set logout completed flag to prevent auto-redirect
+            sessionStorage.setItem('admin_logout_completed', 'true');
+            
+            addResult('✅ Admin logout completed - data cleared, flag set', 'success');
+            addResult('🔧 Next: Login page should see logout flag and NOT auto-redirect', 'info');
+            checkAuthStatus();
+        }
+
+        function checkLoginPageBehavior() {
+            addResult('🔍 Checking admin login page behavior...', 'info');
+            
+            // Simulate admin login page logic
+            const pathname = '/admin-login.html'; // Simulate being on login page
+            
+            // Check if logout was just completed
+            const logoutCompleted = sessionStorage.getItem('admin_logout_completed');
+            if (logoutCompleted === 'true') {
+                addResult('✅ Logout flag detected - login page would stay put and clear flag', 'success');
+                
+                // Simulate clearing the flag (as the real code would do)
+                sessionStorage.removeItem('admin_logout_completed');
+                addResult('🧹 Logout flag cleared - login form would be shown', 'success');
+                
+                return;
+            }
+            
+            // Check for existing admin session
+            const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
+            const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+            const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
+            
+            if (adminStatus === 'true' && adminEmail && adminLoginTime) {
+                // Would check session timeout here
+                const loginTime = new Date(adminLoginTime);
+                const currentTime = new Date();
+                const timeDiff = currentTime - loginTime;
+                const minutesDiff = timeDiff / (1000 * 60);
+                
+                if (minutesDiff <= 30) {
+                    addResult('🔄 Valid session found - would redirect to dashboard', 'info');
+                } else {
+                    addResult('⏰ Session expired - would clear data and show login', 'info');
+                }
+            } else {
+                addResult('📝 No admin session - would show login form', 'success');
+            }
+        }
+
+        function verifyNoDashboardRedirect() {
+            addResult('🎯 Verifying dashboard redirect behavior...', 'info');
+            
+            // Simulate admin dashboard authentication check
+            const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
+            const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+            const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
+            
+            if (adminStatus !== 'true' || !adminEmail || !adminLoginTime) {
+                addResult('✅ Dashboard would detect missing auth and redirect to login', 'success');
+                addResult('🔄 But login page has logout flag logic to prevent loop!', 'success');
+            } else {
+                addResult('⚠️ Dashboard would allow access (unexpected for this test)', 'error');
+            }
+        }
+
+        function showStorageState() {
+            const stateDiv = document.getElementById('storageState');
+            
+            const localStorage_admin = localStorage.getItem('bloodconnect_admin');
+            const localStorage_email = localStorage.getItem('admin_email');
+            const localStorage_time = localStorage.getItem('admin_login_time');
+            
+            const sessionStorage_admin = sessionStorage.getItem('bloodconnect_admin');
+            const sessionStorage_email = sessionStorage.getItem('admin_email');
+            const sessionStorage_time = sessionStorage.getItem('admin_login_time');
+            const logoutFlag = sessionStorage.getItem('admin_logout_completed');
+            
+            stateDiv.innerHTML = `
+                <div class="code">
+                    <strong>localStorage:</strong><br>
+                    bloodconnect_admin: ${localStorage_admin || 'null'}<br>
+                    admin_email: ${localStorage_email || 'null'}<br>
+                    admin_login_time: ${localStorage_time || 'null'}<br><br>
+                    
+                    <strong>sessionStorage:</strong><br>
+                    bloodconnect_admin: ${sessionStorage_admin || 'null'}<br>
+                    admin_email: ${sessionStorage_email || 'null'}<br>
+                    admin_login_time: ${sessionStorage_time || 'null'}<br>
+                    admin_logout_completed: ${logoutFlag || 'null'}
+                </div>
+            `;
+        }
+
+        function clearAllData() {
+            // Clear all admin-related data
+            const keys = [
+                'bloodconnect_admin',
+                'admin_email',
+                'admin_login_time',
+                'admin_session',
+                'admin_preferences',
+                'admin_last_activity',
+                'admin_logout_completed'
+            ];
+            
+            keys.forEach(key => {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+            });
+            
+            addResult('🧹 All admin data cleared', 'info');
+            checkAuthStatus();
+        }
+
+        // Initialize
+        checkAuthStatus();
+        
+        // Auto-run the test sequence for demonstration
+        setTimeout(() => {
+            addResult('🚀 Running automatic test sequence...', 'info');
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -108,8 +108,9 @@ document.addEventListener('DOMContentLoaded', function() {
  * @returns {Object} Authentication status and message
  */
 function checkFormAuthentication(formType) {
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-    const userData = localStorage.getItem('userData') || sessionStorage.getItem('userData');
+    // Check for authentication tokens - try multiple keys for compatibility
+    const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token') || localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    const userData = localStorage.getItem('bloodconnect_user') || localStorage.getItem('userData') || localStorage.getItem('user') || sessionStorage.getItem('userData');
     
     console.log('Checking form authentication:', {
         formType,
@@ -221,11 +222,21 @@ function setupDonorForm() {
             const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                 ? 'http://localhost:3002/api' 
                 : `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+            
+            // Get auth token for authenticated submissions  
+            const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token') || localStorage.getItem('authToken');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+                console.log('🔐 User is logged in, sending donation with auth token');
+            }
+            
             const response = await fetch(`${apiBase}/donors`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: headers,
                 body: JSON.stringify(donorData)
             });
             
@@ -399,8 +410,8 @@ function setupRequestForm() {
 
             console.log('📤 Submitting blood request to MongoDB Atlas:', requestData);
             
-            // Get auth token if user is logged in
-            const token = localStorage.getItem('authToken');
+            // Get auth token if user is logged in - check multiple keys
+            const token = localStorage.getItem('token') || localStorage.getItem('bloodconnect_token') || localStorage.getItem('authToken');
             const headers = {
                 'Content-Type': 'application/json'
             };

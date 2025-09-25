@@ -31,10 +31,17 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
 
 
-        // Get donation statistics from Donor collection
+        // Get donation statistics from Donor collection - ONLY for this user
         const Donor = require('../models/Donor');
         const donationStats = await Donor.aggregate([
-            { $match: { email: user.email, isActive: { $ne: false } } },
+            { 
+                $match: { 
+                    $and: [
+                        { email: user.email },
+                        { isActive: { $ne: false } }
+                    ]
+                }
+            },
             {
                 $group: {
                     _id: null,
@@ -46,17 +53,17 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             }
         ]);
 
-        // Get request statistics from Request collection
+        // Get request statistics from Request collection - ONLY for this user
         const Request = require('../models/Request');
-        const requestQuery = user.phoneNumber ?
-            { contactNumber: user.phoneNumber, isActive: { $ne: false } } :
-            {
-                $or: [
-                    { contactPersonName: new RegExp(user.firstName, 'i') },
-                    { contactPersonName: new RegExp(user.lastName, 'i') }
-                ],
-                isActive: { $ne: false }
-            };
+        const mongoose = require('mongoose');
+        
+        const requestQuery = {
+            $and: [
+                { userId: { $exists: true, $ne: null } }, // Must have userId
+                { userId: new mongoose.Types.ObjectId(userId) }, // Must match authenticated user's ObjectId
+                { isActive: { $ne: false } }
+            ]
+        };
 
         const requestStats = await Request.aggregate([
             { $match: requestQuery },
@@ -75,23 +82,27 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             }
         ]);
 
-        // Get recent donations (last 5)
+        // Get recent donations (last 5) - ONLY for this user
         const recentDonations = await Donor.find({
-            email: user.email,
-            isActive: { $ne: false }
+            $and: [
+                { email: user.email },
+                { isActive: { $ne: false } }
+            ]
         })
             .sort({ applicationDate: -1, dateOfDonation: -1 })
             .limit(5);
 
-        // Get recent requests (last 5)
+        // Get recent requests (last 5) - ONLY for this user
         const recentRequests = await Request.find(requestQuery)
             .sort({ createdAt: -1 })
             .limit(5);
 
-        // Get upcoming eligible donation date
+        // Get upcoming eligible donation date - ONLY for this user
         const lastDonation = await Donor.findOne({
-            email: user.email,
-            isActive: { $ne: false }
+            $and: [
+                { email: user.email },
+                { isActive: { $ne: false } }
+            ]
         }).sort({ dateOfDonation: -1 });
 
         let nextEligibleDate = null;
@@ -172,35 +183,53 @@ router.get('/donations', [
             });
         }
 
-        // Get donations from Donor collection by matching email
+        // Get donations from Donor collection - ONLY for authenticated user
         const Donor = require('../models/Donor');
-        console.log('🔍 Looking for donations with email:', user.email);
+        console.log('🔍 Looking for donations with email:', user.email, 'for userId:', userId);
 
-        const donations = await Donor.find({
-            email: user.email,
-            isActive: { $ne: false } // Include documents where isActive is not false
-        })
+        // Security: ONLY get donations for the authenticated user's email
+        const donationQuery = {
+            $and: [
+                { email: user.email }, // Must match user's email
+                { isActive: { $ne: false } } // Include documents where isActive is not false
+            ]
+        };
+
+        const donations = await Donor.find(donationQuery)
             .sort({ applicationDate: -1, dateOfDonation: -1 })
             .skip(skip)
             .limit(limit);
 
-        console.log('📊 Found donations:', donations.length);
+        console.log('📊 Found donations for current user:', donations.length);
+        
+        // Security check: Verify all returned donations belong to the current user
+        const verifyDonations = donations.filter(donation => donation.email === user.email);
+        if (verifyDonations.length !== donations.length) {
+            console.error('😱 SECURITY ALERT: Found donations not belonging to current user!');
+            console.error('Expected email:', user.email);
+            console.error('Found donations:', donations.map(d => ({ id: d._id, email: d.email })));
+            
+            // Filter to only include current user's donations
+            const secureReponse = donations.filter(donation => donation.email === user.email);
+            donations = secureReponse;
+        }
 
-        // Get total count
-        const totalDonations = await Donor.countDocuments({
-            email: user.email,
-            isActive: { $ne: false }
-        });
+        // Get total count - ONLY for authenticated user
+        const totalDonations = await Donor.countDocuments(donationQuery);
 
         console.log('📤 Sending donations response:', {
             success: true,
             donationsCount: donations.length,
             totalDonations,
+            userEmail: user.email,
+            userId: userId,
+            securityVerified: true,
             sampleDonation: donations[0] ? {
                 id: donations[0]._id,
                 email: donations[0].email,
                 bloodGroup: donations[0].bloodGroup,
-                dateOfDonation: donations[0].dateOfDonation
+                dateOfDonation: donations[0].dateOfDonation,
+                emailMatches: donations[0].email === user.email
             } : null
         });
 
@@ -353,35 +382,56 @@ router.get('/requests', [
             });
         }
 
-        console.log('🔍 Looking for requests for user:', user.email, 'userId:', userId);
-
-        // Build query for Request collection with proper user identification
+        // Build query for Request collection - SECURITY: ONLY use userId
         const Request = require('../models/Request');
+        const mongoose = require('mongoose');
+
+        console.log('🔍 Looking for requests for userId:', userId);
         
-        // Primary query: Look for requests with exact userId match (most secure)
+        // SECURITY: Primary and ONLY query - must match exact userId
         const requestQuery = {
-            userId: userId,
-            isActive: { $ne: false }
+            $and: [
+                { userId: { $exists: true, $ne: null } }, // CRITICAL: Must have userId field
+                { userId: new mongoose.Types.ObjectId(userId) }, // CRITICAL: Must match authenticated user's ObjectId
+                { isActive: { $ne: false } }
+            ]
         };
 
         if (status) {
-            requestQuery.status = status;
+            requestQuery.$and.push({ status: status });
         }
 
-        console.log('🔍 Primary request query (userId):', JSON.stringify(requestQuery, null, 2));
+        console.log('🔍 Secure request query (userId only):', JSON.stringify(requestQuery, null, 2));
 
-        // Get requests from Request table with pagination
-        // Only use userId for filtering to ensure privacy
+        // Get requests ONLY for authenticated user
         let requests = await Request.find(requestQuery)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
-        console.log('📊 Found requests:', requests.length);
+        console.log('📊 Found requests for authenticated user:', requests.length);
+        
+        // Security check: Verify all returned requests belong to the current user
+        const invalidRequests = requests.filter(request => {
+            return !request.userId || request.userId.toString() !== userId.toString();
+        });
+        if (invalidRequests.length > 0) {
+            console.error('😱 SECURITY ALERT: Found requests not belonging to current user!');
+            console.error('Expected userId:', userId);
+            console.error('Invalid requests:', invalidRequests.map(r => ({ 
+                id: r._id, 
+                userId: r.userId, 
+                patientName: r.patientName 
+            })));
+            
+            // Filter to only include current user's requests
+            requests = requests.filter(request => {
+                return request.userId && request.userId.toString() === userId.toString();
+            });
+            console.log('🛡️ Filtered to secure requests:', requests.length);
+        }
 
-        console.log('📊 Found requests:', requests.length);
-
-        // Get total count from Request table
+        // Get total count ONLY for authenticated user
         let totalRequests = await Request.countDocuments(requestQuery);
 
         // Prepare the response
@@ -403,12 +453,16 @@ router.get('/requests', [
             success: responseData.success,
             requestsCount: requests.length,
             totalRequests,
+            userId: userId,
+            securityVerified: true,
             sampleRequest: requests[0] ? {
                 id: requests[0]._id,
+                userId: requests[0].userId,
                 patientName: requests[0].patientName,
                 bloodGroup: requests[0].bloodGroup,
                 requiredUnits: requests[0].requiredUnits,
-                status: requests[0].status
+                status: requests[0].status,
+                userIdMatches: requests[0].userId && requests[0].userId.toString() === userId.toString()
             } : null
         });
 
@@ -526,6 +580,98 @@ router.put('/settings', [
         res.status(500).json({
             success: false,
             message: 'Error updating settings',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
+/**
+ * @route   PUT /api/profile/change-password
+ * @desc    Change user password
+ * @access  Private
+ */
+router.put('/change-password', [
+    authMiddleware,
+    body('currentPassword')
+        .notEmpty()
+        .withMessage('Current password is required'),
+    body('newPassword')
+        .isLength({ min: 6 })
+        .withMessage('New password must be at least 6 characters long')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)
+        .withMessage('New password must contain at least one uppercase letter, one lowercase letter, and one number'),
+    body('confirmPassword')
+        .custom((value, { req }) => {
+            if (value !== req.body.newPassword) {
+                throw new Error('Password confirmation does not match new password');
+            }
+            return true;
+        })
+], async (req, res) => {
+    try {
+        // Check for validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                errors: errors.array()
+            });
+        }
+
+        const userId = req.user.userId;
+        const { currentPassword, newPassword } = req.body;
+
+        // Get user from database
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Verify current password
+        const bcrypt = require('bcryptjs');
+        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isCurrentPasswordValid) {
+            return res.status(400).json({
+                success: false,
+                message: 'Current password is incorrect'
+            });
+        }
+
+        // Check if new password is different from current password
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        if (isSamePassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'New password must be different from current password'
+            });
+        }
+
+        // Hash new password
+        const saltRounds = 12;
+        const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update user password
+        await User.findByIdAndUpdate(userId, {
+            password: hashedNewPassword,
+            passwordChangedAt: new Date()
+        });
+
+        console.log(`🔐 Password changed successfully for user: ${user.email}`);
+
+        res.json({
+            success: true,
+            message: 'Password changed successfully'
+        });
+
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error changing password',
             error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
