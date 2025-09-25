@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Bank Dashboard - BloodConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/blood-bank-styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">
+                    <i class="fas fa-heart"></i>
+                    Blood Bank Dashboard
+                </h1>
+                <span id="bankName">Loading...</span>
+            </div>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </header>
+        
+        <main class="dashboard-main">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number" id="pendingCount">0</div>
+                    <div class="stat-label">Pending Approvals</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-number" id="approvedToday">0</div>
+                    <div class="stat-label">Approved Today</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="stat-number" id="totalUnits">0</div>
+                    <div class="stat-label">Total Units</div>
+                </div>
+            </div>
+            
+            <div class="pending-donations">
+                <div class="section-header">
+                    <h2>Pending Donation Approvals</h2>
+                    <button id="refreshBtn" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="donations-table">
+                        <thead>
+                            <tr>
+                                <th>Donor Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Blood Group</th>
+                                <th>Units</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="donationsTableBody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2rem; color: #7f8c8d;">
+                                    Loading donations...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="pagination" class="pagination-container">
+                    <!-- Pagination will be added here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/blood-bank-dashboard.js"></script>
+</body>
+</html>

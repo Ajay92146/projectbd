@@ -26,17 +26,29 @@
         if (el) el.innerHTML = html;
     }
 
-    const UI = {
+        const UI = {
         loading(message = 'Loading...') {
-            return `<div class="loading" style="text-align:center;padding:16px;color:#6b7280;"><i class="fas fa-spinner fa-spin"></i> ${message}</div>`;
+            return `<div class="loading" style="text-align:center;padding:2rem;color:var(--gray-500);"><i class="fas fa-spinner fa-spin" style="font-size:2rem;margin-bottom:1rem;color:var(--gray-400);"></i><br>${message}</div>`;
         },
-        empty(title = 'Nothing here', description = 'No data to show yet.') {
-            return `<div class="empty" style="text-align:center;padding:24px;color:#6b7280;"><h3 style="margin-bottom:6px;">${title}</h3><p>${description}</p></div>`;
+        empty(title = 'Nothing here', description = 'No data to show yet.', actionButton = '') {
+            return `<div class="empty-state" style="text-align:center;padding:3rem 1rem;color:var(--gray-500);">
+                <i class="fas fa-inbox" style="font-size:4rem;margin-bottom:1rem;color:var(--gray-400);"></i>
+                <h3 style="margin-bottom:0.5rem;color:var(--gray-600);">${title}</h3>
+                <p>${description}</p>
+                ${actionButton}
+            </div>`;
         },
         error(title = 'Error', description = 'Something went wrong.') {
-            return `<div class="error" style="text-align:center;padding:24px;color:#991b1b;background:#fee2e2;border:1px solid #fecaca;border-radius:10px;"><h3 style="margin-bottom:6px;">${title}</h3><p>${description}</p></div>`;
+            return `<div class="error" style="text-align:center;padding:2rem;color:var(--danger-color);background:var(--gray-100);border:1px solid var(--gray-300);border-radius:var(--border-radius);">
+                <i class="fas fa-exclamation-triangle" style="font-size:2rem;margin-bottom:1rem;"></i><br>
+                <h3 style="margin-bottom:0.5rem;">${title}</h3><p>${description}</p>
+            </div>`;
         }
     };
+
+        // MUST process replacements in provided order
+        // NEVER make parallel calls on same file
+        // MUST ensure earlier replacements don't interfere with later ones
 
     // ------------------------- API Client -------------------------
     const api = {
@@ -52,6 +64,14 @@
             const token = ensureAuth();
             if (!token) return null;
             const res = await fetch(path, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            if (res.status === 401) { localStorage.removeItem('token'); window.location.href = 'login.html'; return null; }
+            if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+            return res.json();
+        },
+        async delete(path) {
+            const token = ensureAuth();
+            if (!token) return null;
+            const res = await fetch(path, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
             if (res.status === 401) { localStorage.removeItem('token'); window.location.href = 'login.html'; return null; }
             if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
             return res.json();
@@ -90,7 +110,11 @@
             const data = await api.get(`/api/profile/donations?page=${page}&limit=${limit}`);
             const donations = data?.data?.donations || [];
             const filtered = donationsFilter ? donations.filter(d => (d.status||'').toLowerCase() === donationsFilter) : donations;
-            if (!filtered.length) { setContent(container, UI.empty('No Donations Yet', 'Start saving lives today!')); return; }
+            if (!filtered.length) { 
+                const actionButton = '<a href="donate.html" class="btn btn-primary" style="margin-top: 1rem;"><i class="fas fa-plus"></i> Donate Now</a>';
+                setContent(container, UI.empty('No Donations Yet', 'Start making a difference by donating blood today!', actionButton)); 
+                return; 
+            }
             const html = filtered.map(d => {
                 const status = (d.status || 'Recorded').toLowerCase();
                 const date = d.donationDate ? new Date(d.donationDate).toLocaleDateString() : 'Not specified';
@@ -98,13 +122,28 @@
                 const city = d.city || '';
                 const state = d.state || '';
                 return `
-                    <div class="item">
-                        <div class="header">
-                            <h4 style="margin:0;font-weight:600;">Blood Donation</h4>
-                            <span class="badge ${status}">${status}</span>
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div>
+                                <h4 class="item-title">Blood Donation</h4>
+                                <div class="item-meta">Donated on ${date}</div>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                <span class="status-badge status-${status}">${status}</span>
+                                ${status === 'pending' ? `
+                                    <button class="btn-cancel-donation" onclick="cancelDonation('${d._id}')" 
+                                        style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; 
+                                               border: none; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer;
+                                               font-size: 0.85rem; font-weight: 600; transition: all 0.3s;
+                                               display: flex; align-items: center; gap: 0.5rem;"
+                                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(220, 53, 69, 0.3)';"
+                                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;">
-                            <p><strong>Date:</strong> ${date}</p>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
                             <p><strong>Blood Group:</strong> ${d.bloodGroup || 'N/A'}</p>
                             <p><strong>Units:</strong> ${d.unitsCollected || 1}</p>
                             <p><strong>Center:</strong> ${center}</p>
@@ -128,7 +167,11 @@
             const statusParam = requestsStatus ? `&status=${encodeURIComponent(requestsStatus)}` : '';
             const data = await api.get(`/api/profile/requests?page=${page}&limit=${limit}${statusParam}`);
             const requests = data?.data?.requests || [];
-            if (!requests.length) { setContent(container, UI.empty('No Blood Requests', "You haven't made any requests yet.")); return; }
+            if (!requests.length) { 
+                const actionButton = '<a href="request.html" class="btn btn-primary" style="margin-top: 1rem;"><i class="fas fa-plus"></i> Create Request</a>';
+                setContent(container, UI.empty('No Blood Requests', "You haven't made any requests yet.", actionButton)); 
+                return; 
+            }
             const html = requests.map(r => {
                 const status = (r.status || 'Pending').toLowerCase().replace(/\s+/g,'-');
                 const reqDate = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—';
@@ -140,18 +183,33 @@
                 const location = r.location || `${r.city||''}${r.city&&r.state?', ':''}${r.state||''}`;
                 const notes = r.additionalNotes || '';
                 return `
-                    <div class="item">
-                        <div class="header">
-                            <h4 style="margin:0;font-weight:600;">${r.patientName || 'Patient'}</h4>
-                            <span class="badge ${status}">${status}</span>
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div>
+                                <h4 class="item-title">${r.patientName || 'Patient'}</h4>
+                                <div class="item-meta">Requested on ${reqDate}</div>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                <span class="status-badge status-${status}">${r.status || 'Pending'}</span>
+                                ${['pending', 'in-progress'].includes(status) ? `
+                                    <button class="btn-cancel-request" onclick="cancelRequest('${r._id}')" 
+                                        style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; 
+                                               border: none; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer;
+                                               font-size: 0.85rem; font-weight: 600; transition: all 0.3s;
+                                               display: flex; align-items: center; gap: 0.5rem;"
+                                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(220, 53, 69, 0.3)';"
+                                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
                             <p><strong>Blood Group:</strong> ${blood}</p>
                             <p><strong>Required Units:</strong> ${units}</p>
                             <p><strong>Fulfilled:</strong> ${fulfilled}/${units}</p>
                             <p><strong>Hospital:</strong> ${hospital}</p>
                             <p><strong>Location:</strong> ${location || '—'}</p>
-                            <p><strong>Request Date:</strong> ${reqDate}</p>
                             ${requiredBy ? `<p><strong>Required By:</strong> ${requiredBy}</p>` : ''}
                             ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
                         </div>
@@ -160,6 +218,28 @@
             setContent(container, html);
         } catch (e) {
             setContent(container, UI.error('Unable to load requests', e.message));
+        }
+    }
+
+    // ------------------------- Load Statistics -------------------------
+    async function loadStatistics() {
+        try {
+            // Load donations count
+            const donationsData = await api.get('/api/profile/donations?page=1&limit=1000');
+            const totalDonations = donationsData?.data?.donations?.length || 0;
+            if (qs('#totalDonations')) qs('#totalDonations').textContent = totalDonations;
+            
+            // Load requests count
+            const requestsData = await api.get('/api/profile/requests?page=1&limit=1000');
+            const totalRequests = requestsData?.data?.requests?.length || 0;
+            if (qs('#totalRequests')) qs('#totalRequests').textContent = totalRequests;
+            
+            // Calculate lives impacted (assuming 1 donation can help 3 people)
+            const livesImpacted = totalDonations * 3;
+            if (qs('#livesImpacted')) qs('#livesImpacted').textContent = livesImpacted;
+            
+        } catch (e) {
+            console.error('Failed to load statistics:', e);
         }
     }
 
@@ -173,12 +253,32 @@
             const result = await res.json();
             const user = result?.data?.user || {};
             const name = [user.firstName||'', user.lastName||''].join(' ').trim();
+            
+            // Update form fields
             if (qs('#profileName')) qs('#profileName').value = name;
             if (qs('#profileEmail')) qs('#profileEmail').value = user.email || '';
+            if (qs('#profileEmailInput')) qs('#profileEmailInput').value = user.email || '';
             if (qs('#profilePhone')) qs('#profilePhone').value = user.phoneNumber || '';
             if (qs('#profileBloodType')) qs('#profileBloodType').value = user.bloodGroup || '';
+            if (qs('#profileAddress')) qs('#profileAddress').value = user.address || '';
+            if (qs('#profileCity')) qs('#profileCity').value = user.city || '';
+            
+            // Update profile header
+            if (qs('#profileDisplayName')) qs('#profileDisplayName').textContent = name || 'User';
+            if (qs('#profileEmail')) qs('#profileEmail').textContent = user.email || '';
+            
+            // Update user avatar initials
+            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'U';
+            if (qs('#profileAvatar')) qs('#profileAvatar').innerHTML = initials;
+            if (qs('#userAvatar')) qs('#userAvatar').innerHTML = initials;
+            
+            // Update member since
+            if (user.createdAt && qs('#memberSince')) {
+                const year = new Date(user.createdAt).getFullYear();
+                qs('#memberSince').textContent = year;
+            }
         } catch (e) {
-            // noop UI fallback
+            console.error('Failed to load profile:', e);
         }
     }
 
@@ -200,7 +300,9 @@
                 firstName: firstName || '',
                 lastName: rest.join(' '),
                 phoneNumber: qs('#profilePhone')?.value || '',
-                bloodGroup: qs('#profileBloodType')?.value || ''
+                bloodGroup: qs('#profileBloodType')?.value || '',
+                address: qs('#profileAddress')?.value || '',
+                city: qs('#profileCity')?.value || ''
             };
             // remove empty
             Object.keys(payload).forEach(k => { if (!payload[k]) delete payload[k]; });
@@ -246,6 +348,7 @@
         initTabs();
         initSettings();
         initChangePassword();
+        loadStatistics(); // Load profile statistics
 
         // Filters and pagination bindings
         qsa('[data-status]').forEach(chip => chip.addEventListener('click', () => {
@@ -262,12 +365,31 @@
             qsa('[data-donation-filter]').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             donationsFilter = chip.getAttribute('data-donation-filter');
+            if (donationsFilter === 'all') donationsFilter = '';
             donationsPage = 1;
             loadDonations(donationsPage);
         }));
         const donMore = qs('#donationsMore');
         if (donMore) donMore.addEventListener('click', () => { donationsPage += 1; loadDonations(donationsPage); });
+        
+        // User avatar dropdown functionality (if needed)
+        const userAvatar = qs('#userAvatar');
+        if (userAvatar) {
+            userAvatar.addEventListener('click', function() {
+                // Could add dropdown menu functionality here
+                console.log('User avatar clicked');
+            });
+        }
     });
+
+    // ------------------------- Cancel Functions -------------------------
+    // Note: Enhanced cancel functions are now defined in the HTML script tag
+    // to provide better UI/UX with modal confirmations and loading states
+    
+    // Make necessary functions globally accessible for cancel operations
+    window.api = api;
+    window.loadDonations = loadDonations;
+    window.loadRequests = loadRequests;
 })();
 
 

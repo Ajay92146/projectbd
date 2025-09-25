@@ -176,18 +176,7 @@
             box-shadow: var(--shadow-lg);
             margin-bottom: 2rem;
             border: 1px solid rgba(229, 62, 62, 0.1);
-            margin-bottom: 1.5rem;
             overflow-x: auto;
-        }
-
-        /* Table Container */
-        #usersTableContainer,
-        #donationsTableContainer,
-        #requestsTableContainer {
-            overflow-x: auto;
-            margin: 0 -1.5rem;
-            padding: 0 1.5rem;
-        }
         }
 
         .section-header {
@@ -240,6 +229,10 @@
             font-family: inherit;
         }
 
+        .table-container {
+            overflow-x: auto;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -284,6 +277,21 @@
         .status-inactive {
             background: #fed7d7;
             color: #822727;
+        }
+
+        .status-fulfilled {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-cancelled {
+            background: #fed7d7;
+            color: #822727;
+        }
+
+        .status-expired {
+            background: #e2e8f0;
+            color: #4a5568;
         }
 
         .action-btn {
@@ -363,7 +371,7 @@
 
         .data-table th,
         .data-table td {
-            padding: 0.75rem 0.75rem;
+            padding: 0.75rem;
             text-align: left;
             border-bottom: 1px solid var(--gray-200);
             white-space: nowrap;
@@ -372,86 +380,12 @@
             font-size: 0.9rem;
         }
 
-        /* User Management Table - optimized column widths */
-        #usersTableContainer .data-table th:nth-child(1),
-        #usersTableContainer .data-table td:nth-child(1) { width: 8%; max-width: 120px; } /* ID */
-        #usersTableContainer .data-table th:nth-child(2),
-        #usersTableContainer .data-table td:nth-child(2) { width: 15%; } /* Name */
-        #usersTableContainer .data-table th:nth-child(3),
-        #usersTableContainer .data-table td:nth-child(3) { width: 20%; } /* Email */
-        #usersTableContainer .data-table th:nth-child(4),
-        #usersTableContainer .data-table td:nth-child(4) { width: 12%; } /* Phone */
-        #usersTableContainer .data-table th:nth-child(5),
-        #usersTableContainer .data-table td:nth-child(5) { width: 8%; } /* Role */
-        #usersTableContainer .data-table th:nth-child(6),
-        #usersTableContainer .data-table td:nth-child(6) { width: 10%; } /* Blood Group */
-        #usersTableContainer .data-table th:nth-child(7),
-        #usersTableContainer .data-table td:nth-child(7) { width: 10%; } /* City */
-        #usersTableContainer .data-table th:nth-child(8),
-        #usersTableContainer .data-table td:nth-child(8) { width: 8%; } /* Donations */
-        #usersTableContainer .data-table th:nth-child(9),
-        #usersTableContainer .data-table td:nth-child(9) { width: 9%; } /* Requests */
-        #usersTableContainer .data-table th:nth-child(10),
-        #usersTableContainer .data-table td:nth-child(10) { width: 10%; } /* Joined */
-
-        /* Requests Table - specific contact column handling */
-        #requestsTableContainer .data-table th:nth-child(5),
-        #requestsTableContainer .data-table td:nth-child(5) {
-            white-space: normal;
-            word-wrap: break-word;
-            text-overflow: unset;
-            overflow: visible;
-            width: 120px;
->>>>>>> e22a89051c0f91f28b6ef0ab4e89d265db65d65d
-        }
-
-        @media (max-width: 768px) {
-            .stats-container {
-                grid-template-columns: 1fr;
-            }
-
-            .search-filter {
-                flex-direction: column;
-            }
-
-<<<<<<< HEAD
-            .dashboard-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-=======
         .status-badge {
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.8rem;
             font-weight: 600;
             text-transform: uppercase;
-        }
-
-        .status-active {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
-        .status-fulfilled {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .status-cancelled {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .status-expired {
-            background: #f3f4f6;
-            color: #6b7280;
         }
 
         .urgency-badge {
@@ -510,6 +444,22 @@
             font-size: 3rem;
             margin-bottom: 1rem;
             color: var(--gray-300);
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
         }
     </style>
 </head>
@@ -700,7 +650,7 @@
                     </thead>
                     <tbody id="requestsTableBody">
                         <tr>
-                            <td colspan="9" class="loading">
+                            <td colspan="8" class="loading">
                                 <i class="fas fa-spinner"></i>
                                 Loading requests...
                             </td>
@@ -879,11 +829,20 @@
             
             displayRequests(filteredRequests);
         }
+
         // View functions
         function viewRequest(requestId) {
             const request = requestsData.find(r => r.id === requestId);
             if (request) {
-                alert(`Request Details:\n\nRequester: ${request.requesterName}\nBlood Type: ${request.bloodType}\nUnits: ${request.units}\nStatus: ${request.status}\nDate: ${request.date}\nLocation: ${request.location}\nReason: ${request.reason || ''}`);
+                alert(`Request Details:
+
+Requester: ${request.requesterName}
+Blood Type: ${request.bloodType}
+Units: ${request.units}
+Status: ${request.status}
+Date: ${request.date}
+Location: ${request.location}
+Reason: ${request.reason || ''}`);
             }
         }
     </script>

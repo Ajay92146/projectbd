@@ -9,6 +9,7 @@ const Donor = require('../models/Donor');
 const Request = require('../models/Request');
 const UserDonation = require('../models/UserDonation');
 const UserRequest = require('../models/UserRequest');
+const BloodBank = require('../models/BloodBank');
 const { authMiddleware } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const router = express.Router();
@@ -1200,5 +1201,223 @@ router.get('/health', (req, res) => {
 // This would typically be handled by a WebSocket server, not an HTTP route
 // We'll add a placeholder comment for now
 // WebSocket implementation would be in a separate service
+
+/**
+ * @route   GET /api/admin/blood-banks
+ * @desc    Get all blood banks with pagination and filtering
+ * @access  Admin only
+ */
+router.get('/blood-banks', adminAuthMiddleware, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const search = req.query.search || '';
+        const status = req.query.status || '';
+        
+        // Build query
+        let query = { isActive: true };
+        
+        if (search) {
+            query.$or = [
+                { bankName: { $regex: search, $options: 'i' } },
+                { licenseNumber: { $regex: search, $options: 'i' } },
+                { contactPerson: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        if (status) {
+            query.status = status;
+        }
+        
+        // Get blood banks with pagination
+        const bloodBanks = await BloodBank.find(query)
+            .select('-password') // Exclude password field
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+        
+        // Get total count
+        const totalBloodBanks = await BloodBank.countDocuments(query);
+        
+        res.json({
+            success: true,
+            data: {
+                bloodBanks,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(totalBloodBanks / limit),
+                    totalItems: totalBloodBanks,
+                    itemsPerPage: limit
+                }
+            }
+        });
+    } catch (error) {
+        logger.error('Error fetching blood banks:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch blood banks'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/approve-blood-bank/:bankId
+ * @desc    Approve a blood bank registration
+ * @access  Admin only
+ */
+router.post('/approve-blood-bank/:bankId', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { bankId } = req.params;
+        const adminEmail = req.headers['x-admin-email'];
+        
+        const bloodBank = await BloodBank.findById(bankId);
+        
+        if (!bloodBank) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blood bank not found'
+            });
+        }
+        
+        if (bloodBank.status !== 'pending') {
+            return res.status(400).json({
+                success: false,
+                message: 'Blood bank is not pending approval'
+            });
+        }
+        
+        // Update blood bank status
+        bloodBank.status = 'approved';
+        bloodBank.isVerified = true;
+        bloodBank.verifiedBy = adminEmail;
+        bloodBank.verificationDate = new Date();
+        await bloodBank.save();
+        
+        logger.activity('BLOOD_BANK_APPROVED', adminEmail, {
+            bankId,
+            bankName: bloodBank.bankName,
+            licenseNumber: bloodBank.licenseNumber
+        });
+        
+        res.json({
+            success: true,
+            message: 'Blood bank approved successfully',
+            data: bloodBank
+        });
+        
+    } catch (error) {
+        logger.error('Error approving blood bank:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to approve blood bank'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/reject-blood-bank/:bankId
+ * @desc    Reject a blood bank registration
+ * @access  Admin only
+ */
+router.post('/reject-blood-bank/:bankId', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { bankId } = req.params;
+        const { reason } = req.body;
+        const adminEmail = req.headers['x-admin-email'];
+        
+        const bloodBank = await BloodBank.findById(bankId);
+        
+        if (!bloodBank) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blood bank not found'
+            });
+        }
+        
+        if (bloodBank.status !== 'pending') {
+            return res.status(400).json({
+                success: false,
+                message: 'Blood bank is not pending approval'
+            });
+        }
+        
+        // Update blood bank status
+        bloodBank.status = 'rejected';
+        bloodBank.rejectionReason = reason || 'Rejected by admin';
+        bloodBank.verifiedBy = adminEmail;
+        bloodBank.verificationDate = new Date();
+        await bloodBank.save();
+        
+        logger.activity('BLOOD_BANK_REJECTED', adminEmail, {
+            bankId,
+            bankName: bloodBank.bankName,
+            licenseNumber: bloodBank.licenseNumber,
+            reason
+        });
+        
+        res.json({
+            success: true,
+            message: 'Blood bank rejected',
+            data: bloodBank
+        });
+        
+    } catch (error) {
+        logger.error('Error rejecting blood bank:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to reject blood bank'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/suspend-blood-bank/:bankId
+ * @desc    Suspend a blood bank
+ * @access  Admin only
+ */
+router.post('/suspend-blood-bank/:bankId', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { bankId } = req.params;
+        const { reason } = req.body;
+        const adminEmail = req.headers['x-admin-email'];
+        
+        const bloodBank = await BloodBank.findById(bankId);
+        
+        if (!bloodBank) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blood bank not found'
+            });
+        }
+        
+        // Update blood bank status
+        bloodBank.status = 'suspended';
+        bloodBank.rejectionReason = reason || 'Suspended by admin';
+        bloodBank.verifiedBy = adminEmail;
+        bloodBank.verificationDate = new Date();
+        await bloodBank.save();
+        
+        logger.activity('BLOOD_BANK_SUSPENDED', adminEmail, {
+            bankId,
+            bankName: bloodBank.bankName,
+            licenseNumber: bloodBank.licenseNumber,
+            reason
+        });
+        
+        res.json({
+            success: true,
+            message: 'Blood bank suspended',
+            data: bloodBank
+        });
+        
+    } catch (error) {
+        logger.error('Error suspending blood bank:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to suspend blood bank'
+        });
+    }
+});
 
 module.exports = router;

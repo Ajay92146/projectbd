@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Bank Registration - BloodConnect</title>
+    <link rel="stylesheet" href="css/blood-bank-styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="registration-card">
+            <div class="header">
+                <div class="logo">
+                    <div class="blood-drop">🩸</div>
+                    <h1>Register Blood Bank</h1>
+                </div>
+                <p class="subtitle">Join our trusted network of blood banks</p>
+            </div>
+            
+            <form class="registration-form" id="registrationForm">
+                <div class="form-section">
+                    <h3>Blood Bank Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bankName">Blood Bank Name *</label>
+                            <input type="text" id="bankName" name="bankName" required 
+                                   placeholder="Enter blood bank name">
+                            <span class="error-message" id="bankNameError"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="licenseNumber">License Number *</label>
+                            <input type="text" id="licenseNumber" name="licenseNumber" required 
+                                   placeholder="Enter license number">
+                            <span class="error-message" id="licenseNumberError"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="establishedYear">Established Year *</label>
+                            <input type="number" id="establishedYear" name="establishedYear" required 
+                                   min="1900" max="2025" placeholder="YYYY">
+                            <span class="error-message" id="establishedYearError"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bankType">Bank Type *</label>
+                            <select id="bankType" name="bankType" required>
+                                <option value="">Select bank type</option>
+                                <option value="hospital">Hospital Blood Bank</option>
+                                <option value="standalone">Standalone Blood Bank</option>
+                                <option value="mobile">Mobile Blood Bank</option>
+                                <option value="government">Government Blood Bank</option>
+                                <option value="private">Private Blood Bank</option>
+                            </select>
+                            <span class="error-message" id="bankTypeError"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Contact Information</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contactPerson">Contact Person *</label>
+                            <input type="text" id="contactPerson" name="contactPerson" required 
+                                   placeholder="Primary contact name">
+                            <span class="error-message" id="contactPersonError"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="designation">Designation *</label>
+                            <input type="text" id="designation" name="designation" required 
+                                   placeholder="e.g., Blood Bank Officer">
+                            <span class="error-message" id="designationError"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required 
+                                   placeholder="+1 (555) 123-4567">
+                            <span class="error-message" id="phoneError"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required 
+                                   placeholder="contact@bloodbank.com">
+                            <span class="error-message" id="emailError"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="website">Website (Optional)</label>
+                        <input type="url" id="website" name="website" 
+                               placeholder="https://www.yourbloodbank.com">
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Address Details</h3>
+                    
+                    <div class="form-group">
+                        <label for="address">Street Address *</label>
+                        <textarea id="address" name="address" required rows="3" 
+                                  placeholder="Enter complete address"></textarea>
+                        <span class="error-message" id="addressError"></span>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" name="city" required 
+                                   placeholder="Enter city">
+                            <span class="error-message" id="cityError"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="state">State/Province *</label>
+                            <input type="text" id="state" name="state" required 
+                                   placeholder="Enter state/province">
+                            <span class="error-message" id="stateError"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="zipCode">ZIP/Postal Code *</label>
+                            <input type="text" id="zipCode" name="zipCode" required 
+                                   placeholder="Enter ZIP code">
+                            <span class="error-message" id="zipCodeError"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="country">Country *</label>
+                            <select id="country" name="country" required>
+                                <option value="">Select country</option>
+                                <option value="US">United States</option>
+                                <option value="CA">Canada</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="IN">India</option>
+                                <option value="AU">Australia</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="error-message" id="countryError"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Login Credentials</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="loginEmail">Login Email *</label>
+                            <input type="email" id="loginEmail" name="loginEmail" required 
+                                   placeholder="Email for logging in">
+                            <span class="error-message" id="loginEmailError"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password *</label>
+                            <input type="password" id="password" name="password" required 
+                                   placeholder="Create a strong password">
+                            <span class="error-message" id="passwordError"></span>
+                            <div class="password-strength" id="passwordStrength"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password *</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required 
+                               placeholder="Re-enter your password">
+                        <span class="error-message" id="confirmPasswordError"></span>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <div class="checkbox-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="agreeTerms" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="#" target="_blank">Terms of Service</a> and 
+                            <a href="#" target="_blank">Privacy Policy</a> *
+                        </label>
+                        
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="agreeCompliance" required>
+                            <span class="checkmark"></span>
+                            I confirm that our blood bank complies with all local health regulations *
+                        </label>
+                        
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="subscribeUpdates">
+                            <span class="checkmark"></span>
+                            Subscribe to updates and notifications
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <a href="/blood-bank-login" class="back-btn">
+                        ← Back to Login
+                    </a>
+                    <button type="submit" class="register-btn">
+                        <span class="btn-text">Register Blood Bank</span>
+                        <div class="loader" id="registerLoader"></div>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="footer">
+                <p>Already registered? <a href="/blood-bank-login">Sign in here</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/blood-bank-auth.js"></script>
+</body>
+</html>

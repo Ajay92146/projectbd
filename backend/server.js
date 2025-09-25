@@ -24,6 +24,7 @@ const statsRoutes = require('./routes/stats');
 const expirationRoutes = require('./routes/expiration');
 const locationRoutes = require('./routes/location');
 const emergencyRoutes = require('./routes/emergency');
+const bloodBankRoutes = require('./routes/bloodBank');
 
 // Import services
 const requestExpirationService = require('./services/requestExpirationService');
@@ -143,6 +144,7 @@ app.use('/api/external', require('./routes/external-config'));
 app.use('/api/expiration', expirationRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/emergency', emergencyRoutes);
+app.use('/api/bloodbank', bloodBankRoutes);
 console.log('✅ API routes loaded successfully');
 
 // Serve static files from frontend directory (AFTER API routes)
@@ -224,6 +226,21 @@ app.get('/production-admin-test', (req, res) => {
 app.get('/admin-dashboard-csp-fixed', (req, res) => {
     console.log('🔧 CSP-fixed admin dashboard requested');
     res.sendFile(path.join(__dirname, '../frontend/admin-dashboard-csp-fixed.html'));
+});
+
+app.get('/blood-bank-login', (req, res) => {
+    console.log('🏦 Blood bank login page requested');
+    res.sendFile(path.join(__dirname, '../frontend/blood-bank-login.html'));
+});
+
+app.get('/blood-bank-register', (req, res) => {
+    console.log('🏦 Blood bank register page requested');
+    res.sendFile(path.join(__dirname, '../frontend/blood-bank-register.html'));
+});
+
+app.get('/blood-bank-dashboard', (req, res) => {
+    console.log('🏦 Blood bank dashboard requested');
+    res.sendFile(path.join(__dirname, '../frontend/blood-bank-dashboard.html'));
 });
 
 // Test endpoint

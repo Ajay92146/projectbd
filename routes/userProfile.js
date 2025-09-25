@@ -492,4 +492,129 @@ router.post('/requests', [
     }
 });
 
+/**
+ * @route   PUT /api/profile/donations/:id/cancel
+ * @desc    Cancel a user's donation
+ * @access  Private
+ */
+router.put('/donations/:id/cancel', [
+    authMiddleware,
+    body('reason')
+        .optional()
+        .isLength({ max: 500 })
+        .withMessage('Cancellation reason cannot exceed 500 characters')
+], async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const userId = req.user.userId;
+
+        // Find the donation by ID and ensure it belongs to the current user
+        const donation = await UserDonation.findOne({
+            _id: id,
+            userId: userId
+        });
+
+        if (!donation) {
+            return res.status(404).json({
+                success: false,
+                message: 'Donation not found or does not belong to you'
+            });
+        }
+
+        // Check if donation can be cancelled
+        if (['Cancelled', 'Completed'].includes(donation.status)) {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot cancel donation with status: ${donation.status}`
+            });
+        }
+
+        // Update donation status to cancelled
+        donation.status = 'Cancelled';
+        donation.notes = reason || 'Cancelled by user';
+        donation.updatedAt = new Date();
+        await donation.save();
+
+        res.json({
+            success: true,
+            message: 'Donation cancelled successfully',
+            data: {
+                donation
+            }
+        });
+
+    } catch (error) {
+        console.error('Error cancelling donation:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error cancelling donation',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
+/**
+ * @route   PUT /api/profile/requests/:id/cancel
+ * @desc    Cancel a user's blood request
+ * @access  Private
+ */
+router.put('/requests/:id/cancel', [
+    authMiddleware,
+    body('reason')
+        .optional()
+        .isLength({ max: 500 })
+        .withMessage('Cancellation reason cannot exceed 500 characters')
+], async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const userId = req.user.userId;
+
+        // Find the request by ID and ensure it belongs to the current user
+        const request = await UserRequest.findOne({
+            _id: id,
+            userId: userId
+        });
+
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: 'Request not found or does not belong to you'
+            });
+        }
+
+        // Check if request can be cancelled
+        if (['Cancelled', 'Fulfilled'].includes(request.status)) {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot cancel request with status: ${request.status}`
+            });
+        }
+
+        // Update request status to cancelled
+        request.status = 'Cancelled';
+        request.isActive = false;
+        request.additionalNotes = (request.additionalNotes || '') + `\nCancelled by user: ${reason || 'No reason provided'}`;
+        request.updatedAt = new Date();
+        await request.save();
+
+        res.json({
+            success: true,
+            message: 'Blood request cancelled successfully',
+            data: {
+                request
+            }
+        });
+
+    } catch (error) {
+        console.error('Error cancelling request:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error cancelling request',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+        });
+    }
+});
+
 module.exports = router;
