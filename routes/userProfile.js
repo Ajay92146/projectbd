@@ -345,7 +345,10 @@ router.get('/requests', [
             .skip(skip)
             .limit(limit);
 
-        console.log('📊 Found requests:', requests.length);
+        // Extra safety: enforce ownership in-memory as well
+        requests = requests.filter(r => r.userId && r.userId.toString() === userId.toString());
+
+        console.log('📊 Found requests (after ownership filter):', requests.length);
 
         // Get total count
         const totalRequests = await Request.countDocuments(requestQuery);
