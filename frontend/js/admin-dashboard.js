@@ -12,23 +12,31 @@ function debugLog(message) {
 function checkAdminAuthentication() {
     debugLog('🔍 Checking admin authentication...');
     
-    // Get admin status from localStorage
-    const adminStatus = localStorage.getItem('bloodconnect_admin');
-    const adminEmail = localStorage.getItem('admin_email');
-    const adminLoginTime = localStorage.getItem('admin_login_time');
+    // Check both localStorage and sessionStorage
+    const adminStatus = localStorage.getItem('bloodconnect_admin') || sessionStorage.getItem('bloodconnect_admin');
+    const adminEmail = localStorage.getItem('admin_email') || sessionStorage.getItem('admin_email');
+    const adminLoginTime = localStorage.getItem('admin_login_time') || sessionStorage.getItem('admin_login_time');
     
-    debugLog(`📱 LocalStorage admin status: ${adminStatus}`);
-    debugLog(`📧 LocalStorage admin email: ${adminEmail}`);
-    debugLog(`🕒 LocalStorage admin login time: ${adminLoginTime}`);
+    debugLog(`📱 Admin status: ${adminStatus}`);
+    debugLog(`📧 Admin email: ${adminEmail}`);
+    debugLog(`🕒 Admin login time: ${adminLoginTime}`);
     debugLog(`🌐 Current URL: ${window.location.href}`);
     
+    // Check if we're already on the login page to prevent redirect loops
+    if (window.location.pathname.includes('admin-login.html')) {
+        debugLog('Already on login page, skipping redirect');
+        return false;
+    }
+    
     // Check if admin is authenticated
-    if (adminStatus !== 'true') {
+    if (adminStatus !== 'true' || !adminEmail || !adminLoginTime) {
         debugLog('❌ Not authenticated as admin, redirecting to login...');
-        // Add delay to ensure any ongoing localStorage operations complete
+        // Add delay to ensure any ongoing operations complete and prevent loops
         setTimeout(() => {
-            window.location.href = 'admin-login.html';
-        }, 100);
+            if (!window.location.pathname.includes('admin-login.html')) {
+                window.location.href = 'admin-login.html';
+            }
+        }, 500);
         return false;
     }
     
@@ -44,7 +52,20 @@ function checkAdminAuthentication() {
         if (minutesDiff > 30) {
             debugLog('⏰ Session expired, logging out...');
             showNotification('Session expired. Please log in again.', 'error');
-            logout();
+            
+            // Clear expired session
+            localStorage.removeItem('bloodconnect_admin');
+            localStorage.removeItem('admin_email');
+            localStorage.removeItem('admin_login_time');
+            sessionStorage.removeItem('bloodconnect_admin');
+            sessionStorage.removeItem('admin_email');
+            sessionStorage.removeItem('admin_login_time');
+            
+            setTimeout(() => {
+                if (!window.location.pathname.includes('admin-login.html')) {
+                    window.location.href = 'admin-login.html';
+                }
+            }, 2000);
             return false;
         }
     }
@@ -410,16 +431,46 @@ function displayUsers(users, tableBody) {
     
     tableBody.innerHTML = users.map(user => `
         <tr>
-            <td>${user.id}</td>
-            <td>${user.firstName} ${user.lastName}</td>
-            <td>${user.email}</td>
-            <td>${user.phone || 'N/A'}</td>
-            <td><span class="status-badge ${user.role === 'donor' ? 'status-active' : 'status-pending'}">${user.role}</span></td>
+            <td>${user._id || user.id || 'N/A'}</td>
+            <td>${user.firstName || ''} ${user.lastName || ''}</td>
+            <td>${user.email || 'N/A'}</td>
+            <td>${user.phoneNumber || user.phone || 'N/A'}</td>
+            <td><span class="status-badge ${user.role === 'donor' ? 'status-active' : 'status-pending'}">${user.role || 'user'}</span></td>
             <td>${user.bloodGroup || 'N/A'}</td>
             <td>${user.city || 'N/A'}</td>
             <td>${user.donationsCount || 0}</td>
             <td>${user.requestsCount || 0}</td>
             <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+        </tr>
+    `).join('');
+}
+
+// Display donations in table
+function displayDonations(donations, tableBody) {
+    if (!tableBody) return;
+    
+    if (!donations || donations.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="empty-state">
+                    <i class="fas fa-tint"></i>
+                    <p>No donations found</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tableBody.innerHTML = donations.map(donation => `
+        <tr>
+            <td>${donation._id || donation.id || 'N/A'}</td>
+            <td>${donation.name || 'N/A'}</td>
+            <td>${donation.email || 'N/A'}</td>
+            <td>${donation.bloodGroup || 'N/A'}</td>
+            <td>${donation.city || 'N/A'}</td>
+            <td>${donation.contactNumber || donation.phone || 'N/A'}</td>
+            <td><span class="status-badge ${donation.isAvailable ? 'status-active' : 'status-pending'}">${donation.isAvailable ? 'Available' : 'Unavailable'}</span></td>
+            <td>${new Date(donation.registrationDate || donation.createdAt).toLocaleDateString()}</td>
         </tr>
     `).join('');
 }
@@ -529,6 +580,13 @@ function logout() {
 document.addEventListener('DOMContentLoaded', function() {
     debugLog('🚀 Initializing admin dashboard...');
     
+    // Prevent multiple initialization
+    if (window.adminDashboardInitialized) {
+        debugLog('Admin dashboard already initialized, skipping...');
+        return;
+    }
+    window.adminDashboardInitialized = true;
+    
     // Check authentication first
     if (!checkAdminAuthentication()) {
         return;
@@ -628,6 +686,83 @@ window.showNotification = showNotification;
 window.logout = logout;
 window.filterRequests = filterRequests;
 
+/**
+ * Enhanced loadRequests with pagination and filtering
+ */
+async function loadRequests(searchTerm = '', statusFilter = '', page = 1, limit = 20) {
+    const requestsTableBody = document.getElementById('requestsTableBody');
+    const requestsCount = document.getElementById('requestsCount');
+    
+    if (requestsTableBody) {
+        requestsTableBody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner"></i> Loading requests...</td></tr>';
+    }
+
+    try {
+        debugLog('Loading requests...');
+        let apiUrl = `${getAPIBaseURL()}/admin/requests?page=${page}&limit=${limit}`;
+        
+        // Add search and filter parameters
+        if (searchTerm) {
+            apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+        if (statusFilter) {
+            apiUrl += `&status=${encodeURIComponent(statusFilter)}`;
+        }
+        
+        debugLog(`API URL: ${apiUrl}`);
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
+        
+        debugLog(`Response status: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        debugLog('Requests response data:', data);
+        
+        if (data.success) {
+            // Store requests data globally
+            window.requestsData = data.data.requests;
+            
+            displayRequests(data.data.requests, requestsTableBody);
+            updatePagination(data.data.pagination, 'requests', loadRequests);
+            
+            if (requestsCount) {
+                requestsCount.textContent = `(${data.data.pagination.total} total)`;
+            }
+            
+            // Update requests count in the dashboard
+            const totalRequests = document.getElementById('totalRequests');
+            if (totalRequests && data.data.pagination) {
+                totalRequests.textContent = data.data.pagination.total.toLocaleString();
+            }
+        } else {
+            throw new Error(data.message || 'Failed to load requests');
+        }
+    } catch (error) {
+        debugLog(`Error loading requests: ${error.message}`);
+        console.error('Error loading requests:', error);
+        
+        if (requestsTableBody) {
+            requestsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading requests: ${error.message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        showNotification('Failed to load requests. Please try again.', 'error');
+    }
+}
+
 // Display requests in table
 function displayRequests(requests, tableBody) {
     if (!tableBody) return;
@@ -646,16 +781,29 @@ function displayRequests(requests, tableBody) {
     
     tableBody.innerHTML = requests.map(request => `
         <tr>
-            <td>${request.id}</td>
-            <td>${request.patientName}</td>
-            <td>${request.bloodGroup}</td>
-            <td>${request.unitsNeeded}</td>
-            <td><span class="status-badge status-${request.status}">${request.status}</span></td>
-            <td>${request.hospital || 'N/A'}</td>
-            <td><span class="urgency-badge urgency-${request.urgency}">${request.urgency}</span></td>
-            <td>${new Date(request.createdAt).toLocaleDateString()}</td>
+            <td>${request.id || request._id}</td>
+            <td>${request.patientName || request.requesterName || 'N/A'}</td>
+            <td>${request.bloodGroup || 'N/A'}</td>
+            <td>${request.unitsNeeded || request.units || '1'}</td>
+            <td><span class="status-badge status-${request.status || 'pending'}">${request.status || 'pending'}</span></td>
+            <td>${request.hospital || request.location || 'N/A'}</td>
+            <td><span class="urgency-badge urgency-${request.urgency || 'normal'}">${request.urgency || 'normal'}</span></td>
+            <td>${new Date(request.createdAt || request.date || Date.now()).toLocaleDateString()}</td>
         </tr>
     `).join('');
+    
+    // Add event listeners for view buttons if they exist
+    const viewButtons = tableBody.querySelectorAll('.view-request-btn');
+    if (viewButtons.length > 0) {
+        viewButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const requestId = button.getAttribute('data-id');
+                if (typeof viewRequest === 'function') {
+                    viewRequest(requestId);
+                }
+            });
+        });
+    }
 }
 
 // Make loadRequests globally available

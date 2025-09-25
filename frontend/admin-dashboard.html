@@ -98,15 +98,26 @@
             transform: translateY(-2px);
         }
 
-        .main-content {
-            margin-top: 100px;
-            padding: 1.5rem;
+        .admin-main {
             max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto;
+            padding: 6rem 1.5rem 2rem;
         }
 
-        .stats-grid {
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
@@ -114,8 +125,7 @@
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            background: var(--white);
             border-radius: 1rem;
             padding: 1.5rem;
             box-shadow: var(--shadow-lg);
@@ -130,47 +140,42 @@
 
         .stat-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 1rem;
         }
 
+        .stat-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
         .stat-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            width: 40px;
+            height: 40px;
+            background: var(--accent-red);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--primary-red);
             font-size: 1.2rem;
-            color: var(--white);
         }
 
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--gray-600);
-            font-weight: 500;
-            margin-top: 0.5rem;
-        }
-
-        .dashboard-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+        .data-section {
+            background: var(--white);
             border-radius: 1rem;
             padding: 1.5rem;
             box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
             border: 1px solid rgba(229, 62, 62, 0.1);
-            margin-bottom: 1.5rem;
         }
 
         .section-header {
@@ -178,293 +183,298 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--gray-100);
         }
 
         .section-title {
             font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--gray-900);
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .refresh-btn {
+            background: var(--gray-100);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .section-title i {
+        .refresh-btn:hover {
+            background: var(--gray-200);
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-family: inherit;
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-family: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--gray-50);
+            color: var(--gray-700);
+            font-weight: 600;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            color: var(--gray-800);
+        }
+
+        tr:hover {
+            background: var(--gray-50);
+        }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-pending {
+            background: #feebc8;
+            color: #744210;
+        }
+
+        .status-inactive {
+            background: #fed7d7;
+            color: #822727;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
             color: var(--primary-red);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
         }
 
-        .data-count {
-            font-size: 0.9rem;
-            color: var(--gray-600);
-            font-weight: 400;
-            margin-left: 0.5rem;
+        .action-btn:hover {
+            color: var(--primary-red-dark);
+            transform: scale(1.1);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
         }
 
         .btn {
             padding: 0.5rem 1rem;
             border: none;
             border-radius: 0.5rem;
-            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            background: var(--primary-red);
             color: var(--white);
-            box-shadow: 0 10px 25px -5px rgba(229, 62, 62, 0.4);
         }
 
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn:hover {
             transform: translateY(-2px);
         }
 
-        .search-filter {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 300px;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            padding-left: 2.5rem;
-            border: 2px solid var(--gray-200);
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-red);
-            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray-400);
-        }
-
-        .filter-select {
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--gray-200);
-            border-radius: 0.5rem;
+        .notification {
+            position: fixed;
+            top: 5rem;
+            right: 1.5rem;
             background: var(--white);
-            font-size: 0.9rem;
-            min-width: 150px;
+            border-left: 4px solid var(--primary-red);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1001;
         }
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
+        .notification.show {
+            transform: translateX(0);
         }
 
-        .data-table th,
-        .data-table td {
-            padding: 0.75rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--gray-200);
+        .last-updated {
+            text-align: right;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
         }
 
-        .data-table th {
-            background: var(--gray-50);
-            font-weight: 600;
-            color: var(--gray-700);
-            font-size: 0.9rem;
-        }
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
 
-        .data-table tr:hover {
-            background: var(--gray-50);
-        }
+            .search-filter {
+                flex-direction: column;
+            }
 
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-active {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 3rem;
-            color: var(--gray-500);
-        }
-
-        .loading i {
-            animation: spin 1s linear infinite;
-            margin-right: 0.75rem;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: var(--gray-500);
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--gray-300);
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Admin Header -->
     <header class="admin-header">
         <div class="header-container">
             <a href="#" class="admin-logo">
                 <i class="fas fa-heart"></i>
                 <span>BloodConnect Admin</span>
             </a>
-            <div>
-                <button class="logout-btn" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </button>
-            </div>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Statistics Grid -->
-        <div class="stats-grid">
+    <main class="admin-main">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Admin Dashboard</h1>
+            <p class="last-updated">Last updated: <span id="lastUpdated">Just now</span></p>
+        </div>
+
+        <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-header">
+                    <h3 class="stat-title">Total Users</h3>
                     <div class="stat-icon">
                         <i class="fas fa-users"></i>
                     </div>
                 </div>
-                <div class="stat-number" id="totalUsers">-</div>
-                <div class="stat-label">Total Users</div>
+                <p class="stat-value" id="totalUsers">0</p>
             </div>
-            
+
             <div class="stat-card">
                 <div class="stat-header">
+                    <h3 class="stat-title">Total Donations</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="totalDonations">0</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Total Requests</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="totalRequests">0</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Blood Units Available</h3>
                     <div class="stat-icon">
                         <i class="fas fa-tint"></i>
                     </div>
                 </div>
-                <div class="stat-number" id="totalDonations">-</div>
-                <div class="stat-label">Total Donations</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-hand-holding-medical"></i>
-                    </div>
-                </div>
-                <div class="stat-number" id="totalRequests">-</div>
-                <div class="stat-label">Blood Requests</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon">
-                        <i class="fas fa-vial"></i>
-                    </div>
-                </div>
-                <div class="stat-number" id="totalBloodUnits">-</div>
-                <div class="stat-label">Blood Units</div>
+                <p class="stat-value" id="totalBloodUnits">0</p>
             </div>
         </div>
 
-        <!-- Users Management Section -->
-        <div class="dashboard-section">
+        <div class="data-section">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-users"></i>
-                    Users Management
-                    <span class="data-count" id="usersCount">(0 total)</span>
-                </h2>
-                <button class="btn btn-primary" id="refreshUsersBtn">
+                <h2 class="section-title">Users</h2>
+                <button id="refreshUsersBtn" class="refresh-btn">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
             </div>
-            
-            <!-- Search and Filter -->
+
             <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Search users..." id="userSearch">
-                </div>
-                <select class="filter-select" id="roleFilter">
+                <input type="text" id="userSearch" class="search-input" placeholder="Search users...">
+                <select id="roleFilter" class="filter-select">
                     <option value="">All Roles</option>
                     <option value="donor">Donor</option>
                     <option value="recipient">Recipient</option>
-                    <option value="admin">Admin</option>
+                    <option value="both">Both</option>
                 </select>
             </div>
-            
-            <!-- Users Table -->
-            <div id="usersTableContainer">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    Loading users...
-                </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Blood Type</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- User data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="usersPagination" class="pagination">
+                <!-- Pagination will be added here -->
             </div>
         </div>
 
-        <!-- Blood Donations Section -->
-        <div class="dashboard-section">
+        <div class="data-section">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-tint"></i>
-                    Blood Donations
-                    <span class="data-count" id="donationsCount">(0 total)</span>
-                </h2>
-                <button class="btn btn-primary" id="refreshDonationsBtn">
+                <h2 class="section-title">Donations</h2>
+                <button id="refreshDonationsBtn" class="refresh-btn">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
             </div>
-            
-            <!-- Search and Filter -->
+
             <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Search donations..." id="donationSearch">
-                </div>
-                <select class="filter-select" id="bloodTypeFilter">
+                <input type="text" id="donationSearch" class="search-input" placeholder="Search donations...">
+                <select id="bloodTypeFilter" class="filter-select">
                     <option value="">All Blood Types</option>
                     <option value="A+">A+</option>
                     <option value="A-">A-</option>
@@ -476,98 +486,107 @@
                     <option value="O-">O-</option>
                 </select>
             </div>
-            
-            <!-- Donations Table -->
-            <div id="donationsTableContainer">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    Loading donations...
-                </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Donor</th>
+                            <th>Blood Type</th>
+                            <th>Units</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="donationsTableBody">
+                        <!-- Donation data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="donationsPagination" class="pagination">
+                <!-- Pagination will be added here -->
             </div>
         </div>
 
-        <!-- Blood Requests Section -->
-        <div class="dashboard-section">
+        <div class="data-section">
             <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-hand-holding-medical"></i>
-                    Blood Requests
-                    <span class="data-count" id="requestsCount">(0 total)</span>
-                </h2>
-                <button class="btn btn-primary" id="refreshRequestsBtn">
+                <h2 class="section-title">Requests</h2>
+                <button id="refreshRequestsBtn" class="refresh-btn">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
             </div>
-            
-            <!-- Search and Filter -->
+
             <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Search requests..." id="requestSearch">
-                </div>
-                <select class="filter-select" id="requestStatusFilter">
-                    <option value="">All Status</option>
+                <input type="text" id="requestSearch" class="search-input" placeholder="Search requests...">
+                <select id="requestStatusFilter" class="filter-select">
+                    <option value="">All Statuses</option>
                     <option value="pending">Pending</option>
                     <option value="fulfilled">Fulfilled</option>
+                    <option value="urgent">Urgent</option>
                     <option value="expired">Expired</option>
                 </select>
             </div>
-            
-            <!-- Requests Table -->
-            <div id="requestsTableContainer">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    Loading requests...
-                </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Requester</th>
+                            <th>Blood Type</th>
+                            <th>Units</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsTableBody">
+                        <!-- Request data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="requestsPagination" class="pagination">
+                <!-- Pagination will be added here -->
             </div>
         </div>
-        
     </main>
 
-    <!-- Load scripts in the correct order -->
-<script src="js/api.js"></script>
-<script src="js/admin-auth-utils.js"></script>
+    <div class="notification" id="notification"></div>
 
-<!-- Define updateNavigation function before loading other scripts -->
-<script>
-    // Define updateNavigation function globally
-    window.updateNavigation = function() {
-        console.log('Navigation update placeholder');
-        // This is a placeholder function that will be overridden by auth-state.js if loaded
-        if (window.authStateManager) {
-            window.authStateManager.updateNavigation();
-        }
-    };
-</script>
-
-<!-- Load remaining scripts -->
-<script src="js/auth-state.js"></script>
-<script src="js/admin-dashboard.js"></script>
+    <script src="js/admin-auth-utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth-state.js"></script>
+    <script src="js/admin-dashboard.js"></script>
     <script>
-        // Global variables for data storage
-        let usersData = [];
-        let donationsData = [];
-        let requestsData = [];
-
-        // Event listeners setup
+        
+        // Define updateNavigation function if it doesn't exist
+        if (typeof window.updateNavigation !== 'function') {
+            window.updateNavigation = function() {
+                console.log('Navigation update placeholder');
+                // This is a placeholder function that will be overridden by auth-state.js if loaded
+            };
+        }
+        
+        // Initialize dashboard when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize all event listeners
+            // Initialize event listeners
             initializeEventListeners();
             
-            // Initialize dashboard - using the external JS functions
-            // Do not initialize here as it's already done in admin-dashboard.js
-            // initializeDashboard();
+            // Initialize dashboard
+            initializeDashboard();
         });
 
         function initializeEventListeners() {
             // Header buttons
-            document.getElementById('logoutBtn').addEventListener('click', window.logout);
+            document.getElementById('logoutBtn').addEventListener('click', logout);
             
             // Refresh buttons
-            document.getElementById('refreshUsersBtn').addEventListener('click', window.loadUsers);
-            document.getElementById('refreshDonationsBtn').addEventListener('click', window.loadDonations);
-            document.getElementById('refreshRequestsBtn').addEventListener('click', window.loadRequests);
+            document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
+            document.getElementById('refreshDonationsBtn').addEventListener('click', loadDonations);
+            document.getElementById('refreshRequestsBtn').addEventListener('click', loadRequests);
             
             // Search and filter inputs
             document.getElementById('userSearch').addEventListener('input', filterUsers);
@@ -580,285 +599,98 @@
             document.getElementById('requestStatusFilter').addEventListener('change', filterRequests);
         }
 
-        // Dashboard functions are now handled by admin-dashboard.js
-        // These functions are kept as references to the external functions
-        
+        // Dashboard functions
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                console.log('Logging out...');
+                localStorage.removeItem('bloodconnect_admin');
+                localStorage.removeItem('admin_email');
+                localStorage.removeItem('admin_login_time');
+                window.location.href = 'admin-login.html';
+            }
+        }
+
         function initializeDashboard() {
-            // This function is now handled by admin-dashboard.js
-            if (typeof window.loadStats === 'function') {
-                window.loadStats();
-            }
-            if (typeof window.loadUsers === 'function') {
-                window.loadUsers();
-            }
-        }
-
-        // Users Management Functions are now handled by admin-dashboard.js
-        // This is a fallback implementation if the external function is not available
-        function loadUsers() {
-            // Use the external function if available
-            if (typeof window.loadUsers === 'function') {
-                window.loadUsers();
+            // Check if user is authenticated
+            const adminStatus = localStorage.getItem('bloodconnect_admin');
+            if (adminStatus !== 'true') {
+                alert('You must be logged in as admin to access this page.');
+                window.location.href = 'admin-login.html';
                 return;
             }
             
-            // Fallback implementation
-            const container = document.getElementById('usersTableContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading users...</div>';
-            console.error('External loadUsers function not found. Please check if admin-dashboard.js is properly loaded.');
+            // Load dashboard data
+            loadStats();
+            loadUsers();
+            loadDonations();
+            loadRequests();
+            
+            // Update last updated time
+            updateLastUpdatedTime();
+            
+            // Set up auto-refresh
+            setInterval(() => {
+                loadStats();
+                updateLastUpdatedTime();
+            }, 60000); // Refresh every minute
         }
 
-        function displayUsers(users) {
-            const container = document.getElementById('usersTableContainer');
-            const usersCount = document.getElementById('usersCount');
+        function loadStatistics() {
+            // Call the loadStats function from admin-dashboard.js
+            loadStats();
+        }
+
+        function updateLastUpdatedTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('lastUpdated').textContent = timeString;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification show ${type}';
             
-            usersCount.textContent = `(${users.length} total)`;
-            
-            if (users.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <p>No users found</p>
-                    </div>
-                `;
-                return;
-            }
+            setTimeout(() => {
+                notification.classList.remove('show');s
+            }, 3000);
+        }
 
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Blood Type</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            users.forEach(user => {
-                tableHTML += `
-                    <tr>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.role}</td>
-                        <td>${user.bloodType}</td>
-                        <td><span class="status-badge status-${user.status}">${user.status}</span></td>
-                        <td>
-                            <button class="btn btn-primary edit-user-btn" data-user-id="${user.id}">Edit</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
-
-            // Add event listeners to edit buttons
-            container.querySelectorAll('.edit-user-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const userId = e.target.getAttribute('data-user-id');
-                    editUser(userId);
+        // Add event listeners to view buttons
+        function addViewEventListeners() {
+            document.querySelectorAll('.view-user-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    viewUser(userId);
                 });
             });
-        }
-
-        function filterUsers() {
-            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
-            const roleFilter = document.getElementById('roleFilter').value;
             
-            let filteredUsers = usersData.filter(user => {
-                const matchesSearch = user.name.toLowerCase().includes(searchTerm) || 
-                                    user.email.toLowerCase().includes(searchTerm);
-                const matchesRole = roleFilter === '' || user.role === roleFilter;
-                
-                return matchesSearch && matchesRole;
-            });
-            
-            displayUsers(filteredUsers);
-        }
-
-        function editUser(userId) {
-            console.log('Editing user:', userId);
-            // Add your edit user logic here
-        }
-
-        // Blood Donations Functions are now handled by admin-dashboard.js
-        function loadDonations() {
-            // Use the external function if available
-            if (typeof window.loadDonations === 'function') {
-                window.loadDonations();
-                return;
-            }
-            
-            // Fallback implementation
-            const container = document.getElementById('donationsTableContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading donations...</div>';
-            console.error('External loadDonations function not found. Please check if admin-dashboard.js is properly loaded.');
-        }
-
-        function displayDonations(donations) {
-            const container = document.getElementById('donationsTableContainer');
-            const donationsCount = document.getElementById('donationsCount');
-            
-            donationsCount.textContent = `(${donations.length} total)`;
-            
-            if (donations.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-tint"></i>
-                        <p>No donations found</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Add your donations table HTML here
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Donor</th>
-                            <th>Blood Type</th>
-                            <th>Units</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            donations.forEach(donation => {
-                tableHTML += `
-                    <tr>
-                        <td>${donation.donorName}</td>
-                        <td>${donation.bloodType}</td>
-                        <td>${donation.units}</td>
-                        <td>${donation.date}</td>
-                        <td><span class="status-badge status-${donation.status}">${donation.status}</span></td>
-                        <td>
-                            <button class="btn btn-primary view-donation-btn" data-donation-id="${donation.id}">View</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
-
-            // Add event listeners to view buttons
-            container.querySelectorAll('.view-donation-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const donationId = e.target.getAttribute('data-donation-id');
+            document.querySelectorAll('.view-donation-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const donationId = this.getAttribute('data-id');
                     viewDonation(donationId);
                 });
             });
-        }
-
-        function filterDonations() {
-            const searchTerm = document.getElementById('donationSearch').value.toLowerCase();
-            const bloodTypeFilter = document.getElementById('bloodTypeFilter').value;
             
-            let filteredDonations = donationsData.filter(donation => {
-                const matchesSearch = donation.donorName.toLowerCase().includes(searchTerm);
-                const matchesBloodType = bloodTypeFilter === '' || donation.bloodType === bloodTypeFilter;
-                
-                return matchesSearch && matchesBloodType;
-            });
-            
-            displayDonations(filteredDonations);
-        }
-
-        function viewDonation(donationId) {
-            console.log('Viewing donation:', donationId);
-            // Add your view donation logic here
-        }
-
-        // Blood Requests Functions
-        function loadRequests() {
-            // Use the external function if available
-            if (typeof window.loadRequests === 'function') {
-                window.loadRequests();
-                return;
-            }
-            
-            // Fallback implementation
-            const container = document.getElementById('requestsTableContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i>Loading requests...</div>';
-            console.error('External loadRequests function not found. Please check if admin-dashboard.js is properly loaded.');
-        }
-
-        function displayRequests(requests) {
-            const container = document.getElementById('requestsTableContainer');
-            const requestsCount = document.getElementById('requestsCount');
-            
-            requestsCount.textContent = `(${requests.length} total)`;
-            
-            if (requests.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-hand-holding-medical"></i>
-                        <p>No requests found</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Add your requests table HTML here
-            let tableHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Requester</th>
-                            <th>Blood Type</th>
-                            <th>Units Needed</th>
-                            <th>Urgency</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            requests.forEach(request => {
-                tableHTML += `
-                    <tr>
-                        <td>${request.requesterName}</td>
-                        <td>${request.bloodType}</td>
-                        <td>${request.unitsNeeded}</td>
-                        <td>${request.urgency}</td>
-                        <td>${request.date}</td>
-                        <td><span class="status-badge status-${request.status}">${request.status}</span></td>
-                        <td>
-                            <button class="btn btn-primary view-request-btn" data-request-id="${request.id}">View</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            tableHTML += '</tbody></table>';
-            container.innerHTML = tableHTML;
-
-            // Add event listeners to view buttons
-            container.querySelectorAll('.view-request-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const requestId = e.target.getAttribute('data-request-id');
+            document.querySelectorAll('.view-request-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const requestId = this.getAttribute('data-id');
                     viewRequest(requestId);
                 });
             });
         }
 
+        // Filter functions
         function filterRequests() {
             const searchTerm = document.getElementById('requestSearch').value.toLowerCase();
             const statusFilter = document.getElementById('requestStatusFilter').value;
             
-            let filteredRequests = requestsData.filter(request => {
-                const matchesSearch = request.requesterName.toLowerCase().includes(searchTerm);
+            const filteredRequests = requestsData.filter(request => {
+                const matchesSearch = 
+                    request.requesterName.toLowerCase().includes(searchTerm) ||
+                    request.bloodType.toLowerCase().includes(searchTerm) ||
+                    request.location.toLowerCase().includes(searchTerm);
+                    
                 const matchesStatus = statusFilter === '' || request.status === statusFilter;
                 
                 return matchesSearch && matchesStatus;
@@ -867,11 +699,13 @@
             displayRequests(filteredRequests);
         }
 
+        // View functions
         function viewRequest(requestId) {
-            console.log('Viewing request:', requestId);
-            // Add your view request logic here
+            const request = requestsData.find(r => r.id === requestId);
+            if (request) {
+                alert('Request Details:\n\nRequester: ${request.requesterName}\nBlood Type: ${request.bloodType}\nUnits: ${request.units}\nStatus: ${request.status}\nDate: ${request.date}\nLocation: ${request.location}\nReason: ${request.reason}');
+            }
         }
-
     </script>
 </body>
 </html>
