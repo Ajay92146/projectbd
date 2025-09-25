@@ -172,26 +172,32 @@ router.get('/donations', [
             });
         }
 
-        // Get donations from Donor collection by matching email
+        // Get donations from Donor collection by matching email AND userId if available
         const Donor = require('../models/Donor');
-        console.log('🔍 Looking for donations with email:', user.email);
+        console.log('🔍 Looking for donations with email:', user.email, 'and userId:', userId);
 
-        // Ensure we're only getting the current user's donations by using their email
-        const donations = await Donor.find({
+        // Build query to ensure we're only getting the current user's donations
+        const donorQuery = {
             email: user.email,
-            isActive: { $ne: false } // Include documents where isActive is not false
-        })
+            isActive: { $ne: false }
+        };
+        
+        // Add userId to query if the field exists in the Donor model
+        if (Donor.schema.paths.userId) {
+            donorQuery.userId = userId;
+        }
+        
+        console.log('🔍 Using donor query:', JSON.stringify(donorQuery));
+        
+        const donations = await Donor.find(donorQuery)
             .sort({ applicationDate: -1, dateOfDonation: -1 })
             .skip(skip)
             .limit(limit);
 
         console.log('📊 Found donations:', donations.length);
 
-        // Get total count
-        const totalDonations = await Donor.countDocuments({
-            email: user.email,
-            isActive: { $ne: false }
-        });
+        // Get total count with the same query
+        const totalDonations = await Donor.countDocuments(donorQuery);
 
         console.log('📤 Sending donations response:', {
             success: true,
@@ -377,6 +383,9 @@ router.get('/requests', [
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+            
+        // Log the found requests for debugging
+        console.log('📊 Found requests by userId:', requests.length, 'for userId:', userId);
 
         console.log('📊 Found requests:', requests.length);
 
