@@ -7,23 +7,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/auth-dropdown.css">
     <style>
-        :root { --red:#ef4444; --redDark:#dc2626; --border:#e5e7eb; --bg:#f9fafb; --text:#111827; --muted:#6b7280; }
+        :root { --red:#ef4444; --redDark:#dc2626; --border:#e5e7eb; --bg:#f9fafb; --text:#111827; --muted:#6b7280; --success:#10b981; --warning:#f59e0b; --info:#3b82f6; }
         *{ box-sizing:border-box; margin:0; padding:0; }
         body{ font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: linear-gradient(135deg,#ffe4e6,#fff); color:var(--text); }
         .navbar{ position:fixed; top:0; left:0; right:0; background:#fff; border-bottom:1px solid var(--border); z-index:10; }
         .container{ max-width:1000px; margin:0 auto; padding:12px 16px; }
         .brand{ color:var(--red); text-decoration:none; font-weight:700; }
         .profile-container{ padding-top:84px; padding-bottom:24px; }
-        .card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; box-shadow:0 10px 20px rgba(0,0,0,.04); }
-        .tab-navigation{ display:flex; gap:8px; margin-bottom:12px; border-bottom:1px solid var(--border); overflow:auto; }
-        .tab-button{ padding:10px 14px; border:none; background:none; color:var(--muted); border-radius:8px; cursor:pointer; white-space:nowrap; }
-        .tab-button.active{ background:var(--red); color:#fff; }
+        .card{ background:#fff; border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 10px 24px rgba(0,0,0,.06); }
+        .tab-navigation{ position:sticky; top:60px; background:#fff; padding:8px; border:1px solid var(--border); border-radius:12px; display:flex; gap:8px; margin-bottom:12px; overflow:auto; }
+        .tab-button{ padding:10px 14px; border:none; background:#fff; color:var(--muted); border-radius:10px; cursor:pointer; white-space:nowrap; border:1px solid var(--border); }
+        .tab-button.active{ background:var(--red); color:#fff; border-color:var(--red); box-shadow:0 4px 12px rgba(239,68,68,.3); }
         .tab-content{ display:none; }
         .tab-content.active{ display:block; }
-        .section-title{ display:flex; align-items:center; gap:8px; margin:8px 0 12px; font-weight:600; }
-        .item{ background:#fff; border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:10px; }
-        .item .header{ display:flex; justify-content:space-between; margin-bottom:6px; }
-        .badge{ background:#f3f4f6; color:#374151; font-size:12px; padding:2px 8px; border-radius:999px; }
+        .section-title{ display:flex; align-items:center; gap:8px; margin:8px 0 12px; font-weight:700; font-size:18px; }
+        .item{ background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:12px; transition:box-shadow .2s ease, transform .2s ease; }
+        .item:hover{ box-shadow:0 8px 24px rgba(0,0,0,.06); transform:translateY(-1px); }
+        .item .header{ display:flex; justify-content:space-between; margin-bottom:8px; align-items:center; }
+        .badge{ background:#f3f4f6; color:#374151; font-size:12px; padding:4px 10px; border-radius:999px; text-transform:capitalize; }
+        .badge.pending{ background:#fff7ed; color:#c2410c; }
+        .badge.in-progress{ background:#eff6ff; color:#1d4ed8; }
+        .badge.fulfilled, .badge.completed{ background:#ecfdf5; color:#065f46; }
+        .badge.cancelled, .badge.expired{ background:#fef2f2; color:#991b1b; }
         .form-group{ margin-bottom:12px; }
         .form-input, select{ width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; }
         .actions{ display:flex; gap:8px; }
@@ -31,6 +36,11 @@
         .btn.btn-primary{ background:var(--red); color:#fff; }
         .btn.btn-primary:hover{ background:var(--redDark); }
         .btn.btn-secondary{ background:#fff; color:var(--red); border:1px solid var(--red); }
+        .toolbar{ display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; }
+        .chip{ padding:6px 10px; border:1px solid var(--border); border-radius:999px; cursor:pointer; color:#374151; background:#fff; }
+        .chip.active{ background:#111827; color:#fff; border-color:#111827; }
+        .loadmore{ text-align:center; margin-top:8px; }
+        @media (max-width: 640px){ .tab-navigation{ top:50px; } }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,12 +49,14 @@
 <body>
     <nav class="navbar">
         <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <a class="brand" href="index.html"><i class="fa-solid fa-heart"></i> BloodConnect</a>
-            <div style="display:flex;gap:8px;">
-                <a class="brand" href="urgent-requests.html" style="color:#111827">Urgent</a>
-                <a class="brand" href="request.html" style="color:#111827">Request</a>
-                <a class="brand" href="donate.html" style="color:#111827">Donate</a>
-            </div>
+            <a class="brand" href="index.html" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-heart"></i> BloodConnect</a>
+            <ul style="list-style:none;display:flex;gap:10px;margin:0;padding:0;align-items:center;">
+                <li><a class="brand" href="index.html" style="color:#111827">Home</a></li>
+                <li><a class="brand" href="urgent-requests.html" style="color:#111827">Urgent</a></li>
+                <li><a class="brand" href="request.html" style="color:#111827">Request</a></li>
+                <li><a class="brand" href="donate.html" style="color:#111827">Donate</a></li>
+                <li><a class="brand" href="profile.html" style="color:#ef4444;font-weight:700;">My Profile</a></li>
+            </ul>
         </div>
     </nav>
 
@@ -60,12 +72,33 @@
 
                 <div id="donations" class="tab-content active" style="display:block;">
                     <h2 class="section-title"><i class="fas fa-hand-holding-heart"></i> My Donations</h2>
+                    <div class="toolbar">
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <span class="muted" style="color:#6b7280;">Filter</span>
+                            <button class="chip" data-donation-filter="all">All</button>
+                            <button class="chip" data-donation-filter="completed">Completed</button>
+                            <button class="chip" data-donation-filter="pending">Pending</button>
+                        </div>
+                    </div>
                     <div id="donationsContent"></div>
+                    <div class="loadmore"><button id="donationsMore" class="btn btn-secondary">Load more</button></div>
                 </div>
 
                 <div id="requests" class="tab-content" style="display:none;">
                     <h2 class="section-title"><i class="fas fa-search"></i> My Blood Requests</h2>
+                    <div class="toolbar">
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <span class="muted" style="color:#6b7280;">Status</span>
+                            <button class="chip active" data-status="">All</button>
+                            <button class="chip" data-status="Pending">Pending</button>
+                            <button class="chip" data-status="In Progress">In Progress</button>
+                            <button class="chip" data-status="Fulfilled">Fulfilled</button>
+                            <button class="chip" data-status="Cancelled">Cancelled</button>
+                            <button class="chip" data-status="Expired">Expired</button>
+                        </div>
+                    </div>
                     <div id="requestsContent"></div>
+                    <div class="loadmore"><button id="requestsMore" class="btn btn-secondary">Load more</button></div>
                 </div>
 
                 <div id="settings" class="tab-content" style="display:none;">
@@ -130,6 +163,18 @@
     </div>
 
     <script src="profile.js"></script>
+
+    <footer style="margin-top:24px;border-top:1px solid #e5e7eb;background:#fff;">
+        <div class="container" style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px;flex-wrap:wrap;gap:8px;">
+            <div style="color:#6b7280;">© <span id="fc-year"></span> BloodConnect. All rights reserved.</div>
+            <div style="display:flex;gap:12px;">
+                <a class="brand" href="about.html" style="color:#111827">About</a>
+                <a class="brand" href="contact.html" style="color:#111827">Contact</a>
+                <a class="brand" href="privacy.html" style="color:#111827">Privacy</a>
+            </div>
+        </div>
+        <script>document.getElementById('fc-year').textContent = new Date().getFullYear();</script>
+    </footer>
 </body>
 </html>
 

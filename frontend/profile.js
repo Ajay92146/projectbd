@@ -81,6 +81,7 @@
     }
 
     // ------------------------- Donations -------------------------
+    let donationsPage = 1; let donationsFilter = '';
     async function loadDonations(page = 1, limit = 10) {
         const container = qs('#donationsContent');
         if (!container) return;
@@ -88,8 +89,9 @@
         try {
             const data = await api.get(`/api/profile/donations?page=${page}&limit=${limit}`);
             const donations = data?.data?.donations || [];
-            if (!donations.length) { setContent(container, UI.empty('No Donations Yet', 'Start saving lives today!')); return; }
-            const html = donations.map(d => {
+            const filtered = donationsFilter ? donations.filter(d => (d.status||'').toLowerCase() === donationsFilter) : donations;
+            if (!filtered.length) { setContent(container, UI.empty('No Donations Yet', 'Start saving lives today!')); return; }
+            const html = filtered.map(d => {
                 const status = (d.status || 'Recorded').toLowerCase();
                 const date = d.donationDate ? new Date(d.donationDate).toLocaleDateString() : 'Not specified';
                 const center = d.donationCenter?.name || 'Blood Bank';
@@ -99,7 +101,7 @@
                     <div class="item">
                         <div class="header">
                             <h4 style="margin:0;font-weight:600;">Blood Donation</h4>
-                            <span class="badge">${status}</span>
+                            <span class="badge ${status}">${status}</span>
                         </div>
                         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;">
                             <p><strong>Date:</strong> ${date}</p>
@@ -117,12 +119,14 @@
     }
 
     // ------------------------- Requests -------------------------
+    let requestsPage = 1; let requestsStatus = '';
     async function loadRequests(page = 1, limit = 10) {
         const container = qs('#requestsContent');
         if (!container) return;
         setContent(container, UI.loading('Loading your blood requests...'));
         try {
-            const data = await api.get(`/api/profile/requests?page=${page}&limit=${limit}`);
+            const statusParam = requestsStatus ? `&status=${encodeURIComponent(requestsStatus)}` : '';
+            const data = await api.get(`/api/profile/requests?page=${page}&limit=${limit}${statusParam}`);
             const requests = data?.data?.requests || [];
             if (!requests.length) { setContent(container, UI.empty('No Blood Requests', "You haven't made any requests yet.")); return; }
             const html = requests.map(r => {
@@ -139,7 +143,7 @@
                     <div class="item">
                         <div class="header">
                             <h4 style="margin:0;font-weight:600;">${r.patientName || 'Patient'}</h4>
-                            <span class="badge">${status}</span>
+                            <span class="badge ${status}">${status}</span>
                         </div>
                         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;">
                             <p><strong>Blood Group:</strong> ${blood}</p>
@@ -242,6 +246,27 @@
         initTabs();
         initSettings();
         initChangePassword();
+
+        // Filters and pagination bindings
+        qsa('[data-status]').forEach(chip => chip.addEventListener('click', () => {
+            qsa('[data-status]').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            requestsStatus = chip.getAttribute('data-status') || '';
+            requestsPage = 1;
+            loadRequests(requestsPage);
+        }));
+        const reqMore = qs('#requestsMore');
+        if (reqMore) reqMore.addEventListener('click', () => { requestsPage += 1; loadRequests(requestsPage); });
+
+        qsa('[data-donation-filter]').forEach(chip => chip.addEventListener('click', () => {
+            qsa('[data-donation-filter]').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            donationsFilter = chip.getAttribute('data-donation-filter');
+            donationsPage = 1;
+            loadDonations(donationsPage);
+        }));
+        const donMore = qs('#donationsMore');
+        if (donMore) donMore.addEventListener('click', () => { donationsPage += 1; loadDonations(donationsPage); });
     });
 })();
 
