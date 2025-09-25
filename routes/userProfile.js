@@ -5,6 +5,7 @@
 
 const express = require('express');
 const { body, validationResult, query } = require('express-validator');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const UserDonation = require('../models/UserDonation');
 const UserRequest = require('../models/UserRequest');
@@ -366,30 +367,41 @@ router.get('/requests', [
         const Request = require('../models/Request');
         
         // Primary query: Look for requests with exact userId match (most secure)
+        // CRITICAL FIX: Force string comparison for userId to ensure exact matches
+        const userIdStr = userId.toString();
+        
+        // Strict query that only returns the current user's requests
         const requestQuery = {
-            userId: userId, // Ensure we're only getting the current user's requests
-            isActive: { $ne: false }
+            isActive: { $ne: false },
+            $or: [
+                { userId: mongoose.Types.ObjectId(userId) },  // Try as ObjectId
+                { userId: userIdStr },                        // Try as string
+                { userEmail: user.email }                     // Fallback to email
+            ]
         };
 
         if (status) {
             requestQuery.status = status;
         }
 
-        console.log('🔍 Primary request query (userId):', JSON.stringify(requestQuery, null, 2));
+        console.log('🔍 Enhanced request query:', JSON.stringify(requestQuery, null, 2));
 
         // Get requests from Request table with pagination
-        // Only use userId for filtering to ensure privacy
         let requests = await Request.find(requestQuery)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
             
+        // CRITICAL FIX: Double-check each request to ensure it belongs to the current user
+        // This is a final safety check to prevent any data leakage
+        requests = requests.filter(request => {
+            const requestUserId = request.userId ? request.userId.toString() : null;
+            const requestEmail = request.userEmail || null;
+            return requestUserId === userIdStr || requestEmail === user.email;
+        });
+            
         // Log the found requests for debugging
-        console.log('📊 Found requests by userId:', requests.length, 'for userId:', userId);
-
-        console.log('📊 Found requests:', requests.length);
-
-        console.log('📊 Found requests:', requests.length);
+        console.log('📊 Found requests after strict filtering:', requests.length, 'for userId:', userId);
 
         // Get total count from Request table
         let totalRequests = await Request.countDocuments(requestQuery);
