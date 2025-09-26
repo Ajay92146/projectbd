@@ -8,6 +8,14 @@ function debugLog(message) {
     console.log(`[AdminDashboard] ${message}`);
 }
 
+// Helper function to safely format numbers
+function safeFormatNumber(value, defaultValue = '0') {
+    if (value === undefined || value === null || isNaN(value)) {
+        return defaultValue;
+    }
+    return Number(value).toLocaleString();
+}
+
 // Check admin authentication
 function checkAdminAuthentication() {
     debugLog('🔍 Checking admin authentication...');
@@ -136,12 +144,12 @@ async function loadStats() {
             const totalBloodBanks = document.getElementById('totalBloodBanks');
             const pendingBloodBanks = document.getElementById('pendingBloodBanks');
             
-            if (totalUsers) totalUsers.textContent = data.data.totalUsers.toLocaleString();
-            if (totalDonations) totalDonations.textContent = data.data.totalDonations.toLocaleString();
-            if (totalRequests) totalRequests.textContent = data.data.totalRequests.toLocaleString();
-            if (totalBloodUnits) totalBloodUnits.textContent = data.data.totalBloodUnits.toLocaleString();
-            if (totalBloodBanks) totalBloodBanks.textContent = data.data.totalBloodBanks.toLocaleString();
-            if (pendingBloodBanks) pendingBloodBanks.textContent = data.data.pendingBloodBanks.toLocaleString();
+            if (totalUsers) totalUsers.textContent = safeFormatNumber(data.data.totalUsers);
+            if (totalDonations) totalDonations.textContent = safeFormatNumber(data.data.totalDonations);
+            if (totalRequests) totalRequests.textContent = safeFormatNumber(data.data.totalRequests);
+            if (totalBloodUnits) totalBloodUnits.textContent = safeFormatNumber(data.data.totalBloodUnits);
+            if (totalBloodBanks) totalBloodBanks.textContent = safeFormatNumber(data.data.totalBloodBanks);
+            if (pendingBloodBanks) pendingBloodBanks.textContent = safeFormatNumber(data.data.pendingBloodBanks);
             
             // Update last updated time
             updateLastUpdatedTime();
@@ -634,14 +642,27 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUsers();
     loadDonations();
     loadRequests();
-    loadBloodBanks();
+    
+    // Try to load blood banks, but don't fail if the endpoint doesn't exist
+    try {
+        loadBloodBanks();
+    } catch (error) {
+        console.warn('Blood banks functionality not available:', error.message);
+    }
     
     // Set up auto-refresh
     setInterval(() => {
         loadStats();
         loadDonations();
         loadRequests();
-        loadBloodBanks();
+        
+        // Try to load blood banks, but don't fail if not available
+        try {
+            loadBloodBanks();
+        } catch (error) {
+            // Silently ignore blood banks loading errors during auto-refresh
+        }
+        
         updateLastUpdatedTime();
     }, 30000); // Refresh every 30 seconds
     
@@ -943,6 +964,21 @@ async function loadBloodBanks(searchTerm = '', statusFilter = '', page = 1, limi
         debugLog(`Response status: ${response.status}`);
         
         if (!response.ok) {
+            // If blood banks endpoint doesn't exist, fail gracefully
+            if (response.status === 404) {
+                console.warn('Blood banks endpoint not found - feature may not be implemented yet');
+                if (bloodBanksTableBody) {
+                    bloodBanksTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="empty-state">
+                                <i class="fas fa-info-circle"></i>
+                                <p>Blood banks management feature is not yet available</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+                return;
+            }
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
@@ -1190,7 +1226,13 @@ Registration Date: ${new Date(bank.createdAt).toLocaleString()}
 
 // Filter blood banks
 function filterBloodBanks() {
-    const searchTerm = document.getElementById('bloodBankSearch').value;
-    const statusFilter = document.getElementById('bloodBankStatusFilter').value;
-    loadBloodBanks(searchTerm, statusFilter);
+    try {
+        const searchTerm = document.getElementById('bloodBankSearch')?.value || '';
+        const statusFilter = document.getElementById('bloodBankStatusFilter')?.value || '';
+        if (typeof loadBloodBanks === 'function') {
+            loadBloodBanks(searchTerm, statusFilter);
+        }
+    } catch (error) {
+        console.warn('Blood banks filtering not available:', error.message);
+    }
 }

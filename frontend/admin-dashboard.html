@@ -775,7 +775,12 @@
             document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
             document.getElementById('refreshDonationsBtn').addEventListener('click', loadDonations);
             document.getElementById('refreshRequestsBtn').addEventListener('click', loadRequests);
-            document.getElementById('refreshBloodBanksBtn').addEventListener('click', loadBloodBanks);
+            
+            // Only add blood banks refresh listener if the button exists
+            const refreshBloodBanksBtn = document.getElementById('refreshBloodBanksBtn');
+            if (refreshBloodBanksBtn) {
+                refreshBloodBanksBtn.addEventListener('click', loadBloodBanks);
+            }
             
             // Search and filter inputs
             document.getElementById('userSearch').addEventListener('input', filterUsers);
@@ -787,8 +792,13 @@
             document.getElementById('requestSearch').addEventListener('input', filterRequests);
             document.getElementById('requestStatusFilter').addEventListener('change', filterRequests);
             
-            document.getElementById('bloodBankSearch').addEventListener('input', filterBloodBanks);
-            document.getElementById('bloodBankStatusFilter').addEventListener('change', filterBloodBanks);
+            // Only add blood bank event listeners if the elements exist
+            const bloodBankSearch = document.getElementById('bloodBankSearch');
+            const bloodBankStatusFilter = document.getElementById('bloodBankStatusFilter');
+            if (bloodBankSearch && bloodBankStatusFilter) {
+                bloodBankSearch.addEventListener('input', filterBloodBanks);
+                bloodBankStatusFilter.addEventListener('change', filterBloodBanks);
+            }
         }
 
         // Dashboard functions
