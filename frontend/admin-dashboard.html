@@ -208,6 +208,32 @@
             background: var(--gray-200);
         }
 
+        .section-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .audit-btn {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-red-light));
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        }
+
+        .audit-btn:hover {
+            background: linear-gradient(135deg, var(--primary-red-dark), var(--primary-red));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(229, 62, 62, 0.4);
+        }
+
         .search-filter {
             display: flex;
             gap: 1rem;
@@ -548,10 +574,16 @@
         <div class="data-section">
             <div class="section-header">
                 <h2 class="section-title">Blood Banks</h2>
-                <button id="refreshBloodBanksBtn" class="refresh-btn">
-                    <i class="fas fa-sync-alt"></i>
-                    Refresh
-                </button>
+                <div class="section-actions">
+                    <button id="auditBloodBanksBtn" class="audit-btn" title="Audit Blood Bank Approvals">
+                        <i class="fas fa-search"></i>
+                        Audit
+                    </button>
+                    <button id="refreshBloodBanksBtn" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
             </div>
 
             <div class="search-filter">
@@ -782,6 +814,12 @@
                 refreshBloodBanksBtn.addEventListener('click', loadBloodBanks);
             }
             
+            // Only add blood banks audit listener if the button exists
+            const auditBloodBanksBtn = document.getElementById('auditBloodBanksBtn');
+            if (auditBloodBanksBtn) {
+                auditBloodBanksBtn.addEventListener('click', showBloodBanksAudit);
+            }
+            
             // Search and filter inputs
             document.getElementById('userSearch').addEventListener('input', filterUsers);
             document.getElementById('roleFilter').addEventListener('change', filterUsers);
@@ -931,6 +969,195 @@ Location: ${request.location}
 Reason: ${request.reason || ''}`);
             }
         }
+
+        // Blood Banks Audit functionality
+        async function showBloodBanksAudit() {
+            try {
+                console.log('🔍 Loading blood banks audit...');
+                
+                const response = await fetch(`${getAPIBaseURL()}/admin/blood-banks-audit`, {
+                    method: 'GET',
+                    headers: getAdminAuthHeaders()
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayAuditResults(data.data);
+                } else {
+                    throw new Error(data.message || 'Failed to load audit data');
+                }
+            } catch (error) {
+                console.error('Error loading audit data:', error);
+                showNotification('Failed to load audit data: ' + error.message, 'error');
+            }
+        }
+        
+        function displayAuditResults(auditData) {
+            let auditContent = `
+<div style="font-family: monospace; max-height: 80vh; overflow-y: auto; padding: 20px;">
+    <h2 style="color: #e53e3e; margin-bottom: 20px;">🔍 Blood Banks Audit Report</h2>
+    
+    <div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 10px 0;">📊 Summary</h3>
+        <p>Total Blood Banks: <strong>${auditData.summary.total}</strong></p>
+        <p>Total Approved: <strong>${auditData.summary.approved}</strong></p>
+        <p>Suspicious Approvals: <strong style="color: #e53e3e;">${auditData.summary.suspiciousApprovals}</strong></p>
+        <p>Legitimate Approvals: <strong style="color: #38a169;">${auditData.summary.legitimateApprovals}</strong></p>
+    </div>
+`;
+            
+            if (auditData.suspiciousApprovals.length > 0) {
+                auditContent += `
+    <div style="background: #fed7d7; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #e53e3e;">
+        <h3 style="color: #c53030; margin: 0 0 15px 0;">⚠️ Suspicious Approvals (${auditData.suspiciousApprovals.length})</h3>
+`;
+                auditData.suspiciousApprovals.forEach(bank => {
+                    auditContent += `
+        <div style="background: white; padding: 12px; margin-bottom: 10px; border-radius: 4px;">
+            <strong>${bank.bankName}</strong> (${bank.licenseNumber})<br>
+            <small>Status: ${bank.status} | Verified: ${bank.isVerified ? 'Yes' : 'No'}</small><br>
+            <small style="color: #e53e3e;">Issues: ${bank.suspiciousReasons.join(', ')}</small><br>
+            <small>Created: ${new Date(bank.createdAt).toLocaleString()}</small>
+            <button onclick="resetBloodBankStatus('${bank._id}', '${bank.bankName}')" 
+                    style="background: #e53e3e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
+                🔄 Reset to Pending
+            </button>
+        </div>
+`;
+                });
+                auditContent += `    </div>`;
+            }
+            
+            if (auditData.legitimateApprovals.length > 0) {
+                auditContent += `
+    <div style="background: #f0fff4; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #38a169;">
+        <h3 style="color: #2f855a; margin: 0 0 15px 0;">✅ Legitimate Approvals (${auditData.legitimateApprovals.length})</h3>
+`;
+                auditData.legitimateApprovals.forEach(bank => {
+                    auditContent += `
+        <div style="background: white; padding: 12px; margin-bottom: 10px; border-radius: 4px;">
+            <strong>${bank.bankName}</strong> (${bank.licenseNumber})<br>
+            <small>Verified by: ${bank.verifiedBy || 'N/A'}</small><br>
+            <small>Verification Date: ${bank.verificationDate ? new Date(bank.verificationDate).toLocaleString() : 'N/A'}</small><br>
+            <small>Created: ${new Date(bank.createdAt).toLocaleString()}</small>
+        </div>
+`;
+                });
+                auditContent += `    </div>`;
+            }
+            
+            if (auditData.pending.length > 0) {
+                auditContent += `
+    <div style="background: #fffbeb; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f6ad55;">
+        <h3 style="color: #c05621; margin: 0 0 15px 0;">⏳ Pending Approval (${auditData.pending.length})</h3>
+`;
+                auditData.pending.forEach(bank => {
+                    auditContent += `
+        <div style="background: white; padding: 12px; margin-bottom: 10px; border-radius: 4px;">
+            <strong>${bank.bankName}</strong> (${bank.licenseNumber})<br>
+            <small>Status: ${bank.status}</small><br>
+            <small>Created: ${new Date(bank.createdAt).toLocaleString()}</small>
+        </div>
+`;
+                });
+                auditContent += `    </div>`;
+            }
+            
+            auditContent += `
+    <div style="margin-top: 20px; text-align: center;">
+        <button onclick="closeAuditModal()" 
+                style="background: #4a5568; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+            Close
+        </button>
+    </div>
+</div>
+`;
+            
+            // Create and show modal
+            const modal = document.createElement('div');
+            modal.id = 'auditModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: white;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 800px;
+                max-height: 90vh;
+                overflow-y: auto;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            `;
+            
+            modalContent.innerHTML = auditContent;
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeAuditModal();
+                }
+            });
+        }
+        
+        function closeAuditModal() {
+            const modal = document.getElementById('auditModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        async function resetBloodBankStatus(bankId, bankName) {
+            if (!confirm(`Are you sure you want to reset "${bankName}" back to pending status? This will require re-approval.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${getAPIBaseURL()}/admin/reset-blood-bank-status/${bankId}`, {
+                    method: 'POST',
+                    headers: getAdminAuthHeaders(),
+                    body: JSON.stringify({
+                        reason: 'Suspicious approval detected - reset by admin for proper verification'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Blood bank status reset successfully', 'success');
+                    closeAuditModal();
+                    loadBloodBanks(); // Refresh the main table
+                    loadStats(); // Update statistics
+                } else {
+                    throw new Error(data.message || 'Failed to reset blood bank status');
+                }
+            } catch (error) {
+                console.error('Error resetting blood bank status:', error);
+                showNotification('Failed to reset blood bank status: ' + error.message, 'error');
+            }
+        }
+        
+        // Make functions available globally
+        window.showBloodBanksAudit = showBloodBanksAudit;
+        window.closeAuditModal = closeAuditModal;
+        window.resetBloodBankStatus = resetBloodBankStatus;
     </script>
 </body>
 </html>

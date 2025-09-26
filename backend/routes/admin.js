@@ -9,6 +9,7 @@ const Donor = require('../models/Donor');
 const Request = require('../models/Request');
 const UserDonation = require('../models/UserDonation');
 const UserRequest = require('../models/UserRequest');
+const BloodBank = require('../models/BloodBank');
 const { authMiddleware } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const router = express.Router();
@@ -172,6 +173,15 @@ router.get('/dashboard-stats', adminAuthMiddleware, async (req, res) => {
         // Get total user requests count
         const totalUserRequests = await UserRequest.countDocuments({ isActive: true });
         
+        // Get total blood banks count
+        const totalBloodBanks = await BloodBank.countDocuments({ isActive: true });
+        
+        // Get pending blood banks count
+        const pendingBloodBanks = await BloodBank.countDocuments({ 
+            isActive: true, 
+            status: 'pending' 
+        });
+        
         // Calculate total blood units available (assuming 1 unit per donor for now)
         const totalBloodUnits = totalDonations;
 
@@ -183,7 +193,9 @@ router.get('/dashboard-stats', adminAuthMiddleware, async (req, res) => {
                 totalRequests,
                 totalBloodUnits,
                 totalUserDonations,
-                totalUserRequests
+                totalUserRequests,
+                totalBloodBanks,
+                pendingBloodBanks
             }
         });
     } catch (error) {
@@ -1308,6 +1320,372 @@ router.get('/health', (req, res) => {
         message: 'Admin API is running',
         timestamp: new Date().toISOString()
     });
+});
+
+/**
+ * @route   GET /api/admin/blood-banks-audit
+ * @desc    Get detailed audit information for all blood banks
+ * @access  Admin only
+ */
+router.get('/blood-banks-audit', adminAuthMiddleware, async (req, res) => {
+    try {
+        // Get all blood banks with detailed verification information
+        const bloodBanks = await BloodBank.find({ isActive: true })
+            .select('-password') // Exclude password field
+            .sort({ createdAt: -1 });
+        
+        // Categorize and analyze blood banks
+        const auditData = {
+            suspiciousApprovals: [],
+            legitimateApprovals: [],
+            pending: [],
+            rejected: [],
+            suspended: [],
+            summary: {
+                total: bloodBanks.length,
+                approved: 0,
+                suspiciousApprovals: 0,
+                legitimateApprovals: 0
+            }
+        };
+        
+        bloodBanks.forEach(bank => {
+            if (bank.status === 'approved') {
+                auditData.summary.approved++;
+                
+                // Check if approval is suspicious
+                const isSuspicious = !bank.verifiedBy || !bank.verificationDate || !bank.isVerified;
+                
+                const bankData = {
+                    _id: bank._id,
+                    bankName: bank.bankName,
+                    licenseNumber: bank.licenseNumber,
+                    status: bank.status,
+                    isVerified: bank.isVerified,
+                    verifiedBy: bank.verifiedBy,
+                    verificationDate: bank.verificationDate,
+                    createdAt: bank.createdAt,
+                    updatedAt: bank.updatedAt,
+                    suspicious: isSuspicious,
+                    suspiciousReasons: []
+                };
+                
+                if (isSuspicious) {
+                    auditData.summary.suspiciousApprovals++;
+                    if (!bank.verifiedBy) bankData.suspiciousReasons.push('No verifier information');
+                    if (!bank.verificationDate) bankData.suspiciousReasons.push('No verification date');
+                    if (!bank.isVerified) bankData.suspiciousReasons.push('isVerified flag is false');
+                    auditData.suspiciousApprovals.push(bankData);
+                } else {
+                    auditData.summary.legitimateApprovals++;
+                    auditData.legitimateApprovals.push(bankData);
+                }
+            } else {
+                auditData[bank.status].push({
+                    _id: bank._id,
+                    bankName: bank.bankName,
+                    licenseNumber: bank.licenseNumber,
+                    status: bank.status,
+                    createdAt: bank.createdAt
+                });
+            }
+        });
+        
+        res.json({
+            success: true,
+            data: auditData
+        });
+    } catch (error) {
+        logger.error('Error fetching blood banks audit:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch blood banks audit data'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/reset-blood-bank-status/:bankId
+ * @desc    Reset a blood bank status back to pending (for suspicious approvals)
+ * @access  Admin only
+ */
+router.post('/reset-blood-bank-status/:bankId', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { bankId } = req.params;
+        const { reason } = req.body;
+        const adminEmail = req.headers['x-admin-email'];
+        
+        const bloodBank = await BloodBank.findById(bankId);
+        
+        if (!bloodBank) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blood bank not found'
+            });
+        }
+        
+        // Store original status for logging
+        const originalStatus = bloodBank.status;
+        const originalVerifiedBy = bloodBank.verifiedBy;
+        
+        // Reset blood bank to pending status
+        bloodBank.status = 'pending';
+        bloodBank.isVerified = false;
+        bloodBank.verifiedBy = null;
+        bloodBank.verificationDate = null;
+        bloodBank.rejectionReason = reason || 'Status reset by admin - requires proper approval';
+        await bloodBank.save();
+        
+        logger.info('BLOOD_BANK_STATUS_RESET', {
+            adminEmail,
+            bankId,
+            bankName: bloodBank.bankName,
+            licenseNumber: bloodBank.licenseNumber,
+            originalStatus,
+            originalVerifiedBy,
+            reason,
+            resetDate: new Date()
+        });
+        
+        res.json({
+            success: true,
+            message: 'Blood bank status reset to pending - requires re-approval',
+            data: {
+                id: bloodBank._id,
+                bankName: bloodBank.bankName,
+                status: bloodBank.status,
+                resetReason: bloodBank.rejectionReason
+            }
+        });
+        
+    } catch (error) {
+        logger.error('Error resetting blood bank status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to reset blood bank status'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/admin/blood-banks
+ * @desc    Get all blood banks with pagination and filtering
+ * @access  Admin only
+ */
+router.get('/blood-banks', adminAuthMiddleware, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const search = req.query.search || '';
+        const status = req.query.status || '';
+        
+        // Build query
+        let query = { isActive: true };
+        
+        if (search) {
+            query.$or = [
+                { bankName: { $regex: search, $options: 'i' } },
+                { licenseNumber: { $regex: search, $options: 'i' } },
+                { contactPerson: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        if (status) {
+            query.status = status;
+        }
+        
+        // Get blood banks with pagination
+        const bloodBanks = await BloodBank.find(query)
+            .select('-password') // Exclude password field
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+        
+        // Get total count
+        const totalBloodBanks = await BloodBank.countDocuments(query);
+        
+        res.json({
+            success: true,
+            data: {
+                bloodBanks,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(totalBloodBanks / limit),
+                    totalItems: totalBloodBanks,
+                    itemsPerPage: limit
+                }
+            }
+        });
+    } catch (error) {
+        logger.error('Error fetching blood banks:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch blood banks'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/approve-blood-bank/:bankId
+ * @desc    Approve a blood bank registration
+ * @access  Admin only
+ */
+router.post('/approve-blood-bank/:bankId', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { bankId } = req.params;
+        const adminEmail = req.headers['x-admin-email'];
+        
+        const bloodBank = await BloodBank.findById(bankId);
+        
+        if (!bloodBank) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blood bank not found'
+            });
+        }
+        
+        if (bloodBank.status !== 'pending') {
+            return res.status(400).json({
+                success: false,
+                message: 'Blood bank is not pending approval'
+            });
+        }
+        
+        // Update blood bank status
+        bloodBank.status = 'approved';
+        bloodBank.isVerified = true;
+        bloodBank.verifiedBy = adminEmail;
+        bloodBank.verificationDate = new Date();
+        await bloodBank.save();
+        
+        logger.info('BLOOD_BANK_APPROVED', {
+            adminEmail,
+            bankId,
+            bankName: bloodBank.bankName,
+            licenseNumber: bloodBank.licenseNumber
+        });
+        
+        res.json({
+            success: true,
+            message: 'Blood bank approved successfully',
+            data: bloodBank
+        });
+        
+    } catch (error) {
+        logger.error('Error approving blood bank:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to approve blood bank'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/reject-blood-bank/:bankId
+ * @desc    Reject a blood bank registration
+ * @access  Admin only
+ */
+router.post('/reject-blood-bank/:bankId', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { bankId } = req.params;
+        const { reason } = req.body;
+        const adminEmail = req.headers['x-admin-email'];
+        
+        const bloodBank = await BloodBank.findById(bankId);
+        
+        if (!bloodBank) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blood bank not found'
+            });
+        }
+        
+        if (bloodBank.status !== 'pending') {
+            return res.status(400).json({
+                success: false,
+                message: 'Blood bank is not pending approval'
+            });
+        }
+        
+        // Update blood bank status
+        bloodBank.status = 'rejected';
+        bloodBank.rejectionReason = reason || 'Rejected by admin';
+        bloodBank.verifiedBy = adminEmail;
+        bloodBank.verificationDate = new Date();
+        await bloodBank.save();
+        
+        logger.info('BLOOD_BANK_REJECTED', {
+            adminEmail,
+            bankId,
+            bankName: bloodBank.bankName,
+            licenseNumber: bloodBank.licenseNumber,
+            reason
+        });
+        
+        res.json({
+            success: true,
+            message: 'Blood bank rejected',
+            data: bloodBank
+        });
+        
+    } catch (error) {
+        logger.error('Error rejecting blood bank:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to reject blood bank'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/admin/suspend-blood-bank/:bankId
+ * @desc    Suspend a blood bank
+ * @access  Admin only
+ */
+router.post('/suspend-blood-bank/:bankId', adminAuthMiddleware, async (req, res) => {
+    try {
+        const { bankId } = req.params;
+        const { reason } = req.body;
+        const adminEmail = req.headers['x-admin-email'];
+        
+        const bloodBank = await BloodBank.findById(bankId);
+        
+        if (!bloodBank) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blood bank not found'
+            });
+        }
+        
+        // Update blood bank status
+        bloodBank.status = 'suspended';
+        bloodBank.rejectionReason = reason || 'Suspended by admin';
+        bloodBank.verifiedBy = adminEmail;
+        bloodBank.verificationDate = new Date();
+        await bloodBank.save();
+        
+        logger.info('BLOOD_BANK_SUSPENDED', {
+            adminEmail,
+            bankId,
+            bankName: bloodBank.bankName,
+            licenseNumber: bloodBank.licenseNumber,
+            reason
+        });
+        
+        res.json({
+            success: true,
+            message: 'Blood bank suspended',
+            data: bloodBank
+        });
+        
+    } catch (error) {
+        logger.error('Error suspending blood bank:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to suspend blood bank'
+        });
+    }
 });
 
 // This would typically be handled by a WebSocket server, not an HTTP route
