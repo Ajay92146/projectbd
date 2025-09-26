@@ -133,11 +133,15 @@ async function loadStats() {
             const totalDonations = document.getElementById('totalDonations');
             const totalRequests = document.getElementById('totalRequests');
             const totalBloodUnits = document.getElementById('totalBloodUnits');
+            const totalBloodBanks = document.getElementById('totalBloodBanks');
+            const pendingBloodBanks = document.getElementById('pendingBloodBanks');
             
             if (totalUsers) totalUsers.textContent = data.data.totalUsers.toLocaleString();
             if (totalDonations) totalDonations.textContent = data.data.totalDonations.toLocaleString();
             if (totalRequests) totalRequests.textContent = data.data.totalRequests.toLocaleString();
             if (totalBloodUnits) totalBloodUnits.textContent = data.data.totalBloodUnits.toLocaleString();
+            if (totalBloodBanks) totalBloodBanks.textContent = data.data.totalBloodBanks.toLocaleString();
+            if (pendingBloodBanks) pendingBloodBanks.textContent = data.data.pendingBloodBanks.toLocaleString();
             
             // Update last updated time
             updateLastUpdatedTime();
@@ -162,11 +166,15 @@ async function loadStats() {
         const totalDonations = document.getElementById('totalDonations');
         const totalRequests = document.getElementById('totalRequests');
         const totalBloodUnits = document.getElementById('totalBloodUnits');
+        const totalBloodBanks = document.getElementById('totalBloodBanks');
+        const pendingBloodBanks = document.getElementById('pendingBloodBanks');
         
         if (totalUsers) totalUsers.textContent = 'Error';
         if (totalDonations) totalDonations.textContent = 'Error';
         if (totalRequests) totalRequests.textContent = 'Error';
         if (totalBloodUnits) totalBloodUnits.textContent = 'Error';
+        if (totalBloodBanks) totalBloodBanks.textContent = 'Error';
+        if (pendingBloodBanks) pendingBloodBanks.textContent = 'Error';
     }
 }
 
@@ -626,12 +634,14 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUsers();
     loadDonations();
     loadRequests();
+    loadBloodBanks();
     
     // Set up auto-refresh
     setInterval(() => {
         loadStats();
         loadDonations();
         loadRequests();
+        loadBloodBanks();
         updateLastUpdatedTime();
     }, 30000); // Refresh every 30 seconds
     
@@ -889,8 +899,298 @@ window.loadStats = loadStats;
 window.loadUsers = loadUsers;
 window.loadDonations = loadDonations;
 window.loadRequests = loadRequests;
+window.loadBloodBanks = loadBloodBanks;
 window.showNotification = showNotification;
 window.logout = logout;
 window.displayUsers = displayUsers;
 window.displayDonations = displayDonations;
 window.displayRequests = displayRequests;
+window.displayBloodBanks = displayBloodBanks;
+window.filterBloodBanks = filterBloodBanks;
+window.approveBloodBank = approveBloodBank;
+window.rejectBloodBank = rejectBloodBank;
+window.suspendBloodBank = suspendBloodBank;
+window.viewBloodBankDetails = viewBloodBankDetails;
+
+// Enhanced loadBloodBanks with pagination and filtering
+async function loadBloodBanks(searchTerm = '', statusFilter = '', page = 1, limit = 20) {
+    const bloodBanksTableBody = document.getElementById('bloodBanksTableBody');
+    const bloodBanksCount = document.getElementById('bloodBanksCount');
+    
+    if (bloodBanksTableBody) {
+        bloodBanksTableBody.innerHTML = '<tr><td colspan="9" class="loading"><i class="fas fa-spinner"></i> Loading blood banks...</td></tr>';
+    }
+
+    try {
+        debugLog('Loading blood banks...');
+        let apiUrl = `${getAPIBaseURL()}/admin/blood-banks?page=${page}&limit=${limit}`;
+        
+        // Add search and filter parameters
+        if (searchTerm) {
+            apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+        }
+        if (statusFilter) {
+            apiUrl += `&status=${encodeURIComponent(statusFilter)}`;
+        }
+        
+        debugLog(`API URL: ${apiUrl}`);
+        
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: getAdminAuthHeaders()
+        });
+        
+        debugLog(`Response status: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        debugLog('Blood banks response data:', data);
+        
+        if (data.success) {
+            // Store blood banks data globally
+            window.bloodBanksData = data.data.bloodBanks;
+            
+            displayBloodBanks(data.data.bloodBanks, bloodBanksTableBody);
+            updatePagination(data.data.pagination, 'bloodBanks', loadBloodBanks);
+            
+            if (bloodBanksCount) {
+                bloodBanksCount.textContent = `(${data.data.pagination.totalItems} total)`;
+            }
+        } else {
+            throw new Error(data.message || 'Failed to load blood banks');
+        }
+    } catch (error) {
+        debugLog(`Error loading blood banks: ${error.message}`);
+        console.error('Error loading blood banks:', error);
+        
+        if (bloodBanksTableBody) {
+            bloodBanksTableBody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading blood banks: ${error.message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        showNotification('Failed to load blood banks. Please try again.', 'error');
+    }
+}
+
+// Display blood banks in table
+function displayBloodBanks(bloodBanks, tableBody) {
+    if (!tableBody) return;
+    
+    if (!bloodBanks || bloodBanks.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="9" class="empty-state">
+                    <i class="fas fa-hospital"></i>
+                    <p>No blood banks found</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tableBody.innerHTML = bloodBanks.map(bank => `
+        <tr>
+            <td title="${bank.bankName}">${bank.bankName || 'N/A'}</td>
+            <td>${bank.licenseNumber || 'N/A'}</td>
+            <td>${bank.contactPerson || 'N/A'}</td>
+            <td>${bank.email || bank.loginEmail || 'N/A'}</td>
+            <td>${bank.city || 'N/A'}</td>
+            <td><span class="status-badge status-${bank.bankType || 'private'}">${bank.bankType || 'Private'}</span></td>
+            <td><span class="status-badge status-${(bank.status || 'pending').toLowerCase()}">${bank.status || 'Pending'}</span></td>
+            <td title="${new Date(bank.createdAt).toLocaleString()}">${new Date(bank.createdAt).toLocaleDateString('en-GB').split('/').reverse().join('/')}</td>
+            <td>
+                ${bank.status === 'pending' ? `
+                    <button class="action-btn approve-bank-btn" data-id="${bank._id}" title="Approve">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="action-btn reject-bank-btn" data-id="${bank._id}" title="Reject">
+                        <i class="fas fa-times"></i>
+                    </button>
+                ` : bank.status === 'approved' ? `
+                    <button class="action-btn suspend-bank-btn" data-id="${bank._id}" title="Suspend">
+                        <i class="fas fa-ban"></i>
+                    </button>
+                ` : ''}
+                <button class="action-btn view-bank-btn" data-id="${bank._id}" title="View Details">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+    
+    // Add event listeners for action buttons
+    addBloodBankActionListeners();
+}
+
+// Add event listeners for blood bank action buttons
+function addBloodBankActionListeners() {
+    // Approve buttons
+    document.querySelectorAll('.approve-bank-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const bankId = this.getAttribute('data-id');
+            approveBloodBank(bankId);
+        });
+    });
+    
+    // Reject buttons
+    document.querySelectorAll('.reject-bank-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const bankId = this.getAttribute('data-id');
+            rejectBloodBank(bankId);
+        });
+    });
+    
+    // Suspend buttons
+    document.querySelectorAll('.suspend-bank-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const bankId = this.getAttribute('data-id');
+            suspendBloodBank(bankId);
+        });
+    });
+    
+    // View buttons
+    document.querySelectorAll('.view-bank-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const bankId = this.getAttribute('data-id');
+            viewBloodBankDetails(bankId);
+        });
+    });
+}
+
+// Approve blood bank
+async function approveBloodBank(bankId) {
+    if (!confirm('Are you sure you want to approve this blood bank?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${getAPIBaseURL()}/admin/approve-blood-bank/${bankId}`, {
+            method: 'POST',
+            headers: getAdminAuthHeaders()
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Blood bank approved successfully', 'success');
+            loadBloodBanks(); // Refresh the list
+            loadStats(); // Update statistics
+        } else {
+            throw new Error(data.message || 'Failed to approve blood bank');
+        }
+    } catch (error) {
+        console.error('Error approving blood bank:', error);
+        showNotification('Failed to approve blood bank', 'error');
+    }
+}
+
+// Reject blood bank
+async function rejectBloodBank(bankId) {
+    const reason = prompt('Please enter the reason for rejection:');
+    if (!reason) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${getAPIBaseURL()}/admin/reject-blood-bank/${bankId}`, {
+            method: 'POST',
+            headers: getAdminAuthHeaders(),
+            body: JSON.stringify({ reason })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Blood bank rejected', 'success');
+            loadBloodBanks(); // Refresh the list
+            loadStats(); // Update statistics
+        } else {
+            throw new Error(data.message || 'Failed to reject blood bank');
+        }
+    } catch (error) {
+        console.error('Error rejecting blood bank:', error);
+        showNotification('Failed to reject blood bank', 'error');
+    }
+}
+
+// Suspend blood bank
+async function suspendBloodBank(bankId) {
+    const reason = prompt('Please enter the reason for suspension:');
+    if (!reason) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${getAPIBaseURL()}/admin/suspend-blood-bank/${bankId}`, {
+            method: 'POST',
+            headers: getAdminAuthHeaders(),
+            body: JSON.stringify({ reason })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Blood bank suspended', 'success');
+            loadBloodBanks(); // Refresh the list
+            loadStats(); // Update statistics
+        } else {
+            throw new Error(data.message || 'Failed to suspend blood bank');
+        }
+    } catch (error) {
+        console.error('Error suspending blood bank:', error);
+        showNotification('Failed to suspend blood bank', 'error');
+    }
+}
+
+// View blood bank details
+function viewBloodBankDetails(bankId) {
+    const bank = window.bloodBanksData?.find(b => b._id === bankId);
+    if (bank) {
+        const details = `
+Blood Bank Details:
+
+Bank Name: ${bank.bankName}
+License Number: ${bank.licenseNumber}
+Bank Type: ${bank.bankType}
+Established Year: ${bank.establishedYear}
+
+Contact Information:
+Contact Person: ${bank.contactPerson}
+Designation: ${bank.designation}
+Phone: ${bank.phone}
+Email: ${bank.email}
+Login Email: ${bank.loginEmail}
+Website: ${bank.website || 'Not provided'}
+
+Address:
+${bank.address}
+${bank.city}, ${bank.state}
+${bank.country} - ${bank.zipCode}
+
+Status: ${bank.status}
+Verified: ${bank.isVerified ? 'Yes' : 'No'}
+${bank.verifiedBy ? `Verified By: ${bank.verifiedBy}` : ''}
+${bank.verificationDate ? `Verification Date: ${new Date(bank.verificationDate).toLocaleString()}` : ''}
+${bank.rejectionReason ? `Rejection Reason: ${bank.rejectionReason}` : ''}
+
+Registration Date: ${new Date(bank.createdAt).toLocaleString()}
+        `;
+        alert(details);
+    }
+}
+
+// Filter blood banks
+function filterBloodBanks() {
+    const searchTerm = document.getElementById('bloodBankSearch').value;
+    const statusFilter = document.getElementById('bloodBankStatusFilter').value;
+    loadBloodBanks(searchTerm, statusFilter);
+}

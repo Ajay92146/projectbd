@@ -173,6 +173,15 @@ router.get('/dashboard-stats', adminAuthMiddleware, async (req, res) => {
         // Get total user requests count
         const totalUserRequests = await UserRequest.countDocuments({ isActive: true });
         
+        // Get total blood banks count
+        const totalBloodBanks = await BloodBank.countDocuments({ isActive: true });
+        
+        // Get pending blood banks count
+        const pendingBloodBanks = await BloodBank.countDocuments({ 
+            isActive: true, 
+            status: 'pending' 
+        });
+        
         // Calculate total blood units available (assuming 1 unit per donor for now)
         const totalBloodUnits = totalDonations;
 
@@ -184,7 +193,9 @@ router.get('/dashboard-stats', adminAuthMiddleware, async (req, res) => {
                 totalRequests,
                 totalBloodUnits,
                 totalUserDonations,
-                totalUserRequests
+                totalUserRequests,
+                totalBloodBanks,
+                pendingBloodBanks
             }
         });
     } catch (error) {

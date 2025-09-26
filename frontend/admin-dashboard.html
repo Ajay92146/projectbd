@@ -523,6 +523,77 @@
                 </div>
                 <p class="stat-value" id="totalBloodUnits">0</p>
             </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Blood Banks</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="totalBloodBanks">0</p>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3 class="stat-title">Pending Approvals</h3>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <p class="stat-value" id="pendingBloodBanks">0</p>
+            </div>
+        </div>
+
+        <div class="data-section">
+            <div class="section-header">
+                <h2 class="section-title">Blood Banks</h2>
+                <button id="refreshBloodBanksBtn" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+
+            <div class="search-filter">
+                <input type="text" id="bloodBankSearch" class="search-input" placeholder="Search blood banks...">
+                <select id="bloodBankStatusFilter" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="suspended">Suspended</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Bank Name</th>
+                            <th>License Number</th>
+                            <th>Contact Person</th>
+                            <th>Email</th>
+                            <th>City</th>
+                            <th>Bank Type</th>
+                            <th>Status</th>
+                            <th>Registration Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bloodBanksTableBody">
+                        <tr>
+                            <td colspan="9" class="loading">
+                                <i class="fas fa-spinner"></i>
+                                Loading blood banks...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="bloodBanksPagination" class="pagination">
+                <!-- Pagination will be added here -->
+            </div>
         </div>
 
         <div class="data-section">
@@ -704,6 +775,7 @@
             document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
             document.getElementById('refreshDonationsBtn').addEventListener('click', loadDonations);
             document.getElementById('refreshRequestsBtn').addEventListener('click', loadRequests);
+            document.getElementById('refreshBloodBanksBtn').addEventListener('click', loadBloodBanks);
             
             // Search and filter inputs
             document.getElementById('userSearch').addEventListener('input', filterUsers);
@@ -714,6 +786,9 @@
             
             document.getElementById('requestSearch').addEventListener('input', filterRequests);
             document.getElementById('requestStatusFilter').addEventListener('change', filterRequests);
+            
+            document.getElementById('bloodBankSearch').addEventListener('input', filterBloodBanks);
+            document.getElementById('bloodBankStatusFilter').addEventListener('change', filterBloodBanks);
         }
 
         // Dashboard functions
@@ -757,6 +832,7 @@
             loadUsers();
             loadDonations();
             loadRequests();
+            loadBloodBanks();
             
             // Update last updated time
             updateLastUpdatedTime();
