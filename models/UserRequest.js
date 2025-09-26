@@ -314,4 +314,4 @@ userRequestSchema.statics.getRequestStats = function(userId) {
     ]);
 };
 
-module.exports = mongoose.model('UserRequest', userRequestSchema);
+module.exports = mongoose.models.UserRequest || mongoose.model('UserRequest', userRequestSchema);

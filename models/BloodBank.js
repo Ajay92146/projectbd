@@ -176,4 +176,4 @@ bloodBankSchema.index({ status: 1, isActive: 1 });
 bloodBankSchema.index({ city: 1, state: 1 });
 bloodBankSchema.index({ loginEmail: 1 });
 
-module.exports = mongoose.model('BloodBank', bloodBankSchema);
+module.exports = mongoose.models.BloodBank || mongoose.model('BloodBank', bloodBankSchema);

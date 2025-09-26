@@ -238,6 +238,4 @@ donorSchema.methods.markAvailable = function() {
 };
 
 // Create and export the model
-const Donor = mongoose.model('Donor', donorSchema);
-
-module.exports = Donor;
+module.exports = mongoose.models.Donor || mongoose.model('Donor', donorSchema);

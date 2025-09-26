@@ -215,4 +215,4 @@ userDonationSchema.statics.getDonationStats = function(userId) {
     ]);
 };
 
-module.exports = mongoose.model('UserDonation', userDonationSchema);
+module.exports = mongoose.models.UserDonation || mongoose.model('UserDonation', userDonationSchema);

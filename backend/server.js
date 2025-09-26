@@ -24,7 +24,7 @@ const statsRoutes = require('./routes/stats');
 const expirationRoutes = require('./routes/expiration');
 const locationRoutes = require('./routes/location');
 const emergencyRoutes = require('./routes/emergency');
-// const bloodBankRoutes = require('../routes/bloodBank');
+const bloodBankRoutes = require('../routes/bloodBank');
 
 // Import services
 const requestExpirationService = require('./services/requestExpirationService');
@@ -144,7 +144,7 @@ app.use('/api/external', require('./routes/external-config'));
 app.use('/api/expiration', expirationRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/emergency', emergencyRoutes);
-// app.use('/api/bloodbank', bloodBankRoutes);
+app.use('/api/bloodbank', bloodBankRoutes);
 console.log('✅ API routes loaded successfully');
 
 // Serve static files from frontend directory (AFTER API routes)

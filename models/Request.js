@@ -248,6 +248,4 @@ requestSchema.methods.cancelRequest = function(reason) {
 };
 
 // Create and export the model
-const Request = mongoose.model('Request', requestSchema);
-
-module.exports = Request;
+module.exports = mongoose.models.Request || mongoose.model('Request', requestSchema);

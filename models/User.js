@@ -263,6 +263,4 @@ userSchema.statics.findDonorsInLocation = function(city, state) {
 };
 
 // Create and export the model
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);
