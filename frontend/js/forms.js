@@ -99,8 +99,40 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('✅ BloodConnect fallback created successfully!');
     }
     
-    setupFormHandlers();
+    // FIXED: Check if donate-page.js is handling the donor application form
+    // If so, don't set up duplicate handlers
+    if (document.getElementById('donorApplicationForm') && typeof BloodDonationPage !== 'undefined') {
+        console.log('🔄 donate-page.js detected, skipping duplicate donor form handler setup');
+        // Only set up handlers for non-donation forms
+        setupNonDonationFormHandlers();
+    } else {
+        setupFormHandlers();
+    }
 });
+
+/**
+ * Setup non-donation form handlers (login, register, contact, etc.)
+ * This avoids conflicts with donate-page.js
+ */
+function setupNonDonationFormHandlers() {
+    setupRequestForm();
+    setupSearchForm();
+    setupContactForm();
+    setupLoginForm();
+    setupRegisterForm();
+}
+
+/**
+ * Setup all form handlers
+ */
+function setupFormHandlers() {
+    setupDonorForm();
+    setupRequestForm();
+    setupSearchForm();
+    setupContactForm();
+    setupLoginForm();
+    setupRegisterForm();
+}
 
 /**
  * Check authentication for form access
@@ -146,18 +178,6 @@ Why do we require login?
             message: 'Invalid user session. Please log in again.'
         };
     }
-}
-
-/**
- * Setup all form handlers
- */
-function setupFormHandlers() {
-    setupDonorForm();
-    setupRequestForm();
-    setupSearchForm();
-    setupContactForm();
-    setupLoginForm();
-    setupRegisterForm();
 }
 
 /**

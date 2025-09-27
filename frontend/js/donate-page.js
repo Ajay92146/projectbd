@@ -1,5 +1,9 @@
 // Modern Blood Donation Page Interactions (extracted from donate.html to satisfy CSP)
 
+// FIXED: Add flag to indicate this script is handling form submissions
+window.BloodConnect = window.BloodConnect || {};
+window.BloodConnect.donatePageHandlersSetup = true;
+
 class BloodDonationPage {
     constructor() {
         this.init();
@@ -230,5 +234,3 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSmoothScrolling();
     console.log('Donate page loaded - auth state manager active');
 });
-
-

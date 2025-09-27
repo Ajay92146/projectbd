@@ -32,11 +32,19 @@ The system uses the following statuses for donations:
 - Donations are stored in MongoDB using the UserDonation model
 - The `/api/donors/apply` endpoint handles donation submissions
 - Authentication is required to link donations to user profiles
+- Proper ObjectId conversion is used to match user IDs
 
 ### Frontend (JavaScript)
-- The donation form is handled by `frontend/js/forms.js`
+- The donation form is handled by `frontend/js/donate-page.js` (primary handler)
+- `frontend/js/forms.js` handles other forms but avoids conflicts with donate-page.js
 - Profile display is managed by `frontend/profile.js`
 - Success messages explain the approval process to users
+
+### Form Handler Conflict Resolution
+To prevent conflicts between multiple form handlers:
+- `forms.js` checks if `donate-page.js` is present before setting up handlers
+- If `donate-page.js` is handling the donor application form, `forms.js` skips duplicate handlers
+- Only one script handles form submission at a time
 
 ## User Experience Guidelines
 
@@ -63,3 +71,4 @@ Users can:
 1. Ensure the UserDonation model properly links to User profiles via ObjectId
 2. Verify authentication tokens are correctly passed in API requests
 3. Check that status updates are properly handled in the backend
+4. Verify that form handlers don't conflict with each other
