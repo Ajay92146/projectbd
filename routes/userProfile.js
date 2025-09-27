@@ -30,9 +30,12 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
             });
         }
 
+        // Convert userId string to ObjectId for UserDonation queries
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
         // Get donation statistics from UserDonation collection scoped to current user
         const donationStats = await UserDonation.aggregate([
-            { $match: { userId: user._id } },
+            { $match: { userId: userObjectId } },
             {
                 $group: {
                     _id: null,
@@ -70,7 +73,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
         // Get recent donations (last 5) from UserDonation
         const recentDonations = await UserDonation.find({
-            userId: user._id
+            userId: userObjectId
         })
             .sort({ donationDate: -1, createdAt: -1 })
             .limit(5);
@@ -82,7 +85,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
         // Get upcoming eligible donation date from UserDonation
         const lastDonation = await UserDonation.findOne({
-            userId: user._id
+            userId: userObjectId
         }).sort({ donationDate: -1, createdAt: -1 });
 
         let nextEligibleDate = null;
@@ -156,9 +159,12 @@ router.get('/donations', [
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
+        // Convert userId string to ObjectId for UserDonation queries
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
         // Look up donations strictly in UserDonation by userId
         const donations = await UserDonation.find({
-            userId: userId
+            userId: userObjectId
         })
             .sort({ donationDate: -1, createdAt: -1 })
             .skip(skip)
@@ -166,18 +172,20 @@ router.get('/donations', [
 
         // Get total count
         const totalDonations = await UserDonation.countDocuments({
-            userId: userId
+            userId: userObjectId
         });
 
         console.log('📤 Sending donations response:', {
             success: true,
+            userId: userId,
+            userObjectId: userObjectId,
             donationsCount: donations.length,
             totalDonations,
             sampleDonation: donations[0] ? {
                 id: donations[0]._id,
-                email: donations[0].email,
+                userId: donations[0].userId,
                 bloodGroup: donations[0].bloodGroup,
-                dateOfDonation: donations[0].dateOfDonation
+                donationDate: donations[0].donationDate
             } : null
         });
 

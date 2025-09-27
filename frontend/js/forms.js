@@ -185,7 +185,7 @@ function setupDonorForm() {
             return;
         }
         
-        const submitBtn = document.getElementById('submitBtn');
+        const submitBtn = document.getElementById('submitBtn') || document.getElementById('submitApplicationBtn');
         const originalText = submitBtn.innerHTML;
         
         try {
@@ -194,30 +194,56 @@ function setupDonorForm() {
             const formData = new FormData(donorForm);
             const rawData = Object.fromEntries(formData.entries());
 
-            // Map form fields to MongoDB schema
-            const donorData = {
-                name: rawData.fullName,
-                age: parseInt(rawData.age),
-                gender: rawData.gender,
-                bloodGroup: rawData.bloodGroup,
-                contactNumber: rawData.contactNumber,
-                email: rawData.email,
-                city: rawData.city,
-                state: rawData.state,
-                dateOfDonation: rawData.donationDate ? new Date(rawData.donationDate).toISOString() : '',
-                medicalHistory: rawData.medicalHistory || ''
-            };
+            // Check if this is the application form or basic form
+            const isApplicationForm = donorForm.id === 'donorApplicationForm';
+            let donorData;
+            let apiEndpoint;
+
+            if (isApplicationForm) {
+                // Handle application form data mapping for /api/donors/apply
+                donorData = {
+                    firstName: rawData.firstName,
+                    lastName: rawData.lastName,
+                    dateOfBirth: rawData.dateOfBirth,
+                    gender: rawData.gender,
+                    email: rawData.email,
+                    phoneNumber: rawData.phoneNumber,
+                    city: rawData.city,
+                    state: rawData.state,
+                    address: rawData.address,
+                    bloodGroup: rawData.bloodGroup,
+                    weight: parseInt(rawData.weight),
+                    emergencyContact: rawData.emergencyContact,
+                    preferredDate: rawData.preferredDate,
+                    preferredTime: rawData.preferredTime,
+                    medicalHistory: rawData.medicalHistory || '',
+                    lastDonation: rawData.lastDonation || null,
+                    availability: rawData.availability || '',
+                    healthConsent: rawData.healthConsent === 'on',
+                    dataConsent: rawData.dataConsent === 'on',
+                    contactConsent: rawData.contactConsent === 'on'
+                };
+                apiEndpoint = '/donors/apply';
+            } else {
+                // Handle basic form data mapping for /api/donors (legacy)
+                donorData = {
+                    name: rawData.fullName,
+                    age: parseInt(rawData.age),
+                    gender: rawData.gender,
+                    bloodGroup: rawData.bloodGroup,
+                    contactNumber: rawData.contactNumber,
+                    email: rawData.email,
+                    city: rawData.city,
+                    state: rawData.state,
+                    dateOfDonation: rawData.donationDate ? new Date(rawData.donationDate).toISOString() : '',
+                    medicalHistory: rawData.medicalHistory || ''
+                };
+                apiEndpoint = '/donors';
+            }
 
             console.log('📝 Raw form data:', rawData);
             console.log('📤 Submitting donor data to MongoDB Atlas:', donorData);
-
-            // Validate required fields before sending
-            const requiredFields = ['name', 'age', 'gender', 'bloodGroup', 'contactNumber', 'email', 'city', 'state', 'dateOfDonation'];
-            const missingFields = requiredFields.filter(field => !donorData[field]);
-
-            if (missingFields.length > 0) {
-                throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-            }
+            console.log('📍 Using endpoint:', apiEndpoint);
 
             const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                 ? 'http://localhost:3002/api' 
@@ -234,7 +260,7 @@ function setupDonorForm() {
                 console.log('🔐 User is logged in, sending donation with auth token');
             }
             
-            const response = await fetch(`${apiBase}/donors`, {
+            const response = await fetch(`${apiBase}${apiEndpoint}`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(donorData)
@@ -244,18 +270,33 @@ function setupDonorForm() {
             console.log('📥 MongoDB Atlas response:', result);
 
             if (response.ok) {
-                BloodConnect.showModal(
-                    '🎉 Registration Successful!',
-                    `Thank you ${donorData.name}! Your blood donor registration has been saved to our database.
+                if (isApplicationForm) {
+                    BloodConnect.showModal(
+                        '🎉 Application Submitted Successfully!',
+                        `Thank you for applying to become a blood donor! Your application has been submitted successfully.
 
-                    📋 Registration Details:
-                    • Blood Group: ${donorData.bloodGroup}
-                    • Donation Date: ${new Date(donorData.dateOfDonation).toLocaleDateString()}
-                    • Location: ${donorData.city}, ${donorData.state}
+                        📋 Application Details:
+                        • Blood Group: ${donorData.bloodGroup}
+                        • Preferred Date: ${new Date(donorData.preferredDate).toLocaleDateString()}
+                        • Location: ${donorData.city}, ${donorData.state}
 
-                    We will contact you at ${donorData.contactNumber} to confirm your donation appointment.`,
-                    'success'
-                );
+                        You will be contacted within 2-3 business days with next steps. ${result.data?.userLinked ? 'You can track your donation status in your profile.' : ''}`,
+                        'success'
+                    );
+                } else {
+                    BloodConnect.showModal(
+                        '🎉 Registration Successful!',
+                        `Thank you ${donorData.name}! Your blood donor registration has been saved to our database.
+
+                        📋 Registration Details:
+                        • Blood Group: ${donorData.bloodGroup}
+                        • Donation Date: ${new Date(donorData.dateOfDonation).toLocaleDateString()}
+                        • Location: ${donorData.city}, ${donorData.state}
+
+                        We will contact you at ${donorData.contactNumber} to confirm your donation appointment.`,
+                        'success'
+                    );
+                }
                 donorForm.reset();
             } else {
                 throw new Error(result.message || 'Registration failed');
@@ -293,7 +334,7 @@ function setupDonorForm() {
  * @returns {boolean} - Validation result
  */
 function validateDonorForm() {
-    const form = document.getElementById('donorForm');
+    const form = document.getElementById('donorForm') || document.getElementById('donorApplicationForm');
     if (!form) return false;
     
     const fields = form.querySelectorAll('input[required], select[required]');
@@ -305,8 +346,8 @@ function validateDonorForm() {
         }
     });
     
-    // Additional validation for date
-    const dateField = document.getElementById('donationDate');
+    // Additional validation for date (both forms)
+    const dateField = document.getElementById('donationDate') || document.getElementById('preferredDate');
     if (dateField && dateField.value) {
         const selectedDate = new Date(dateField.value);
         const today = new Date();
@@ -320,7 +361,7 @@ function validateDonorForm() {
         }
     }
 
-    // Age validation
+    // Age validation (basic form)
     const ageField = document.getElementById('age');
     if (ageField && ageField.value) {
         const age = parseInt(ageField.value);
@@ -332,8 +373,8 @@ function validateDonorForm() {
         }
     }
 
-    // Phone number validation
-    const phoneField = document.getElementById('contactNumber');
+    // Phone number validation (both forms)
+    const phoneField = document.getElementById('contactNumber') || document.getElementById('phoneNumber');
     if (phoneField && phoneField.value) {
         const phoneRegex = /^[6-9][0-9]{9}$/;
         if (!phoneRegex.test(phoneField.value)) {
@@ -344,7 +385,7 @@ function validateDonorForm() {
         }
     }
 
-    // Email validation
+    // Email validation (both forms)
     const emailField = document.getElementById('email');
     if (emailField && emailField.value) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

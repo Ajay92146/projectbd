@@ -468,9 +468,10 @@ router.post('/apply', [
         if (req.user && req.user.userId) {
             try {
                 const UserDonation = require('../models/UserDonation');
+                const mongoose = require('mongoose');
                 
                 const userDonation = new UserDonation({
-                    userId: req.user.userId,
+                    userId: new mongoose.Types.ObjectId(req.user.userId),
                     donationDate: new Date(),
                     bloodGroup: bloodGroup,
                     unitsCollected: 1, // Default to 1 unit
