@@ -353,14 +353,14 @@ router.get('/requests', [
         // Get total count
         const totalRequests = await Request.countDocuments(requestQuery);
 
-        // Also get UserRequest records if they exist
+        // Also get UserRequest records if they exist - with blood bank contact info
         const UserRequest = require('../models/UserRequest');
-        // Optionally also include UserRequest documents for the same user
         const userRequests = await UserRequest.find({
             userId: userId,
             isActive: { $ne: false },
             ...(status && { status })
         })
+            .populate('acceptedBy.bloodBankId', 'bankName email phone address city state')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
@@ -375,16 +375,54 @@ router.get('/requests', [
             return true;
         });
 
-        console.log('📤 Sending requests response:', {
+        // Enhance requests with blood bank contact information
+        const enhancedRequests = uniqueRequests.map(request => {
+            const requestObj = request.toObject();
+            
+            // Add additional fields for better user experience
+            if (requestObj.acceptedBy && requestObj.acceptedBy.bloodBankId) {
+                requestObj.hasBloodBankContact = true;
+                requestObj.bloodBankContactInfo = {
+                    name: requestObj.acceptedBy.bloodBankName,
+                    contactPerson: requestObj.acceptedBy.contactPerson,
+                    contactNumber: requestObj.acceptedBy.contactNumber,
+                    email: requestObj.acceptedBy.email,
+                    address: requestObj.acceptedBy.address,
+                    acceptedDate: requestObj.acceptedBy.acceptedDate,
+                    fulfillmentDate: requestObj.acceptedBy.fulfillmentDate,
+                    notes: requestObj.acceptedBy.notes || '',
+                    fulfillmentNotes: requestObj.acceptedBy.fulfillmentNotes || ''
+                };
+            } else {
+                requestObj.hasBloodBankContact = false;
+                requestObj.bloodBankContactInfo = null;
+            }
+            
+            // Add time-related information
+            if (requestObj.requiredBy) {
+                const daysLeft = Math.ceil((new Date(requestObj.requiredBy) - new Date()) / (1000 * 60 * 60 * 24));
+                requestObj.daysLeft = daysLeft;
+                requestObj.isUrgent = daysLeft <= 3 || requestObj.urgency === 'Critical';
+            }
+            
+            if (requestObj.createdAt) {
+                requestObj.timeAgo = getTimeAgo(new Date(requestObj.createdAt));
+            }
+            
+            return requestObj;
+        });
+
+        console.log('📤 Sending enhanced requests response:', {
             success: true,
-            requestsCount: uniqueRequests.length,
-            totalRequests
+            requestsCount: enhancedRequests.length,
+            totalRequests,
+            acceptedRequests: enhancedRequests.filter(r => r.hasBloodBankContact).length
         });
 
         res.json({
             success: true,
             data: {
-                requests: uniqueRequests,
+                requests: enhancedRequests,
                 pagination: {
                     currentPage: page,
                     totalPages: Math.ceil(totalRequests / limit),
@@ -616,5 +654,24 @@ router.put('/requests/:id/cancel', [
         });
     }
 });
+
+// Helper function to calculate time ago
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) {
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffHours > 0) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    } else if (diffMins > 0) {
+        return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    } else {
+        return 'Just now';
+    }
+}
 
 module.exports = router;

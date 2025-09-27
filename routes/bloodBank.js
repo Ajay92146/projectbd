@@ -344,15 +344,313 @@ router.post('/reject-donation/:donationId', bloodBankAuthMiddleware, async (req,
 });
 
 /**
+ * @route   GET /api/bloodbank/blood-requests
+ * @desc    Get all available blood requests that blood banks can accept
+ * @access  Blood Bank only
+ */
+router.get('/blood-requests', bloodBankAuthMiddleware, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const { bloodGroup, urgency, location } = req.query;
+        
+        // Build search criteria - only show requests not accepted by any blood bank
+        let searchCriteria = {
+            isActive: true,
+            status: { $in: ['Pending', 'In Progress'] },
+            acceptedBy: { $exists: false } // Only show requests not yet accepted
+        };
+
+        if (bloodGroup) {
+            searchCriteria.bloodGroup = bloodGroup;
+        }
+
+        if (urgency) {
+            searchCriteria.urgency = urgency;
+        }
+
+        if (location) {
+            searchCriteria.$or = [
+                { 'hospital.city': new RegExp(location, 'i') },
+                { 'hospital.state': new RegExp(location, 'i') }
+            ];
+        }
+
+        // Get blood requests from UserRequest model
+        const UserRequest = require('../models/UserRequest');
+        const bloodRequests = await UserRequest.find(searchCriteria)
+            .populate('userId', 'firstName lastName email phoneNumber')
+            .sort({ urgency: -1, requiredBy: 1, createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalRequests = await UserRequest.countDocuments(searchCriteria);
+
+        // Map urgency to priority for better sorting
+        const priorityMap = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+        
+        const enhancedRequests = bloodRequests.map(request => ({
+            ...request.toObject(),
+            priority: priorityMap[request.urgency] || 2,
+            daysLeft: Math.ceil((request.requiredBy - new Date()) / (1000 * 60 * 60 * 24)),
+            timeAgo: getTimeAgo(request.createdAt)
+        }));
+
+        res.json({
+            success: true,
+            data: {
+                requests: enhancedRequests,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(totalRequests / limit),
+                    totalItems: totalRequests,
+                    itemsPerPage: limit
+                }
+            }
+        });
+        
+    } catch (error) {
+        logger.error('Error fetching blood requests:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch blood requests'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/bloodbank/accept-request/:requestId
+ * @desc    Accept a blood request
+ * @access  Blood Bank only
+ */
+router.post('/accept-request/:requestId', bloodBankAuthMiddleware, async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { notes, contactNumber, contactPerson } = req.body;
+        
+        const UserRequest = require('../models/UserRequest');
+        const BloodBank = require('../models/BloodBank');
+        
+        // Get blood bank details
+        const bloodBank = await BloodBank.findById(req.bloodBank.id);
+        if (!bloodBank) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blood bank not found'
+            });
+        }
+        
+        const request = await UserRequest.findById(requestId);
+        
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: 'Blood request not found'
+            });
+        }
+        
+        // Check if request is already accepted
+        if (request.acceptedBy) {
+            return res.status(400).json({
+                success: false,
+                message: 'Request has already been accepted by another blood bank'
+            });
+        }
+        
+        if (!['Pending', 'In Progress'].includes(request.status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Request is not available for acceptance'
+            });
+        }
+        
+        // Update request with blood bank acceptance
+        request.status = 'In Progress';
+        request.acceptedBy = {
+            bloodBankId: bloodBank._id,
+            bloodBankName: bloodBank.bankName,
+            contactPerson: contactPerson || bloodBank.contactPerson,
+            contactNumber: contactNumber || bloodBank.phone,
+            email: bloodBank.email,
+            address: bloodBank.fullAddress,
+            acceptedDate: new Date(),
+            notes: notes || ''
+        };
+        request.updatedAt = new Date();
+        
+        await request.save();
+        
+        logger.activity('BLOOD_REQUEST_ACCEPTED', req.bloodBank.id, {
+            requestId,
+            bloodBankName: req.bloodBank.bankName,
+            patientName: request.patientName,
+            bloodGroup: request.bloodGroup,
+            requiredUnits: request.requiredUnits
+        });
+        
+        res.json({
+            success: true,
+            message: 'Blood request accepted successfully',
+            data: {
+                request: request,
+                bloodBankContact: {
+                    name: bloodBank.bankName,
+                    contactPerson: contactPerson || bloodBank.contactPerson,
+                    contactNumber: contactNumber || bloodBank.phone,
+                    email: bloodBank.email,
+                    address: bloodBank.fullAddress
+                }
+            }
+        });
+        
+    } catch (error) {
+        logger.error('Error accepting blood request:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to accept blood request'
+        });
+    }
+});
+
+/**
+ * @route   GET /api/bloodbank/accepted-requests
+ * @desc    Get requests accepted by this blood bank
+ * @access  Blood Bank only
+ */
+router.get('/accepted-requests', bloodBankAuthMiddleware, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        
+        const UserRequest = require('../models/UserRequest');
+        
+        // Get requests accepted by this blood bank
+        const acceptedRequests = await UserRequest.find({
+            'acceptedBy.bloodBankId': req.bloodBank.id,
+            isActive: true
+        })
+        .populate('userId', 'firstName lastName email phoneNumber')
+        .sort({ 'acceptedBy.acceptedDate': -1 })
+        .skip(skip)
+        .limit(limit);
+        
+        const totalAccepted = await UserRequest.countDocuments({
+            'acceptedBy.bloodBankId': req.bloodBank.id,
+            isActive: true
+        });
+        
+        res.json({
+            success: true,
+            data: {
+                requests: acceptedRequests,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(totalAccepted / limit),
+                    totalItems: totalAccepted,
+                    itemsPerPage: limit
+                }
+            }
+        });
+        
+    } catch (error) {
+        logger.error('Error fetching accepted requests:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch accepted requests'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/bloodbank/fulfill-request/:requestId
+ * @desc    Mark a blood request as fulfilled
+ * @access  Blood Bank only
+ */
+router.post('/fulfill-request/:requestId', bloodBankAuthMiddleware, async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { unitsFulfilled, notes } = req.body;
+        
+        const UserRequest = require('../models/UserRequest');
+        
+        const request = await UserRequest.findOne({
+            _id: requestId,
+            'acceptedBy.bloodBankId': req.bloodBank.id
+        });
+        
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: 'Request not found or not accepted by your blood bank'
+            });
+        }
+        
+        // Update fulfillment details
+        request.fulfilledUnits = unitsFulfilled || request.requiredUnits;
+        request.status = (request.fulfilledUnits >= request.requiredUnits) ? 'Fulfilled' : 'Partially Fulfilled';
+        request.acceptedBy.fulfillmentDate = new Date();
+        request.acceptedBy.fulfillmentNotes = notes || '';
+        request.updatedAt = new Date();
+        
+        await request.save();
+        
+        logger.activity('BLOOD_REQUEST_FULFILLED', req.bloodBank.id, {
+            requestId,
+            bloodBankName: req.bloodBank.bankName,
+            patientName: request.patientName,
+            unitsFulfilled: request.fulfilledUnits,
+            totalRequired: request.requiredUnits
+        });
+        
+        res.json({
+            success: true,
+            message: 'Blood request marked as fulfilled',
+            data: request
+        });
+        
+    } catch (error) {
+        logger.error('Error fulfilling blood request:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fulfill blood request'
+        });
+    }
+});
+
+/**
  * @route   GET /api/bloodbank/dashboard-stats
  * @desc    Get dashboard statistics for blood bank
  * @access  Blood Bank only
  */
 router.get('/dashboard-stats', bloodBankAuthMiddleware, async (req, res) => {
     try {
+        const UserRequest = require('../models/UserRequest');
+        
         // Get pending donations count
         const pendingCount = await UserDonation.countDocuments({
             status: 'Pending',
+            isActive: true
+        });
+        
+        // Get available blood requests count
+        const availableRequestsCount = await UserRequest.countDocuments({
+            isActive: true,
+            status: { $in: ['Pending', 'In Progress'] },
+            acceptedBy: { $exists: false }
+        });
+        
+        // Get requests accepted by this blood bank
+        const acceptedRequestsCount = await UserRequest.countDocuments({
+            'acceptedBy.bloodBankId': req.bloodBank.id,
+            isActive: true
+        });
+        
+        // Get fulfilled requests by this blood bank
+        const fulfilledRequestsCount = await UserRequest.countDocuments({
+            'acceptedBy.bloodBankId': req.bloodBank.id,
+            status: 'Fulfilled',
             isActive: true
         });
         
@@ -379,7 +677,10 @@ router.get('/dashboard-stats', bloodBankAuthMiddleware, async (req, res) => {
             data: {
                 pendingCount,
                 approvedToday,
-                totalUnits: totalUnits[0]?.total || 0
+                totalUnits: totalUnits[0]?.total || 0,
+                availableRequestsCount,
+                acceptedRequestsCount,
+                fulfilledRequestsCount
             }
         });
         
@@ -391,5 +692,24 @@ router.get('/dashboard-stats', bloodBankAuthMiddleware, async (req, res) => {
         });
     }
 });
+
+// Helper function to calculate time ago
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) {
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffHours > 0) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    } else if (diffMins > 0) {
+        return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    } else {
+        return 'Just now';
+    }
+}
 
 module.exports = router;

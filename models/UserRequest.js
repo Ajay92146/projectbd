@@ -226,6 +226,51 @@ const userRequestSchema = new mongoose.Schema({
             };
             return urgencyPriority[this.urgency] || 2;
         }
+    },
+    
+    // Blood Bank Acceptance Information
+    acceptedBy: {
+        bloodBankId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'BloodBank'
+        },
+        bloodBankName: {
+            type: String,
+            trim: true
+        },
+        contactPerson: {
+            type: String,
+            trim: true
+        },
+        contactNumber: {
+            type: String,
+            trim: true
+        },
+        email: {
+            type: String,
+            trim: true,
+            lowercase: true
+        },
+        address: {
+            type: String,
+            trim: true
+        },
+        acceptedDate: {
+            type: Date
+        },
+        fulfillmentDate: {
+            type: Date
+        },
+        notes: {
+            type: String,
+            maxlength: [500, 'Notes cannot exceed 500 characters'],
+            default: ''
+        },
+        fulfillmentNotes: {
+            type: String,
+            maxlength: [500, 'Fulfillment notes cannot exceed 500 characters'],
+            default: ''
+        }
     }
 }, {
     timestamps: true, // Adds createdAt and updatedAt fields
@@ -256,6 +301,16 @@ userRequestSchema.virtual('isUrgent').get(function() {
 // Virtual field to check if request is expired
 userRequestSchema.virtual('isExpired').get(function() {
     return new Date() > this.requiredBy && this.status !== 'Fulfilled';
+});
+
+// Virtual field to check if request is accepted
+userRequestSchema.virtual('isAccepted').get(function() {
+    return this.acceptedBy && this.acceptedBy.bloodBankId;
+});
+
+// Virtual field to check if request is fulfilled
+userRequestSchema.virtual('isFulfilled').get(function() {
+    return this.status === 'Fulfilled';
 });
 
 // Index for efficient queries

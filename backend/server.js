@@ -248,6 +248,11 @@ app.get('/blood-bank-dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/blood-bank-dashboard.html'));
 });
 
+app.get('/blood-bank-requests', (req, res) => {
+    console.log('🏦 Blood bank requests page requested');
+    res.sendFile(path.join(__dirname, '../frontend/blood-bank-requests.html'));
+});
+
 // Test endpoint
 app.get('/api/test', (req, res) => {
     res.json({

@@ -182,6 +182,39 @@
                 const hospital = r.hospitalName || r.hospital?.name || '—';
                 const location = r.location || `${r.city||''}${r.city&&r.state?', ':''}${r.state||''}`;
                 const notes = r.additionalNotes || '';
+                
+                // Blood bank contact information if request is accepted
+                let bloodBankContactInfo = '';
+                if (r.hasBloodBankContact && r.bloodBankContactInfo) {
+                    const contact = r.bloodBankContactInfo;
+                    const acceptedDate = contact.acceptedDate ? new Date(contact.acceptedDate).toLocaleDateString() : '';
+                    const fulfillmentDate = contact.fulfillmentDate ? new Date(contact.fulfillmentDate).toLocaleDateString() : '';
+                    
+                    bloodBankContactInfo = `
+                        <div style="margin-top: 15px; padding: 15px; background: linear-gradient(135deg, #e8f5e8, #f0f8f0); 
+                                    border-left: 4px solid #28a745; border-radius: 8px;">
+                            <h5 style="color: #28a745; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-hospital"></i> Blood Bank Contact Information
+                            </h5>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                                <p><strong>Blood Bank:</strong> ${contact.name || 'N/A'}</p>
+                                <p><strong>Contact Person:</strong> ${contact.contactPerson || 'N/A'}</p>
+                                <p><strong>Phone:</strong> 
+                                    ${contact.contactNumber ? `<a href="tel:${contact.contactNumber}" style="color: #28a745; font-weight: 600;">${contact.contactNumber}</a>` : 'N/A'}
+                                </p>
+                                <p><strong>Email:</strong> 
+                                    ${contact.email ? `<a href="mailto:${contact.email}" style="color: #28a745; font-weight: 600;">${contact.email}</a>` : 'N/A'}
+                                </p>
+                                ${acceptedDate ? `<p><strong>Accepted On:</strong> ${acceptedDate}</p>` : ''}
+                                ${fulfillmentDate ? `<p><strong>Fulfilled On:</strong> ${fulfillmentDate}</p>` : ''}
+                            </div>
+                            ${contact.address ? `<p style="margin-top: 10px;"><strong>Address:</strong> ${contact.address}</p>` : ''}
+                            ${contact.notes ? `<p style="margin-top: 10px; font-style: italic;"><strong>Notes:</strong> ${contact.notes}</p>` : ''}
+                            ${contact.fulfillmentNotes ? `<p style="margin-top: 10px; font-style: italic;"><strong>Fulfillment Notes:</strong> ${contact.fulfillmentNotes}</p>` : ''}
+                        </div>
+                    `;
+                }
+                
                 return `
                     <div class="item-card">
                         <div class="item-header">
@@ -213,6 +246,7 @@
                             ${requiredBy ? `<p><strong>Required By:</strong> ${requiredBy}</p>` : ''}
                             ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
                         </div>
+                        ${bloodBankContactInfo}
                     </div>`;
             }).join('');
             setContent(container, html);
