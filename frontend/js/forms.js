@@ -244,6 +244,7 @@ function setupDonorForm() {
             console.log('📝 Raw form data:', rawData);
             console.log('📤 Submitting donor data to MongoDB Atlas:', donorData);
             console.log('📍 Using endpoint:', apiEndpoint);
+            console.log('🔐 Authentication status:', !!token ? 'Authenticated' : 'Not authenticated');
 
             const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                 ? 'http://localhost:3002/api' 
@@ -280,9 +281,20 @@ function setupDonorForm() {
                         • Preferred Date: ${new Date(donorData.preferredDate).toLocaleDateString()}
                         • Location: ${donorData.city}, ${donorData.state}
 
-                        You will be contacted within 2-3 business days with next steps. ${result.data?.userLinked ? 'You can track your donation status in your profile.' : ''}`,
+                        You will be contacted within 2-3 business days with next steps. ${result.data?.userLinked ? 'You can track your donation status in your profile under "My Donations".' : ''}
+                        
+                        📝 Note: Your donation will appear as "Pending" until approved by our blood bank staff.`,
                         'success'
                     );
+                    
+                    // Auto-redirect to profile after 3 seconds if user is logged in
+                    if (result.data?.userLinked) {
+                        setTimeout(() => {
+                            if (confirm('Would you like to view your donation status in your profile?')) {
+                                window.location.href = 'profile.html';
+                            }
+                        }, 3000);
+                    }
                 } else {
                     BloodConnect.showModal(
                         '🎉 Registration Successful!',

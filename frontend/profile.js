@@ -112,7 +112,10 @@
             const filtered = donationsFilter ? donations.filter(d => (d.status||'').toLowerCase() === donationsFilter) : donations;
             if (!filtered.length) { 
                 const actionButton = '<a href="donate.html" class="btn btn-primary" style="margin-top: 1rem;"><i class="fas fa-plus"></i> Donate Now</a>';
-                setContent(container, UI.empty('No Donations Yet', 'Start making a difference by donating blood today!', actionButton)); 
+                const statusInfo = donationsFilter ? 
+                    `<p style="color: #666; margin-top: 1rem;">No donations found with status "${donationsFilter}". Try changing the filter or submit a new donation.</p>` :
+                    '';
+                setContent(container, UI.empty('No Donations Yet', 'Start making a difference by donating blood today!' + statusInfo, actionButton)); 
                 return; 
             }
             const html = filtered.map(d => {
@@ -121,6 +124,15 @@
                 const center = d.donationCenter?.name || 'Blood Bank';
                 const city = d.city || '';
                 const state = d.state || '';
+                
+                // Status explanation
+                const statusExplanation = {
+                    'pending': 'Your donation application is being reviewed by our blood bank staff.',
+                    'completed': 'Your donation has been successfully completed and approved.',
+                    'cancelled': 'This donation was cancelled or rejected.',
+                    'recorded': 'Your donation has been recorded in our system.'
+                };
+                
                 return `
                     <div class="item-card">
                         <div class="item-header">
@@ -129,7 +141,7 @@
                                 <div class="item-meta">Donated on ${date}</div>
                             </div>
                             <div style="display: flex; gap: 0.75rem; align-items: center;">
-                                <span class="status-badge status-${status}">${status}</span>
+                                <span class="status-badge status-${status}" title="${statusExplanation[status] || 'Status information'}">${status}</span>
                                 ${status === 'pending' ? `
                                     <button class="btn-cancel-donation" onclick="cancelDonation('${d._id}')" 
                                         style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; 

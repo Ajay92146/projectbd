@@ -489,7 +489,12 @@ router.post('/apply', [
                 });
 
                 await userDonation.save();
-                console.log('✅ UserDonation record created for authenticated user');
+                console.log('✅ UserDonation record created for authenticated user:', {
+                    userId: req.user.userId,
+                    donationId: userDonation._id,
+                    bloodGroup: bloodGroup,
+                    status: userDonation.status
+                });
             } catch (error) {
                 console.error('❌ Error creating UserDonation record:', error);
                 // Don't fail the whole request if UserDonation creation fails
