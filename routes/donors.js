@@ -470,8 +470,11 @@ router.post('/apply', [
                 const UserDonation = require('../models/UserDonation');
                 const mongoose = require('mongoose');
                 
+                // Ensure userId is properly converted to ObjectId
+                const userObjectId = new mongoose.Types.ObjectId(req.user.userId);
+                
                 const userDonation = new UserDonation({
-                    userId: new mongoose.Types.ObjectId(req.user.userId),
+                    userId: userObjectId,
                     donationDate: new Date(),
                     bloodGroup: bloodGroup,
                     unitsCollected: 1, // Default to 1 unit
@@ -491,6 +494,7 @@ router.post('/apply', [
                 await userDonation.save();
                 console.log('✅ UserDonation record created for authenticated user:', {
                     userId: req.user.userId,
+                    userObjectId: userObjectId,
                     donationId: userDonation._id,
                     bloodGroup: bloodGroup,
                     status: userDonation.status

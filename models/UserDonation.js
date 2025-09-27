@@ -193,7 +193,9 @@ userDonationSchema.pre('save', function(next) {
 
 // Static method to get user's donation history
 userDonationSchema.statics.getUserDonationHistory = function(userId, limit = 10) {
-    return this.find({ userId, isActive: true })
+    // Ensure userId is converted to ObjectId if it's a string
+    const userObjectId = typeof userId === 'string' ? mongoose.Types.ObjectId(userId) : userId;
+    return this.find({ userId: userObjectId, isActive: true })
         .sort({ donationDate: -1 })
         .limit(limit)
         .populate('userId', 'firstName lastName email');
@@ -201,8 +203,10 @@ userDonationSchema.statics.getUserDonationHistory = function(userId, limit = 10)
 
 // Static method to get donation statistics
 userDonationSchema.statics.getDonationStats = function(userId) {
+    // Ensure userId is converted to ObjectId if it's a string
+    const userObjectId = typeof userId === 'string' ? mongoose.Types.ObjectId(userId) : userId;
     return this.aggregate([
-        { $match: { userId: mongoose.Types.ObjectId(userId), isActive: true } },
+        { $match: { userId: userObjectId, isActive: true } },
         {
             $group: {
                 _id: null,

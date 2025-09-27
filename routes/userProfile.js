@@ -35,7 +35,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
         // Get donation statistics from UserDonation collection scoped to current user
         const donationStats = await UserDonation.aggregate([
-            { $match: { userId: userObjectId } },
+            { $match: { userId: userObjectId, isActive: true } },  // Add isActive filter
             {
                 $group: {
                     _id: null,
@@ -73,7 +73,8 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
         // Get recent donations (last 5) from UserDonation
         const recentDonations = await UserDonation.find({
-            userId: userObjectId
+            userId: userObjectId,
+            isActive: true  // Add isActive filter
         })
             .sort({ donationDate: -1, createdAt: -1 })
             .limit(5);
@@ -85,7 +86,8 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 
         // Get upcoming eligible donation date from UserDonation
         const lastDonation = await UserDonation.findOne({
-            userId: userObjectId
+            userId: userObjectId,
+            isActive: true  // Add isActive filter
         }).sort({ donationDate: -1, createdAt: -1 });
 
         let nextEligibleDate = null;
@@ -164,7 +166,8 @@ router.get('/donations', [
 
         // Look up donations strictly in UserDonation by userId
         const donations = await UserDonation.find({
-            userId: userObjectId
+            userId: userObjectId,
+            isActive: true  // Only fetch active donations
         })
             .sort({ donationDate: -1, createdAt: -1 })
             .skip(skip)
@@ -172,7 +175,8 @@ router.get('/donations', [
 
         // Get total count
         const totalDonations = await UserDonation.countDocuments({
-            userId: userObjectId
+            userId: userObjectId,
+            isActive: true  // Only count active donations
         });
 
         console.log('📤 Sending donations response:', {
