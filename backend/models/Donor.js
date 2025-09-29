@@ -162,12 +162,19 @@ const donorSchema = new mongoose.Schema({
             values: ['pending', 'approved', 'rejected', 'under_review'],
             message: 'Invalid application status'
         },
-        default: 'approved' // For backward compatibility with existing donors
+        default: 'pending'
     },
 
     applicationDate: {
         type: Date,
         default: Date.now
+    },
+
+    // Notes field for blood bank reviews
+    notes: {
+        type: String,
+        maxlength: [500, 'Notes cannot exceed 500 characters'],
+        default: ''
     },
 
     // System Information

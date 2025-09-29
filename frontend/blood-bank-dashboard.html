@@ -49,46 +49,175 @@
                     <div class="stat-number" id="totalUnits">0</div>
                     <div class="stat-label">Total Units</div>
                 </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="stat-number" id="pendingApplications">0</div>
+                    <div class="stat-label">Pending Applications</div>
+                </div>
             </div>
             
-            <div class="pending-donations">
-                <div class="section-header">
-                    <h2>Pending Donation Approvals</h2>
-                    <button id="refreshBtn" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i>
-                        Refresh
-                    </button>
+            <div class="tabs-container">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="donations">Donation Approvals</button>
+                    <button class="tab-btn" data-tab="applications">Donor Applications</button>
                 </div>
                 
-                <div class="table-container">
-                    <table class="donations-table">
-                        <thead>
-                            <tr>
-                                <th>Donor Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Blood Group</th>
-                                <th>Units</th>
-                                <th>Date</th>
-                                <th>Location</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="donationsTableBody">
-                            <tr>
-                                <td colspan="8" style="text-align: center; padding: 2rem; color: #7f8c8d;">
-                                    Loading donations...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div id="pagination" class="pagination-container">
-                    <!-- Pagination will be added here -->
+                <div class="tab-content">
+                    <!-- Donations Tab -->
+                    <div id="donations-tab" class="tab-pane active">
+                        <div class="pending-donations">
+                            <div class="section-header">
+                                <h2>Pending Donation Approvals</h2>
+                                <button id="refreshDonationsBtn" class="refresh-btn">
+                                    <i class="fas fa-sync-alt"></i>
+                                    Refresh
+                                </button>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table class="donations-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Donor Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Blood Group</th>
+                                            <th>Units</th>
+                                            <th>Date</th>
+                                            <th>Location</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="donationsTableBody">
+                                        <tr>
+                                            <td colspan="8" style="text-align: center; padding: 2rem; color: #7f8c8d;">
+                                                Loading donations...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div id="donationsPagination" class="pagination-container">
+                                <!-- Pagination will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Applications Tab -->
+                    <div id="applications-tab" class="tab-pane">
+                        <div class="pending-applications">
+                            <div class="section-header">
+                                <h2>Donor Applications</h2>
+                                <button id="refreshApplicationsBtn" class="refresh-btn">
+                                    <i class="fas fa-sync-alt"></i>
+                                    Refresh
+                                </button>
+                            </div>
+                            
+                            <div class="filters">
+                                <div class="filter-group">
+                                    <label for="bloodGroupFilter">Blood Group:</label>
+                                    <select id="bloodGroupFilter">
+                                        <option value="">All</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="filter-group">
+                                    <label for="cityFilter">City:</label>
+                                    <input type="text" id="cityFilter" placeholder="Filter by city">
+                                </div>
+                                
+                                <div class="filter-group">
+                                    <label for="statusFilter">Status:</label>
+                                    <select id="statusFilter">
+                                        <option value="">All</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                        <option value="under_review">Under Review</option>
+                                    </select>
+                                </div>
+                                
+                                <button id="applyFiltersBtn" class="apply-filters-btn">
+                                    <i class="fas fa-filter"></i> Apply Filters
+                                </button>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table class="applications-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Applicant Name</th>
+                                            <th>Age</th>
+                                            <th>Gender</th>
+                                            <th>Blood Group</th>
+                                            <th>Contact</th>
+                                            <th>City</th>
+                                            <th>Preferred Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="applicationsTableBody">
+                                        <tr>
+                                            <td colspan="9" style="text-align: center; padding: 2rem; color: #7f8c8d;">
+                                                Loading applications...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div id="applicationsPagination" class="pagination-container">
+                                <!-- Pagination will be added here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
+    </div>
+    
+    <!-- Review Application Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Review Donor Application</h2>
+            <div id="applicationDetails">
+                <!-- Application details will be loaded here -->
+            </div>
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label for="reviewStatus">Status:</label>
+                    <select id="reviewStatus" required>
+                        <option value="">Select Status</option>
+                        <option value="approved">Approve</option>
+                        <option value="rejected">Reject</option>
+                        <option value="under_review">Under Review</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reviewNotes">Notes:</label>
+                    <textarea id="reviewNotes" placeholder="Add any notes for this review..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelReviewBtn" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="submit-btn">Submit Review</button>
+                </div>
+            </form>
+        </div>
     </div>
     
     <script src="js/blood-bank-dashboard.js"></script>

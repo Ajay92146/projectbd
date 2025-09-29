@@ -693,6 +693,132 @@ router.get('/dashboard-stats', bloodBankAuthMiddleware, async (req, res) => {
     }
 });
 
+/**
+ * @route   GET /api/bloodbank/donor-applications
+ * @desc    Get donor applications for review
+ * @access  Blood Bank only
+ */
+router.get('/donor-applications', bloodBankAuthMiddleware, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const { bloodGroup, city, status } = req.query;
+        
+        // Build search criteria for donor applications
+        let searchCriteria = {
+            isActive: true
+        };
+
+        // Only add applicationStatus filter if provided, otherwise show all except inactive
+        if (status) {
+            searchCriteria.applicationStatus = status;
+        } else {
+            // By default, we might want to show pending applications
+            searchCriteria.applicationStatus = 'pending';
+        }
+
+        if (bloodGroup) {
+            searchCriteria.bloodGroup = bloodGroup;
+        }
+
+        if (city) {
+            searchCriteria.city = new RegExp(city, 'i');
+        }
+
+        // Get donor applications
+        const donorApplications = await Donor.find(searchCriteria)
+            .sort({ applicationDate: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalApplications = await Donor.countDocuments(searchCriteria);
+
+        res.json({
+            success: true,
+            data: {
+                applications: donorApplications,
+                pagination: {
+                    currentPage: page,
+                    totalPages: Math.ceil(totalApplications / limit),
+                    totalItems: totalApplications,
+                    itemsPerPage: limit
+                }
+            }
+        });
+        
+    } catch (error) {
+        logger.error('Error fetching donor applications:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch donor applications'
+        });
+    }
+});
+
+/**
+ * @route   POST /api/bloodbank/review-application/:applicationId
+ * @desc    Review and update status of a donor application
+ * @access  Blood Bank only
+ */
+router.post('/review-application/:applicationId', bloodBankAuthMiddleware, async (req, res) => {
+    try {
+        const { applicationId } = req.params;
+        const { status, notes } = req.body; // status: 'approved', 'rejected', 'under_review'
+        
+        // Validate status
+        if (!['approved', 'rejected', 'under_review', 'pending'].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid status. Must be approved, rejected, under_review, or pending'
+            });
+        }
+        
+        // Find the donor application
+        const donorApplication = await Donor.findById(applicationId);
+        
+        if (!donorApplication) {
+            return res.status(404).json({
+                success: false,
+                message: 'Donor application not found'
+            });
+        }
+        
+        // Update application status
+        donorApplication.applicationStatus = status;
+        if (notes) {
+            donorApplication.notes = notes;
+        }
+        
+        // If approved, make the donor available for donations
+        if (status === 'approved') {
+            donorApplication.isAvailable = true;
+        }
+        
+        await donorApplication.save();
+        
+        logger.activity('DONOR_APPLICATION_REVIEWED', req.bloodBank.id, {
+            applicationId,
+            bloodBankName: req.bloodBank.bankName,
+            donorName: donorApplication.name,
+            newStatus: status
+        });
+        
+        res.json({
+            success: true,
+            message: `Donor application ${status} successfully`,
+            data: donorApplication
+        });
+        
+    } catch (error) {
+        logger.error('Error reviewing donor application:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to review donor application'
+        });
+    }
+});
+
 // Helper function to calculate time ago
 function getTimeAgo(date) {
     const now = new Date();
